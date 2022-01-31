@@ -11,4 +11,4 @@ import standardisation
 if __name__ == '__main__':
     print('starting main')
     standardisation.standardise()
-
+    standardisation.png_to_ipx3()
