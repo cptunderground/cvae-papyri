@@ -4,11 +4,17 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import numpy as np
 
+import mnist_reader
 import standardisation
 
 
 
 if __name__ == '__main__':
     print('starting main')
-    standardisation.standardise()
+
+    dimension = 28
+
+    standardisation.standardise(dimension)
     standardisation.png_to_ipx3()
+
+    mnist_reader.mnist_read()

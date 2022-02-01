@@ -8,7 +8,7 @@ from array import *
 from random import shuffle
 
 def png_to_ipx3():
-    Names = [['./data/training-data-standardised', 't10k'], ['./data/test-data-standardised', 'test']]
+    Names = [['./data/training-data-standardised', 'train'], ['./data/test-data-standardised', 't10k']]
 
     for name in Names:
 
@@ -64,25 +64,26 @@ def png_to_ipx3():
 
         data_image = header + data_image
 
-        output_file = open(name[1] + '-images-idx3-ubyte.gz', 'wb')
+        output_file = open(f'data/raw/compressed/{name[1]}-images-idx3-ubyte.gz', 'wb')
         with gzip.open(output_file, "wb") as f:
             f.write(data_image)
         #output_file.close()
 
-        output_file = open(name[1] + '-labels-idx1-ubyte.gz', 'wb')
+        output_file = open(f'data/raw/compressed/{name[1]}-labels-idx1-ubyte.gz', 'wb')
         with gzip.open(output_file, "wb") as f:
             f.write(data_label)
 
-        output_file = open(name[1] + '-images-idx3-ubyte', 'wb')
-        with gzip.open(output_file, "wb") as f:
-            f.write(data_image)
+        output_file = open(f'data/raw/uncompressed/{name[1]}-images-idx3-ubyte', 'wb')
+        data_image.tofile(output_file)
+        output_file.close()
         # output_file.close()
 
-        output_file = open(name[1] + '-labels-idx1-ubyte', 'wb')
-        with gzip.open(output_file, "wb") as f:
-            f.write(data_label)
+        output_file = open(f'data/raw/uncompressed/{name[1]}-labels-idx1-ubyte', 'wb')
+        data_label.tofile(output_file)
+        output_file.close()
 
-    # gzip resulting files
+
+
 
 
 
@@ -123,7 +124,7 @@ def otsu(img):
 
 
 
-def standardise():
+def standardise(dimension):
     print(f"cv2.version={cv2.__version__}")
 
     path_train = "./data/training-data"
@@ -156,7 +157,7 @@ def standardise():
 
                 img = otsu(img)
                 img = crop_img(img)
-                img = scale_img(img, 28)
+                img = scale_img(img, dimension)
 
 
                 # save image to folder
