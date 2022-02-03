@@ -4,16 +4,16 @@ import random
 from mnist import MNIST
 
 def mnist_read():
-    with gzip.open('data/raw/compressed/train-images-idx3-ubyte.gz', 'r') as fin:
+    with gzip.open('data/MNIST/raw/train-images-idx3-ubyte.gz', 'r') as fin:
         for line in fin:
             print('got line', line)
 
-    with gzip.open('data/raw/compressed/t10k-images-idx3-ubyte.gz', 'r') as fin:
+    with gzip.open('data/MNIST/raw/t10k-images-idx3-ubyte.gz', 'r') as fin:
         for line in fin:
             print('got line', line)
 
 
-    mndata = MNIST('data/raw/uncompressed')
+    mndata = MNIST('data/MNIST/raw')
 
     print("TRAINING IMAGES")
     images, labels = mndata.load_training()

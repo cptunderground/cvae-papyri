@@ -7,6 +7,7 @@ import shutil
 from array import *
 from random import shuffle
 
+
 def png_to_ipx3():
     Names = [['./data/training-data-standardised', 'train'], ['./data/test-data-standardised', 't10k']]
 
@@ -16,19 +17,19 @@ def png_to_ipx3():
         data_label = array('B')
 
         FileList = []
-        #for dirname in os.listdir(name[0])[1:]:  # [1:] Excludes .DS_Store from Mac OS
-        path = f"{name[0]}" #os.path.join(name[0], dirname)
-            #print(path)
+        # for dirname in os.listdir(name[0])[1:]:  # [1:] Excludes .DS_Store from Mac OS
+        path = f"{name[0]}"  # os.path.join(name[0], dirname)
+        # print(path)
         for filename in os.listdir(path):
             print((name[0], filename))
             if filename.endswith(".png"):
-                FileList.append(f"{name[0]}/{filename}") #os.path.join(name[0], dirname, filename))
+                FileList.append(f"{name[0]}/{filename}")  # os.path.join(name[0], dirname, filename))
 
         shuffle(FileList)  # Usefull for further segmenting the validation set
 
         for filename in FileList:
 
-            label = 0 #int(filename.split('/')[2])
+            label = 0  # int(filename.split('/')[2])
 
             Im = Image.open(filename)
 
@@ -64,28 +65,23 @@ def png_to_ipx3():
 
         data_image = header + data_image
 
-        output_file = open(f'data/raw/compressed/{name[1]}-images-idx3-ubyte.gz', 'wb')
+        output_file = open(f'data/MNIST/raw/{name[1]}-images-idx3-ubyte.gz', 'wb')
         with gzip.open(output_file, "wb") as f:
             f.write(data_image)
-        #output_file.close()
+        # output_file.close()
 
-        output_file = open(f'data/raw/compressed/{name[1]}-labels-idx1-ubyte.gz', 'wb')
+        output_file = open(f'data/MNIST/raw/{name[1]}-labels-idx1-ubyte.gz', 'wb')
         with gzip.open(output_file, "wb") as f:
             f.write(data_label)
 
-        output_file = open(f'data/raw/uncompressed/{name[1]}-images-idx3-ubyte', 'wb')
+        output_file = open(f'data/MNIST/raw/{name[1]}-images-idx3-ubyte', 'wb')
         data_image.tofile(output_file)
         output_file.close()
         # output_file.close()
 
-        output_file = open(f'data/raw/uncompressed/{name[1]}-labels-idx1-ubyte', 'wb')
+        output_file = open(f'data/MNIST/raw/{name[1]}-labels-idx1-ubyte', 'wb')
         data_label.tofile(output_file)
         output_file.close()
-
-
-
-
-
 
 
 def crop_img(img):
@@ -122,8 +118,6 @@ def otsu(img):
     return otsu_img[1]
 
 
-
-
 def standardise(dimension):
     print(f"cv2.version={cv2.__version__}")
 
@@ -153,12 +147,16 @@ def standardise(dimension):
             if filename.endswith(".png"):
                 # read img as bw
                 print((src_directory, filename))
+
+                if (filename[0:5] != "alpha"):
+                    os.rename(f'{src_directory}/{filename}', (f"{src_directory}/alpha{filename[1:]}"))
+                    filename = (f"alpha{filename[1:]}")
+
                 img = cv2.imread(f'{src_directory}/{filename}', 0)
 
                 img = otsu(img)
                 img = crop_img(img)
                 img = scale_img(img, dimension)
-
 
                 # save image to folder
                 final_label = f'{dst_directory}/{filename[:-4]}-std.png'
