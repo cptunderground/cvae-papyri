@@ -11,12 +11,16 @@ import standardisation
 
 
 if __name__ == '__main__':
-    print('starting main')
+
 
     dimension = 28
 
+    standardisation.generate_training_sets()
     standardisation.standardise(dimension)
-    standardisation.png_to_ipx3()
-    mnist_reader.mnist_read()
 
-    autoencoder.run_ae()
+    #unused
+    #standardisation.png_to_ipx3()
+    #mnist_reader.mnist_read()
+
+    #autoencoder.run_ae()
+    autoencoder.run_cae()

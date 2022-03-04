@@ -1,4 +1,6 @@
 import gzip
+import math
+import random
 
 import cv2
 from PIL import Image
@@ -9,7 +11,7 @@ from random import shuffle
 
 
 def png_to_ipx3():
-    Names = [['./data/training-data-standardised', 'train'], ['./data/test-data-standardised', 't10k']]
+    Names = [['./data/training-data-standardised/alpha', 'train'], ['./data/test-data-standardised/alpha', 't10k']]
 
     for name in Names:
 
@@ -121,36 +123,53 @@ def otsu(img):
 def standardise(dimension):
     print(f"cv2.version={cv2.__version__}")
 
+    path_raw = "./data/raw"
+
     path_train = "./data/training-data"
     path_test = "./data/test-data"
-    path_train_std = "./data/training-data-standardised"
-    path_test_std = "./data/test-data-standardised"
+    path_train_std = "./data/training-data-standardised/"
+    path_test_std = "./data/test-data-standardised/"
 
     paths = []
     paths.append((path_train, path_train_std))
     paths.append((path_test, path_test_std))
 
-    if (os.path.isdir(path_train_std)):
-        shutil.rmtree(path_train_std)
-    if (os.path.isdir(path_test_std)):
-        shutil.rmtree(path_test_std)
-
-    os.mkdir(path_train_std);
-    os.mkdir(path_test_std);
-
     for tup in paths:
         src_directory = tup[0]
         dst_directory = tup[1]
 
+        print(src_directory, dst_directory)
+
+        for dir in os.listdir(src_directory):
+            print(dir)
+
+            for file in os.listdir(f"{src_directory}/{dir}"):
+                print(file)
+                filename = os.fsdecode(file)
+                if filename.endswith(".png"):
+                    # read img as bw
+                    print((src_directory, filename))
+
+                    img = cv2.imread(f'{src_directory}/{dir}/{filename}', 0)
+
+                    img = otsu(img)
+                    img = crop_img(img)
+                    img = scale_img(img, dimension)
+
+                    # save image to folder
+                    final_label = f'{dst_directory}/{dir}/{filename[:-4]}-std.png'
+                    print(final_label)
+                    cv2.imwrite(final_label, img)
+                    continue
+                else:
+                    continue
+
+        """
         for file in os.listdir(src_directory):
             filename = os.fsdecode(file)
             if filename.endswith(".png"):
                 # read img as bw
                 print((src_directory, filename))
-
-                if (filename[0:5] != "alpha"):
-                    os.rename(f'{src_directory}/{filename}', (f"{src_directory}/alpha{filename[1:]}"))
-                    filename = (f"alpha{filename[1:]}")
 
                 img = cv2.imread(f'{src_directory}/{filename}', 0)
 
@@ -159,9 +178,82 @@ def standardise(dimension):
                 img = scale_img(img, dimension)
 
                 # save image to folder
+                filename = filename.replace(".", "_")
                 final_label = f'{dst_directory}/{filename[:-4]}-std.png'
                 print(final_label)
                 cv2.imwrite(final_label, img)
                 continue
             else:
                 continue
+"""
+
+def generate_training_sets():
+    path_raw = "./data/raw"
+
+    path_train = "./data/training-data"
+    path_test = "./data/test-data"
+    path_train_std = "./data/training-data-standardised/"
+    path_test_std = "./data/test-data-standardised/"
+
+    paths = []
+    paths.append((path_train, path_train_std))
+    paths.append((path_test, path_test_std))
+
+    if (os.path.isdir(path_train)):
+        shutil.rmtree(path_train)
+    if (os.path.isdir(path_test)):
+        shutil.rmtree(path_test)
+    if (os.path.isdir(path_train_std)):
+        shutil.rmtree(path_train_std)
+    if (os.path.isdir(path_test_std)):
+        shutil.rmtree(path_test_std)
+
+    os.mkdir(path_train)
+    os.mkdir(path_test)
+    os.mkdir(path_train_std)
+    os.mkdir(path_test_std)
+
+    with os.scandir(path_raw) as entries:
+        for entry in entries:
+            print(entry)
+            if (os.path.isdir(f"{path_train}/{entry.name}")):
+                shutil.rmtree(f"{path_train}/{entry.name}")
+            os.mkdir(f"{path_train}/{entry.name}")
+
+            if (os.path.isdir(f"{path_test}/{entry.name}")):
+                shutil.rmtree(f"{path_test}/{entry.name}")
+            os.mkdir(f"{path_test}/{entry.name}")
+
+            if (os.path.isdir(f"{path_train_std}/{entry.name}")):
+                shutil.rmtree(f"{path_train_std}/{entry.name}")
+            os.mkdir(f"{path_train_std}/{entry.name}")
+
+            if (os.path.isdir(f"{path_test_std}/{entry.name}")):
+                shutil.rmtree(f"{path_test_std}/{entry.name}")
+            os.mkdir(f"{path_test_std}/{entry.name}")
+
+            with os.scandir(f"{path_raw}/{entry.name}") as classes:
+                num_files = len(os.listdir(f"{path_raw}/{entry.name}"))
+                num_test = math.floor(num_files/10)
+                num_train = num_files - num_test
+
+                print(f"total files found:{num_files}")
+                print(f"total training files:{num_train}")
+                print(f"total testing files:{num_test}")
+
+                files = set(os.listdir(f"{path_raw}/{entry.name}"))
+                train_files = set(random.sample(files,num_train))
+                test_files = files - train_files
+
+                print(train_files)
+                print(test_files)
+
+                for file in train_files:
+                    file_name = file
+                    file_name = f'{entry.name}{file_name[1:-4].replace(".", "_")}.png'
+                    shutil.copy(f'{path_raw}/{entry.name}/{file}', f'{path_train}/{entry.name}/{file_name}')
+
+                for file in test_files:
+                    file_name = file
+                    file_name = f'{entry.name}{file_name[1:-4].replace(".", "_")}.png'
+                    shutil.copy(f'{path_raw}/{entry.name}/{file}', f'{path_test}/{entry.name}/{file_name}')

@@ -1,12 +1,14 @@
 import random
 
 import torch
-#from torch.autograd import Variable
+from torch.autograd import Variable
 import torch.nn as nn
-#import torch.nn.functional as F
+import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
+from mnist import MNIST
 from torchvision import datasets, transforms
+from torchviz import make_dot
 
 import torch
 import torch.nn as nn
@@ -14,12 +16,11 @@ import torch.optim as optim
 
 import torchvision
 import torchvision.transforms as transforms
+from torchsummary import summary
 
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
-
 
 
 class Network(nn.Module):
@@ -40,11 +41,11 @@ class Network(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.fc = nn.Sequential(
-            nn.Linear(in_features=7*7*32, out_features=256),
+            nn.Linear(in_features=7 * 7 * 32, out_features=256),
             nn.Dropout(p=0.2),
             nn.ReLU()
         )
-        self.out = nn.Linear(in_features=256, out_features=10)
+        self.out = nn.Linear(in_features=256, out_features=5)
 
     def forward(self, t):
         t = self.layer1(t)
@@ -55,12 +56,21 @@ class Network(nn.Module):
 
         return t
 
+
 class ConvAutoEncoder(nn.Module):
     def __init__(self, pretrained_model):
         super().__init__()
         self.encoder = nn.Sequential(
-            *list(pretrained_model.layer1.children()),
-            *list(pretrained_model.layer2.children()),
+            nn.Conv2d(in_channels=1, out_channels=16,
+                      kernel_size=5, stride=1, padding=2),
+            nn.BatchNorm2d(num_features=16),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(in_channels=16, out_channels=32,
+                      kernel_size=5, stride=1, padding=2),
+            nn.BatchNorm2d(num_features=32),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(in_channels=32, out_channels=4,
                       kernel_size=3, padding=1),
             nn.BatchNorm2d(num_features=4),
@@ -72,12 +82,16 @@ class ConvAutoEncoder(nn.Module):
                       kernel_size=3, padding=1),
             nn.BatchNorm2d(num_features=32),
             nn.ReLU(),
+
             nn.Upsample(scale_factor=2, mode='nearest'),
+
             nn.Conv2d(in_channels=32, out_channels=16,
                       kernel_size=5, padding=2),
             nn.BatchNorm2d(num_features=16),
             nn.ReLU(),
+
             nn.Upsample(scale_factor=2, mode='nearest'),
+
             nn.Conv2d(in_channels=16, out_channels=1,
                       kernel_size=5, padding=2),
             nn.BatchNorm2d(num_features=1),
@@ -91,32 +105,51 @@ class ConvAutoEncoder(nn.Module):
         return enc, dec
 
 
-def run_ae():
+def run_cae():
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    train_set = torchvision.datasets.MNIST(
-        root='./data/',
-        train=True,
-        download=False,
-        transform=transforms.ToTensor()
+    train_set = datasets.ImageFolder(
+        './data/training-data-standardised',
+
+        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
-    test_set = torchvision.datasets.MNIST(
-        root='./data/',
-        train=False,
-        download=False,
-        transform=transforms.ToTensor()
+    test_set = datasets.ImageFolder(
+        #'./data/test-data-standardised',
+        './data/test-data-manual',
+        #'./data/test-data-manual-otsu',
+
+        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
 
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=256, shuffle=True, num_workers=1)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=32, num_workers=1)
+
+
+    train_loader = torch.utils.data.DataLoader(train_set, shuffle=True, num_workers=1)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=5, shuffle=False, num_workers=1)
+
+    train_loader
+
+    #take 5 random letters from testset
 
     pretrained_model = Network()
-    #pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
-    model = ConvAutoEncoder(pretrained_model)
-    model
+    print(pretrained_model)
+    # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
+
+
+    model = ConvAutoEncoder(pretrained_model)
+    print(model)
+
+    b = torch.randn(16,1,5,5)
+
+    input_names = ['Image']
+    output_names = ['Label']
+    torch.onnx.export(model, b, 'AE.onnx', input_names=input_names, output_names=output_names)
+
+    print(pretrained_model.layer2.children())
+    summary(model, (1,28,28),2592)
     # to check if our weight transfer was successful or not
-    list(list(pretrained_model.layer2.children())[0].parameters()) == list(list(model.encoder.children())[4].parameters())
+    #list(list(pretrained_model.layer2.children())[0].parameters()) == list(
+    #    list(model.encoder.children())[4].parameters())
     #
     for layer_num, child in enumerate(model.encoder.children()):
         if layer_num < 8:
@@ -131,7 +164,7 @@ def run_ae():
     ], lr=0.01)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
-    num_epochs = 5
+    num_epochs = 30
     for epoch in range(num_epochs):
         train_loss = 0
         ###################
@@ -167,7 +200,7 @@ def run_ae():
         decoded_imgs = decoded_imgs.detach().cpu().numpy()
 
         # plot the first ten input images and then reconstructed images
-        fig, axes = plt.subplots(nrows=2, ncols=10, sharex=True, sharey=True, figsize=(25, 4))
+        fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(12, 4))
 
         # input images on top row, reconstructions on bottom
         for images, row in zip([images, decoded_imgs], axes):
@@ -180,7 +213,7 @@ def run_ae():
         fig.savefig('images/original_decoded.png', bbox_inches='tight')
         plt.close()
 
-        encoded_img = encoded_imgs[6]  # get the 7th image from the batch (7th image in the plot above)
+        encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
 
         fig = plt.figure(figsize=(4, 4))
         for fm in range(encoded_img.shape[0]):
@@ -189,10 +222,10 @@ def run_ae():
             ax.imshow(encoded_img[fm], cmap='gray')
 
         plt.show()
-        fig.savefig('images/encoded_img_4')
+        fig.savefig('images/encoded_img_alpha')
         plt.close()
 
-        encoded_img = encoded_imgs[0]  # get 1st image from the batch (here '7')
+        encoded_img = encoded_imgs[3]  # get 1st image from the batch (here '7')
 
         fig = plt.figure(figsize=(4, 4))
         for fm in range(encoded_img.shape[0]):
@@ -201,9 +234,13 @@ def run_ae():
             ax.imshow(encoded_img[fm], cmap='gray')
 
         plt.show()
-        fig.savefig('images/encoded_img_7')
+        fig.savefig('images/encoded_img_epsilon')
         plt.close()
+
+    summary(model,(1,28,28))
+
 """
+
 IMAGE_SIZE = 784
 IMAGE_WIDTH = IMAGE_HEIGHT = 28
 
@@ -257,8 +294,17 @@ def run_ae():
     optimizer_cls = optim.Adam
 
     # Load data
-    train_data = datasets.MNIST('./data', train=True, transform=transforms.ToTensor())
-    test_data = datasets.MNIST('./data', train=False, transform=transforms.ToTensor())
+
+    train_data = datasets.ImageFolder(
+        './data/training-data-standardised',
+
+        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+    )
+    test_data = test_set = datasets.ImageFolder(
+        './data/test-data-standardised',
+
+        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+    )
     train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size, num_workers=4,
                                                drop_last=True)
 
@@ -267,9 +313,7 @@ def run_ae():
     loss_fn = nn.BCELoss()
     optimizer = optimizer_cls(autoencoder.parameters(), lr=lr)
 
-    test_image = random.choice(test_data)
-    test_image = Variable(test_image.view([1, 1, IMAGE_WIDTH, IMAGE_HEIGHT]))
-    print(test_image)
+
     # Training loop
     for epoch in range(num_epochs):
         print("Epoch %d" % epoch)
@@ -286,7 +330,7 @@ def run_ae():
 
     # Try reconstructing on test data
     test_image = random.choice(test_data)
-    test_image = Variable(test_image.view([1, 1, IMAGE_WIDTH, IMAGE_HEIGHT]))
+
     test_reconst, _ = autoencoder(test_image)
 
     torchvision.utils.save_image(test_image.data, 'orig.png')
