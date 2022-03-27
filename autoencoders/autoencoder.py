@@ -185,7 +185,7 @@ def run_cae():
 
         scheduler.step(train_loss)
 
-        torch.save(model.state_dict(), 'models/models-autoencoder.pth')
+        torch.save(model.state_dict(), '../models/models-autoencoder.pth')
 
         images, labels = next(iter(test_loader))
         images = images.to(device)

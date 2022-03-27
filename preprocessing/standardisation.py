@@ -8,6 +8,7 @@ import os
 import shutil
 from array import *
 from random import shuffle
+import preprocessing.padding
 
 
 def png_to_ipx3():
@@ -134,6 +135,11 @@ def standardise(dimension):
     paths.append((path_train, path_train_std))
     paths.append((path_test, path_test_std))
 
+    max_resolution = 0
+    min_resolution = 1000
+    max_resolution_name = None
+    min_resolution_name = None
+
     for tup in paths:
         src_directory = tup[0]
         dst_directory = tup[1]
@@ -146,13 +152,32 @@ def standardise(dimension):
             for file in os.listdir(f"{src_directory}/{dir}"):
                 print(file)
                 filename = os.fsdecode(file)
+
                 if filename.endswith(".png"):
                     # read img as bw
+
                     print((src_directory, filename))
 
                     img = cv2.imread(f'{src_directory}/{dir}/{filename}', 0)
 
+                    img_height = img.shape[0]
+                    img_width = img.shape[1]
+
+                    img_max_res = max(img_height, img_width)
+                    img_min_res = min(img_height, img_width)
+
+                    if (img_max_res > max_resolution):
+                        max_resolution = img_max_res
+                        max_resolution_name = filename
+
+                    if (img_min_res < min_resolution):
+                        min_resolution = img_min_res
+                        min_resolution_name = filename
+
                     img = otsu(img)
+                    #img = preprocessing.padding.pad(img,200)
+
+
                     img = crop_img(img)
                     img = scale_img(img, dimension)
 
@@ -163,29 +188,9 @@ def standardise(dimension):
                     continue
                 else:
                     continue
+    print(f"Global maximum resolution={max_resolution} - file={max_resolution_name}")
+    print(f"Global minimum resolution={min_resolution} - file={min_resolution_name}")
 
-        """
-        for file in os.listdir(src_directory):
-            filename = os.fsdecode(file)
-            if filename.endswith(".png"):
-                # read img as bw
-                print((src_directory, filename))
-
-                img = cv2.imread(f'{src_directory}/{filename}', 0)
-
-                img = otsu(img)
-                img = crop_img(img)
-                img = scale_img(img, dimension)
-
-                # save image to folder
-                filename = filename.replace(".", "_")
-                final_label = f'{dst_directory}/{filename[:-4]}-std.png'
-                print(final_label)
-                cv2.imwrite(final_label, img)
-                continue
-            else:
-                continue
-"""
 
 def generate_training_sets():
     path_raw = "./data/raw"
@@ -234,7 +239,7 @@ def generate_training_sets():
 
             with os.scandir(f"{path_raw}/{entry.name}") as classes:
                 num_files = len(os.listdir(f"{path_raw}/{entry.name}"))
-                num_test = math.floor(num_files/10)
+                num_test = math.floor(num_files / 10)
                 num_train = num_files - num_test
 
                 print(f"total files found:{num_files}")
@@ -242,7 +247,7 @@ def generate_training_sets():
                 print(f"total testing files:{num_test}")
 
                 files = set(os.listdir(f"{path_raw}/{entry.name}"))
-                train_files = set(random.sample(files,num_train))
+                train_files = set(random.sample(files, num_train))
                 test_files = files - train_files
 
                 print(train_files)

@@ -57,8 +57,8 @@ def otsu_report(img):
     return otsu_img[1]
 
 if __name__ == '__main__':
-    img = cv2.imread(f'out/report/alpha_org.png', 0)
-    img_rgb = cv2.imread(f'out/report/alpha_org.png')
+    img = cv2.imread(f'../out/report/alpha_org.png', 0)
+    img_rgb = cv2.imread(f'../out/report/alpha_org.png')
 
     img_std_thresh = simple_thresholding(img)
     img_adapt_thresh = adaptive_thresholding(img)
@@ -66,14 +66,14 @@ if __name__ == '__main__':
     img_grabcut = grab_cut(img_rgb)
     img_watershed = watershed(img_rgb)
 
-    cv2.imwrite("out/report/alpha-simple-thresholding.png", img_std_thresh)
-    cv2.imwrite("out/report/alpha-adaptive-thresholding.png", img_adapt_thresh)
-    cv2.imwrite("out/report/alpha-otsu-binarization.png", img_otsu)
-    cv2.imwrite("out/report/alpha-grabcut.png", img_grabcut)
-    cv2.imwrite("out/report/alpha-watershed.png", img_watershed)
+    cv2.imwrite("../out/report/alpha-simple-thresholding.png", img_std_thresh)
+    cv2.imwrite("../out/report/alpha-adaptive-thresholding.png", img_adapt_thresh)
+    cv2.imwrite("../out/report/alpha-otsu-binarization.png", img_otsu)
+    cv2.imwrite("../out/report/alpha-grabcut.png", img_grabcut)
+    cv2.imwrite("../out/report/alpha-watershed.png", img_watershed)
 
-    img = cv2.imread(f'out/report/epsilon_org.png', 0)
-    img_rgb = cv2.imread(f'out/report/epsilon_org.png')
+    img = cv2.imread(f'../out/report/epsilon_org.png', 0)
+    img_rgb = cv2.imread(f'../out/report/epsilon_org.png')
 
     img_std_thresh = simple_thresholding(img)
     img_adapt_thresh = adaptive_thresholding(img)
@@ -81,9 +81,9 @@ if __name__ == '__main__':
     img_grabcut = grab_cut(img_rgb)
     img_watershed = watershed(img_rgb)
 
-    cv2.imwrite("out/report/epsilon-simple-thresholding.png", img_std_thresh)
-    cv2.imwrite("out/report/epsilon-adaptive-thresholding.png", img_adapt_thresh)
-    cv2.imwrite("out/report/epsilon-otsu-binarization.png", img_otsu)
-    cv2.imwrite("out/report/epsilon-grabcut.png", img_grabcut)
-    cv2.imwrite("out/report/epsilon-watershed.png", img_watershed)
+    cv2.imwrite("../out/report/epsilon-simple-thresholding.png", img_std_thresh)
+    cv2.imwrite("../out/report/epsilon-adaptive-thresholding.png", img_adapt_thresh)
+    cv2.imwrite("../out/report/epsilon-otsu-binarization.png", img_otsu)
+    cv2.imwrite("../out/report/epsilon-grabcut.png", img_grabcut)
+    cv2.imwrite("../out/report/epsilon-watershed.png", img_watershed)
 
