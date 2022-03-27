@@ -204,6 +204,7 @@ def tsne():
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
 
     plt.show(block=True)
+    plt.savefig('./out/tsne_std.png')
 
 
 

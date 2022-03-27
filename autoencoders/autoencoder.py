@@ -145,40 +145,36 @@ def run_cae():
     )
     test_set = datasets.ImageFolder(
         './data/test-data-standardised',
-        #'./data/test-data-manual',
-        #'./data/test-data-manual-otsu',
+        # './data/test-data-manual',
+        # './data/test-data-manual-otsu',
 
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
 
+    train_loader = torch.utils.data.DataLoader(train_set)
+    test_loader = torch.utils.data.DataLoader(test_set,batch_size=500)
+    print(test_loader.batch_size)
 
 
-    train_loader = torch.utils.data.DataLoader(train_set, shuffle=True, num_workers=1)
-    test_loader = torch.utils.data.DataLoader(test_set, num_workers=1)
-
-    train_loader
-
-    #take 5 random letters from testset
+    # take 5 random letters from testset
 
     pretrained_model = Network()
     print(pretrained_model)
     # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
-
-
     model = ConvAutoEncoder(pretrained_model)
     print(model)
 
-    b = torch.randn(16,1,5,5)
+    b = torch.randn(16, 1, 5, 5)
 
     input_names = ['Image']
     output_names = ['Label']
     torch.onnx.export(model, b, 'AE.onnx', input_names=input_names, output_names=output_names)
 
     print(pretrained_model.layer2.children())
-    summary(model, (1,28,28),2592)
+    summary(model, (1, 28, 28), 2592)
     # to check if our weight transfer was successful or not
-    #list(list(pretrained_model.layer2.children())[0].parameters()) == list(
+    # list(list(pretrained_model.layer2.children())[0].parameters()) == list(
     #    list(model.encoder.children())[4].parameters())
     #
     for layer_num, child in enumerate(model.encoder.children()):
@@ -194,7 +190,7 @@ def run_cae():
     ], lr=0.01)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
-    num_epochs = 30
+    num_epochs = 1
     for epoch in range(num_epochs):
         train_loss = 0
         ###################
@@ -218,6 +214,7 @@ def run_cae():
         torch.save(model.state_dict(), './models/models-autoencoder.pth')
 
         images, labels = next(iter(test_loader))
+        #images, labels = next(iter(train_loader))
         images = images.to(device)
 
         # get sample outputs
@@ -267,25 +264,22 @@ def run_cae():
         fig.savefig('images/encoded_img_epsilon')
         plt.close()
 
-    summary(model,(1,28,28))
-
-    palette = sns.color_palette("bright", 5)
+    summary(model, (1, 28, 28))
 
     # X, y = load_digits(return_X_y=True)
 
     data = []
     folder = './data/training-data-standardised'
 
-    #print(encoded_imgs)
-    #print(labels)
-    #print(len(encoded_imgs))
-    #print(len(labels))
+    # print(encoded_imgs)
+    # print(labels)
+    # print(len(encoded_imgs))
+    # print(len(labels))
 
     for i in range(len(encoded_imgs)):
         data.append([encoded_imgs[i], labels[i]])
 
-
-    #print(data)
+    # print(data)
 
     features, images = zip(*data)
     y = images
@@ -296,9 +290,21 @@ def run_cae():
     print(X.shape)
     X.ravel()
     print(X.shape)
-    X = np.reshape(X,(5, 196))
+    X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
     print(X.shape)
 
+    y_list = list(y)
+
+    for item in range(len(y_list)):
+        y_list[item] = str(y_list[item])
+
+    y = tuple(y_list)
+
+    print(y)
+    y_set = set(y)
+    y_len = len(y_set)
+    print(y_len)
+    palette = sns.color_palette("bright", y_len)
     MACHINE_EPSILON = np.finfo(np.double).eps
     n_components = 2
     perplexity = 30
@@ -312,8 +318,13 @@ def run_cae():
     X_embedded = tsne.fit_transform(X)
 
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
     plt.show(block=True)
+    plt.savefig('./out/tsne_AE.png')
+
+    return features, images
+
 
 """
 

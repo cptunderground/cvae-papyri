@@ -13,8 +13,8 @@ import matplotlib.pyplot
 from matplotlib.pyplot import imshow
 import seaborn as sns
 
-def custom_tsne():
 
+def custom_tsne(X, y):
     data = []
     folder = './data/test-data-standardised'
 
@@ -22,19 +22,38 @@ def custom_tsne():
         print(f)
         for filename in os.listdir(f"{folder}/{f}"):
             print(filename)
-            image = cv2.imread(os.path.join(folder,f,filename))
+            image = cv2.imread(os.path.join(folder, f, filename))
             if image is not None:
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                image = cv2.resize(image, (28,28))
+                image = cv2.resize(image, (28, 28))
                 image = image.flatten()
                 data.append([image, f])
-                #data.append([image, f"{folder}/{f}/{filename}"])
+                # data.append([image, f"{folder}/{f}/{filename}"])
 
     features, images = zip(*data)
+    features, images = X, y
+    X = np.array(features)
     print(features)
     print(images)
 
-    features = np.array(features)
+    print(X.shape)
+    X.reshape(-1)
+    print(X.shape)
+    X.ravel()
+    print(X.shape)
+    X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
+    print(X.shape)
+
+    y_list = list(y)
+
+    for item in range(len(y_list)):
+        y_list[item] = str(y_list[item])
+
+    y = tuple(y_list)
+    images = y
+
+
+    features = X
     pca = PCA(n_components=50)
     pca.fit(features)
     pca_features = pca.transform(features)
@@ -54,8 +73,6 @@ def custom_tsne():
     ty = (ty - np.min(ty)) / (np.max(ty) - np.min(ty))
 
     palette = sns.color_palette("bright", 5)
-    sns.scatterplot(tsne[:, 0], tsne[:, 1], hue= images, palette=palette)
-    #sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    sns.scatterplot(tsne[:, 0], tsne[:, 1], hue=images, palette=palette)
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
     plt.show()
-
-
