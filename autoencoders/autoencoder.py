@@ -190,7 +190,7 @@ def run_cae():
     ], lr=0.01)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
-    num_epochs = 1
+    num_epochs = 30
     for epoch in range(num_epochs):
         train_loss = 0
         ###################
@@ -264,64 +264,66 @@ def run_cae():
         fig.savefig('images/encoded_img_epsilon')
         plt.close()
 
+
+
+        # X, y = load_digits(return_X_y=True)
+
+        data = []
+        folder = './data/training-data-standardised'
+
+        # print(encoded_imgs)
+        # print(labels)
+        # print(len(encoded_imgs))
+        # print(len(labels))
+
+        for i in range(len(encoded_imgs)):
+            data.append([encoded_imgs[i], labels[i]])
+
+        # print(data)
+
+        features, images = zip(*data)
+        y = images
+        X = np.array(features)
+
+        print(X.shape)
+        X.reshape(-1)
+        print(X.shape)
+        X.ravel()
+        print(X.shape)
+        X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
+        print(X.shape)
+
+        y_list = list(y)
+
+        for item in range(len(y_list)):
+            y_list[item] = str(y_list[item])
+
+        y = tuple(y_list)
+
+        print(y)
+        y_set = set(y)
+        y_len = len(y_set)
+        print(y_len)
+        palette = sns.color_palette("bright", y_len)
+        MACHINE_EPSILON = np.finfo(np.double).eps
+        n_components = 2
+        perplexity = 30
+
+        # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
+
+        # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+        # plt.show()
+
+        tsne = TSNE()
+        X_embedded = tsne.fit_transform(X)
+
+        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+        # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
+
+        plt.show(block=True)
+        plt.savefig(f'./out/tsne_AE_epoch_{epoch}.png')
+
     summary(model, (1, 28, 28))
-
-    # X, y = load_digits(return_X_y=True)
-
-    data = []
-    folder = './data/training-data-standardised'
-
-    # print(encoded_imgs)
-    # print(labels)
-    # print(len(encoded_imgs))
-    # print(len(labels))
-
-    for i in range(len(encoded_imgs)):
-        data.append([encoded_imgs[i], labels[i]])
-
-    # print(data)
-
-    features, images = zip(*data)
-    y = images
-    X = np.array(features)
-
-    print(X.shape)
-    X.reshape(-1)
-    print(X.shape)
-    X.ravel()
-    print(X.shape)
-    X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
-    print(X.shape)
-
-    y_list = list(y)
-
-    for item in range(len(y_list)):
-        y_list[item] = str(y_list[item])
-
-    y = tuple(y_list)
-
-    print(y)
-    y_set = set(y)
-    y_len = len(y_set)
-    print(y_len)
-    palette = sns.color_palette("bright", y_len)
-    MACHINE_EPSILON = np.finfo(np.double).eps
-    n_components = 2
-    perplexity = 30
-
-    # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
-
-    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
-    # plt.show()
-
-    tsne = TSNE()
-    X_embedded = tsne.fit_transform(X)
-
-    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
-    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
-
-    plt.show(block=True)
-    plt.savefig('./out/tsne_AE.png')
 
     return features, images
 

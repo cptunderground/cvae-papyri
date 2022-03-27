@@ -23,5 +23,5 @@ if __name__ == '__main__':
     X, y = autoencoder.run_cae()
 
 
-    dim_reduction.custom_tsne.custom_tsne(X, y)
+    #dim_reduction.custom_tsne.custom_tsne(X, y)
     dim_reduction.tsne.tsne()
