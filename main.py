@@ -20,7 +20,7 @@ if __name__ == '__main__':
     #mnist_reader.mnist_read()
 
     #autoencoder.run_ae()
-    #autoencoder.run_cae()
+    autoencoder.run_cae()
 
     #dim_reduction.custom_tsne.custom_tsne()
-    dim_reduction.tsne.tsne()
+    #dim_reduction.tsne.tsne()

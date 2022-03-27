@@ -1,6 +1,36 @@
 import random
+import time
 
+import numpy as np
 import torch
+from sklearn.datasets import load_digits
+from scipy.spatial.distance import pdist
+
+from sklearn.manifold._t_sne import _joint_probabilities
+from scipy import linalg
+from sklearn.metrics import pairwise_distances
+from scipy.spatial.distance import squareform
+from sklearn.manifold import TSNE
+from matplotlib import pyplot as plt
+import seaborn as sns
+from torch.utils.data import datasets
+from torchvision.transforms import transforms
+import matplotlib.pyplot as plt
+import cv2
+import os
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+from sklearn.feature_extraction import image
+from skimage import io
+from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
+import matplotlib.pyplot
+from matplotlib.pyplot import imshow
+import seaborn as sns
+import torch
+from sklearn.manifold import TSNE
 from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
@@ -114,8 +144,8 @@ def run_cae():
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
     test_set = datasets.ImageFolder(
-        #'./data/test-data-standardised',
-        './data/test-data-manual',
+        './data/test-data-standardised',
+        #'./data/test-data-manual',
         #'./data/test-data-manual-otsu',
 
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
@@ -124,7 +154,7 @@ def run_cae():
 
 
     train_loader = torch.utils.data.DataLoader(train_set, shuffle=True, num_workers=1)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=5, shuffle=False, num_workers=1)
+    test_loader = torch.utils.data.DataLoader(test_set, num_workers=1)
 
     train_loader
 
@@ -185,7 +215,7 @@ def run_cae():
 
         scheduler.step(train_loss)
 
-        torch.save(model.state_dict(), '../models/models-autoencoder.pth')
+        torch.save(model.state_dict(), './models/models-autoencoder.pth')
 
         images, labels = next(iter(test_loader))
         images = images.to(device)
@@ -238,6 +268,52 @@ def run_cae():
         plt.close()
 
     summary(model,(1,28,28))
+
+    palette = sns.color_palette("bright", 5)
+
+    # X, y = load_digits(return_X_y=True)
+
+    data = []
+    folder = './data/training-data-standardised'
+
+    #print(encoded_imgs)
+    #print(labels)
+    #print(len(encoded_imgs))
+    #print(len(labels))
+
+    for i in range(len(encoded_imgs)):
+        data.append([encoded_imgs[i], labels[i]])
+
+
+    #print(data)
+
+    features, images = zip(*data)
+    y = images
+    X = np.array(features)
+
+    print(X.shape)
+    X.reshape(-1)
+    print(X.shape)
+    X.ravel()
+    print(X.shape)
+    X = np.reshape(X,(5, 196))
+    print(X.shape)
+
+    MACHINE_EPSILON = np.finfo(np.double).eps
+    n_components = 2
+    perplexity = 30
+
+    # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
+
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    # plt.show()
+
+    tsne = TSNE()
+    X_embedded = tsne.fit_transform(X)
+
+    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+
+    plt.show(block=True)
 
 """
 

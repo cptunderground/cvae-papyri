@@ -166,6 +166,7 @@ def tsne():
     X = np.array(features)
     print(features)
     print(images)
+    print(X.shape)
 
     """
     features = np.array(features)
