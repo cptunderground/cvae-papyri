@@ -135,16 +135,29 @@ class ConvAutoEncoder(nn.Module):
         return enc, dec
 
 
-def run_cae():
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+def get_label(label):
+    switcher = {
+        "tensor(0)":"alpha",
+        "tensor(1)":"beta",
+        "tensor(2)":"delta",
+        "tensor(3)":"epsilon",
+        "tensor(4)":"gamma",
+    }
 
+    return switcher.get(label)
+
+def run_cae(epochs=30, mode="not_selected"):
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    name = "CovAE"
     train_set = datasets.ImageFolder(
-        './data/training-data-standardised',
+        # './data/training-data-standardised',
+        './data/raw-cleaned-standardised',
 
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
     test_set = datasets.ImageFolder(
-        './data/test-data-standardised',
+        './data/raw-cleaned-standardised',
+        # './data/test-data-standardised',
         # './data/test-data-manual',
         # './data/test-data-manual-otsu',
 
@@ -152,9 +165,8 @@ def run_cae():
     )
 
     train_loader = torch.utils.data.DataLoader(train_set)
-    test_loader = torch.utils.data.DataLoader(test_set,batch_size=500)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=2877)
     print(test_loader.batch_size)
-
 
     # take 5 random letters from testset
 
@@ -190,7 +202,7 @@ def run_cae():
     ], lr=0.01)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
-    num_epochs = 30
+    num_epochs = epochs
     for epoch in range(num_epochs):
         train_loss = 0
         ###################
@@ -211,10 +223,10 @@ def run_cae():
 
         scheduler.step(train_loss)
 
-        torch.save(model.state_dict(), './models/models-autoencoder.pth')
+        torch.save(model.state_dict(), f'./models/models-autoencoder{mode}.pth')
 
         images, labels = next(iter(test_loader))
-        #images, labels = next(iter(train_loader))
+        # images, labels = next(iter(train_loader))
         images = images.to(device)
 
         # get sample outputs
@@ -264,8 +276,6 @@ def run_cae():
         fig.savefig('images/encoded_img_epsilon')
         plt.close()
 
-
-
         # X, y = load_digits(return_X_y=True)
 
         data = []
@@ -296,7 +306,8 @@ def run_cae():
         y_list = list(y)
 
         for item in range(len(y_list)):
-            y_list[item] = str(y_list[item])
+
+            y_list[item] = get_label(str(y_list[item]))
 
         y = tuple(y_list)
 
@@ -320,8 +331,9 @@ def run_cae():
         sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
         # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
+        plt.title(f"tsne_{name}_epoch_{epoch}_mode_{mode}")
+        plt.savefig(f'./out/tsne/{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png')
         plt.show(block=True)
-        plt.savefig(f'./out/tsne_AE_epoch_{epoch}.png')
 
     summary(model, (1, 28, 28))
 

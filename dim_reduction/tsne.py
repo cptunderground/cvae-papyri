@@ -140,14 +140,14 @@ def _gradient_descent(obj_func, p0,y, args, it=0, n_iter=100,
     return p
 
 
-def tsne():
+def tsne(mode, folder):
     #sns.set(rc={'figure.figsize': (11.7, 8.27)})
     palette = sns.color_palette("bright", 5)
 
     #X, y = load_digits(return_X_y=True)
 
     data = []
-    folder = './data/training-data-standardised'
+    folder = './data/raw-cleaned-standardised'
 
     for f in os.listdir(folder):
         print(f)
@@ -160,7 +160,7 @@ def tsne():
                 image = image.flatten()
                 data.append([image, f])
                 # data.append([image, f"{folder}/{f}/{filename}"])
-
+    print(data)
     features, images = zip(*data)
     y = images
     X = np.array(features)
@@ -203,8 +203,8 @@ def tsne():
 
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
 
+    plt.savefig(f'./out/tsne_{mode}.png')
     plt.show(block=True)
-    plt.savefig('./out/tsne_std.png')
 
 
 

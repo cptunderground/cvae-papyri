@@ -1,6 +1,7 @@
 import gzip
 import math
 import random
+from time import sleep
 
 import cv2
 from PIL import Image
@@ -121,19 +122,24 @@ def otsu(img):
     return otsu_img[1]
 
 
-def standardise(dimension):
+def standardise(dimension=28, mode="gray-scale"):
     print(f"cv2.version={cv2.__version__}")
 
     path_raw = "./data/raw"
 
     path_train = "./data/training-data"
     path_test = "./data/test-data"
-    path_train_std = "./data/training-data-standardised/"
-    path_test_std = "./data/test-data-standardised/"
+    path_raw_cleaned = "./data/raw-cleaned"
+
+    path_train_std = "./data/training-data-standardised"
+    path_test_std = "./data/test-data-standardised"
+    path_raw_cleaned_std = "./data/raw-cleaned-standardised"
+
 
     paths = []
     paths.append((path_train, path_train_std))
     paths.append((path_test, path_test_std))
+    paths.append((path_raw_cleaned, path_raw_cleaned_std))
 
     max_resolution = 0
     min_resolution = 1000
@@ -174,7 +180,8 @@ def standardise(dimension):
                         min_resolution = img_min_res
                         min_resolution_name = filename
 
-                    img = otsu(img)
+                    if (mode == "otsu"):
+                        img = otsu(img)
                     #img = preprocessing.padding.pad(img,200)
 
 
@@ -188,22 +195,99 @@ def standardise(dimension):
                     continue
                 else:
                     continue
+    sleep(2)
     print(f"Global maximum resolution={max_resolution} - file={max_resolution_name}")
     print(f"Global minimum resolution={min_resolution} - file={min_resolution_name}")
+    sleep(10)
+    return mode
 
+def setup():
+    path_raw = "./data/raw"
+
+    path_raw_cleaned = "./data/raw-cleaned"
+    path_train = "./data/training-data"
+    path_test = "./data/test-data"
+    path_raw_cleaned_std = "./data/raw-cleaned-standardised"
+    path_train_std = "./data/training-data-standardised"
+    path_test_std = "./data/test-data-standardised"
+
+    path_out = "./out"
+    path_out_tsne = f'./out/tsne'
+    path_out_tsne_covae = f'./out/tsne/CovAE'
+    path_out_tsne_covae_otsu = f'./out/tsne/CovAE/otsu/'
+    path_out_tsne_covae_gs = f'./out/tsne/CovAE/gray-scale/'
+
+    paths = []
+    paths.append(path_raw_cleaned)
+    paths.append(path_raw_cleaned_std)
+    paths.append(path_train)
+    paths.append(path_train_std)
+    paths.append(path_test)
+    paths.append(path_test_std)
+
+    paths_tup = []
+    paths_tup.append((path_train, path_train_std))
+    paths_tup.append((path_test, path_test_std))
+    paths_tup.append((path_raw_cleaned, path_raw_cleaned_std))
+
+    out_paths = []
+    out_paths.append(path_out)
+    out_paths.append(path_out_tsne)
+    out_paths.append(path_out_tsne_covae)
+    out_paths.append(path_out_tsne_covae_otsu)
+    out_paths.append(path_out_tsne_covae_gs)
+
+    for path in paths and out_paths:
+        if (os.path.isdir(path)):
+            shutil.rmtree(path)
+            os.mkdir(path)
+        else:
+            print(f"{path} already exists")
 
 def generate_training_sets():
     path_raw = "./data/raw"
 
+    path_raw_cleaned = "./data/raw-cleaned"
     path_train = "./data/training-data"
     path_test = "./data/test-data"
-    path_train_std = "./data/training-data-standardised/"
-    path_test_std = "./data/test-data-standardised/"
+    path_raw_cleaned_std = "./data/raw-cleaned-standardised"
+    path_train_std = "./data/training-data-standardised"
+    path_test_std = "./data/test-data-standardised"
+
+    path_out = "./out"
+    path_out_tsne = f'./out/tsne'
+    path_out_tsne_covae = f'./out/tsne/CovAE'
+    path_out_tsne_covae_otsu = f'./out/tsne/CovAE/otsu/'
+    path_out_tsne_covae_gs = f'./out/tsne/CovAE/gray-scale/'
+
 
     paths = []
-    paths.append((path_train, path_train_std))
-    paths.append((path_test, path_test_std))
+    paths.append(path_raw_cleaned)
+    paths.append(path_raw_cleaned_std)
+    paths.append(path_train)
+    paths.append(path_train_std)
+    paths.append(path_test)
+    paths.append(path_test_std)
 
+    paths_tup = []
+    paths_tup.append((path_train, path_train_std))
+    paths_tup.append((path_test, path_test_std))
+    paths_tup.append((path_raw_cleaned, path_raw_cleaned_std))
+
+    out_paths = []
+    out_paths.append(path_out)
+    out_paths.append(path_out_tsne)
+    out_paths.append(path_out_tsne_covae)
+    out_paths.append(path_out_tsne_covae_otsu)
+    out_paths.append(path_out_tsne_covae_gs)
+
+    for path in paths and out_paths:
+        if (os.path.isdir(path)):
+            print(f"{path} already exists")
+        else:
+            os.mkdir(path)
+
+    """
     if (os.path.isdir(path_train)):
         shutil.rmtree(path_train)
     if (os.path.isdir(path_test)):
@@ -212,15 +296,25 @@ def generate_training_sets():
         shutil.rmtree(path_train_std)
     if (os.path.isdir(path_test_std)):
         shutil.rmtree(path_test_std)
+    if (os.path.isdir(path_raw_cleaned)):
+        shutil.rmtree(path_raw_cleaned)
 
     os.mkdir(path_train)
     os.mkdir(path_test)
     os.mkdir(path_train_std)
     os.mkdir(path_test_std)
-
+    os.mkdir(path_raw_cleaned)
+    """
     with os.scandir(path_raw) as entries:
         for entry in entries:
             print(entry)
+
+            for path in paths:
+                if (os.path.isdir(f"{path}/{entry.name}")):
+                    shutil.rmtree(f"{path}/{entry.name}")
+                os.mkdir(f"{path}/{entry.name}")
+
+            """
             if (os.path.isdir(f"{path_train}/{entry.name}")):
                 shutil.rmtree(f"{path_train}/{entry.name}")
             os.mkdir(f"{path_train}/{entry.name}")
@@ -237,6 +331,15 @@ def generate_training_sets():
                 shutil.rmtree(f"{path_test_std}/{entry.name}")
             os.mkdir(f"{path_test_std}/{entry.name}")
 
+            if (os.path.isdir(f"{path_raw_cleaned}/{entry.name}")):
+                shutil.rmtree(f"{path_raw_cleaned}/{entry.name}")
+            os.mkdir(f"{path_raw_cleaned}/{entry.name}")
+            
+            if (os.path.isdir(f"{path_raw_cleaned_std}/{entry.name}")):
+                shutil.rmtree(f"{path_raw_cleaned_std}/{entry.name}")
+            os.mkdir(f"{path_raw_cleaned_std}/{entry.name}")
+            """
+
             with os.scandir(f"{path_raw}/{entry.name}") as classes:
                 num_files = len(os.listdir(f"{path_raw}/{entry.name}"))
                 num_test = math.floor(num_files / 10)
@@ -252,6 +355,12 @@ def generate_training_sets():
 
                 print(train_files)
                 print(test_files)
+
+                for file in files:
+                    file_name = file
+                    file_name = f'{entry.name}{file_name[1:-4].replace(".", "_")}.png'
+                    shutil.copy(f'{path_raw}/{entry.name}/{file}', f'{path_raw_cleaned}/{entry.name}/{file_name}')
+
 
                 for file in train_files:
                     file_name = file

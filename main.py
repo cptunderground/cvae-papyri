@@ -8,20 +8,33 @@ from autoencoders import autoencoder
 from preprocessing import standardisation
 
 if __name__ == '__main__':
-
-
     dimension = 28
-
-    #standardisation.generate_training_sets()
-    #standardisation.standardise(dimension)
-
-    #unused
-    #standardisation.png_to_ipx3()
-    #mnist_reader.mnist_read()
-
-    #autoencoder.run_ae()
-    X, y = autoencoder.run_cae()
+    epochs = 100
 
 
-    #dim_reduction.custom_tsne.custom_tsne(X, y)
-    dim_reduction.tsne.tsne()
+    standardisation.generate_training_sets()
+    mode = standardisation.standardise(dimension=dimension, mode="gray-scale")
+    dim_reduction.tsne.tsne(mode=mode, folder='./data/raw-cleaned-standardised')
+    mode = standardisation.standardise(dimension=dimension, mode="otsu")
+    dim_reduction.tsne.tsne(mode=mode, folder='./data/raw-cleaned-standardised')
+
+    dim_reduction.tsne.tsne(mode="raw", folder='./data/raw')
+
+
+
+
+
+    mode = standardisation.standardise(dimension=dimension, mode="gray-scale")
+    X, y = autoencoder.run_cae(epochs=epochs, mode=mode)
+
+    mode = standardisation.standardise(dimension=dimension, mode="otsu")
+    X, y = autoencoder.run_cae(epochs=epochs, mode=mode)
+
+    # unused
+    # standardisation.png_to_ipx3()
+    # mnist_reader.mnist_read()
+
+    # autoencoder.run_ae()
+    # X, y = autoencoder.run_cae()
+
+    # dim_reduction.custom_tsne.custom_tsne(X, y)
