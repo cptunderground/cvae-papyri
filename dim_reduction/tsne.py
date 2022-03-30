@@ -147,7 +147,7 @@ def tsne(mode, folder):
     #X, y = load_digits(return_X_y=True)
 
     data = []
-    folder = './data/raw-cleaned-standardised'
+    #folder = './data/raw-cleaned-standardised'
 
     for f in os.listdir(folder):
         print(f)

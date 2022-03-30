@@ -281,7 +281,7 @@ def generate_training_sets():
     out_paths.append(path_out_tsne_covae_otsu)
     out_paths.append(path_out_tsne_covae_gs)
 
-    for path in paths and out_paths:
+    for path in (paths + out_paths):
         if (os.path.isdir(path)):
             print(f"{path} already exists")
         else:

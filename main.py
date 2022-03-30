@@ -12,22 +12,19 @@ if __name__ == '__main__':
     epochs = 100
 
 
+
     standardisation.generate_training_sets()
-    mode = standardisation.standardise(dimension=dimension, mode="gray-scale")
-    dim_reduction.tsne.tsne(mode=mode, folder='./data/raw-cleaned-standardised')
-    mode = standardisation.standardise(dimension=dimension, mode="otsu")
-    dim_reduction.tsne.tsne(mode=mode, folder='./data/raw-cleaned-standardised')
 
-    dim_reduction.tsne.tsne(mode="raw", folder='./data/raw')
-
-
+    dim_reduction.tsne.tsne(mode="raw-cleaned", folder='./data/raw-cleaned')
 
 
 
     mode = standardisation.standardise(dimension=dimension, mode="gray-scale")
+    dim_reduction.tsne.tsne(mode=mode, folder='./data/raw-cleaned-standardised')
     X, y = autoencoder.run_cae(epochs=epochs, mode=mode)
 
     mode = standardisation.standardise(dimension=dimension, mode="otsu")
+    dim_reduction.tsne.tsne(mode=mode, folder='./data/raw-cleaned-standardised')
     X, y = autoencoder.run_cae(epochs=epochs, mode=mode)
 
     # unused
