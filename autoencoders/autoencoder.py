@@ -1,3 +1,4 @@
+import logging
 import random
 import time
 
@@ -146,7 +147,7 @@ def get_label(label):
 
     return switcher.get(label)
 
-def run_cae(epochs=30, mode="not_selected"):
+def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
     train_set = datasets.ImageFolder(
@@ -166,16 +167,16 @@ def run_cae(epochs=30, mode="not_selected"):
 
     train_loader = torch.utils.data.DataLoader(train_set)
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=2877)
-    print(test_loader.batch_size)
+    logging.debug(test_loader.batch_size)
 
     # take 5 random letters from testset
 
     pretrained_model = Network()
-    print(pretrained_model)
+    logging.info(pretrained_model)
     # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
     model = ConvAutoEncoder(pretrained_model)
-    print(model)
+    logging.info(model)
 
     b = torch.randn(16, 1, 5, 5)
 
@@ -183,7 +184,7 @@ def run_cae(epochs=30, mode="not_selected"):
     output_names = ['Label']
     torch.onnx.export(model, b, 'AE.onnx', input_names=input_names, output_names=output_names)
 
-    print(pretrained_model.layer2.children())
+
     summary(model, (1, 28, 28), 2592)
     # to check if our weight transfer was successful or not
     # list(list(pretrained_model.layer2.children())[0].parameters()) == list(
@@ -208,7 +209,9 @@ def run_cae(epochs=30, mode="not_selected"):
         ###################
         # train the models #
         ###################
-        loop = tqdm(train_loader, total=len(train_loader))
+        if tqdm_mode: loop = tqdm(train_loader, total=len(train_loader))
+        else: loop = train_loader
+
         for batch in loop:
             images = batch[0].to(device)
             _, outputs = model(images)
@@ -218,8 +221,10 @@ def run_cae(epochs=30, mode="not_selected"):
             optimizer.step()
 
             train_loss += loss.item() * images.size(0)
-            loop.set_description(f'Epoch [{epoch + 1:2d}/{num_epochs}]')
-            loop.set_postfix(loss=train_loss)
+            if tqdm_mode:
+                loop.set_description(f'Epoch [{epoch + 1:2d}/{num_epochs}]')
+                loop.set_postfix(loss=train_loss)
+        logging.info(f'Epoch={epoch} done.')
 
         scheduler.step(train_loss)
 

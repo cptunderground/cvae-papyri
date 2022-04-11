@@ -1,3 +1,4 @@
+import logging
 import time
 
 import numpy as np
@@ -150,9 +151,9 @@ def tsne(mode, folder):
     #folder = './data/raw-cleaned-standardised'
 
     for f in os.listdir(folder):
-        print(f)
+        logging.debug(f)
         for filename in os.listdir(f"{folder}/{f}"):
-            print(filename)
+            logging.debug(filename)
             image = cv2.imread(os.path.join(folder, f, filename))
             if image is not None:
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -160,13 +161,13 @@ def tsne(mode, folder):
                 image = image.flatten()
                 data.append([image, f])
                 # data.append([image, f"{folder}/{f}/{filename}"])
-    print(data)
+    logging.debug(data)
     features, images = zip(*data)
     y = images
     X = np.array(features)
-    print(features)
-    print(images)
-    print(X.shape)
+    logging.debug(features)
+    logging.debug(images)
+    logging.debug(X.shape)
 
     """
     features = np.array(features)
@@ -204,7 +205,7 @@ def tsne(mode, folder):
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
 
     plt.savefig(f'./out/tsne_{mode}.png')
-    plt.show(block=True)
+    plt.show()
 
 
 
