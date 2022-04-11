@@ -14,7 +14,7 @@ from scipy.spatial.distance import squareform
 from sklearn.manifold import TSNE
 from matplotlib import pyplot as plt
 import seaborn as sns
-from torch.utils.data import datasets
+from torch.utils.data import dataset
 from torchvision.transforms import transforms
 import matplotlib.pyplot as plt
 import cv2
