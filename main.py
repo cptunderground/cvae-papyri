@@ -72,13 +72,13 @@ if __name__ == '__main__':
     logging.info(f'processing_mode={processing_mode}')
     logging.info(f'tqdm_mode={tqdm_mode}')
 
-    #standardisation.generate_training_sets()
+    standardisation.generate_training_sets()
 
     # dim_reduction.tsne.tsne(mode="raw-cleaned", folder='./data/raw-cleaned')
 
 
-    #standardisation.standardise(dimension=dimension, mode=processing_mode)
-    #dim_reduction.tsne.tsne(mode=processing_mode, folder='./data/raw-cleaned-standardised')
+    standardisation.standardise(dimension=dimension, mode=processing_mode)
+    dim_reduction.tsne.tsne(mode=processing_mode, folder='./data/raw-cleaned-standardised')
     X, y = autoencoder.run_cae(epochs=epochs, mode=processing_mode, tqdm_mode=tqdm_mode)
 
     # unused
