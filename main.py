@@ -12,7 +12,14 @@ from util.base_logger import logger
 import argparse
 import logging
 
-run_root = ""
+
+def get_root():
+    return globals().get("run_root")
+
+
+def set_root(root):
+    globals().update(run_root=root)
+
 
 if __name__ == '__main__':
 
@@ -40,9 +47,7 @@ if __name__ == '__main__':
         'tqdm': True
     }
 
-    #logging.basicConfig(level=logging.INFO)
-
-
+    # logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser(description="papyri-cvae arguments")
     parser.add_argument('mode', metavar='MODE', type=str, nargs=1,
@@ -62,6 +67,7 @@ if __name__ == '__main__':
     run_path = f'out/{name}'
 
     run_root = run_path
+    util.utils.set_root(run_root)
 
     util.utils.create_folder(run_path)
 
@@ -70,8 +76,6 @@ if __name__ == '__main__':
     util.report.set_mdPath(run_root)
     util.report.create_report(f"report-{name}", title=f"Report for {name}")
     util.report.write_to_report(f"This is your Report for the run {name}. It summarizes all calculations made.")
-
-
 
     logger.info(f'Program starting in {mode}-mode')
     if mode == 'init':
@@ -91,7 +95,7 @@ if __name__ == '__main__':
 
     else:
         selected_config = eval(f'{mode}_config')
-        #logger.basicConfig(level=selected_config['logging_lvl'], filename=f'log-{name}.log')
+        # logger.basicConfig(level=selected_config['logging_lvl'], filename=f'log-{name}.log')
         dimension = selected_config['dimension']
         epochs = selected_config['epochs']
         processing_mode = selected_config['processing_mode']
@@ -109,20 +113,15 @@ if __name__ == '__main__':
     logger.info(f'processing_mode={processing_mode}')
     logger.info(f'tqdm_mode={tqdm_mode}')
 
-
     if args.generate:
         standardisation.generate_training_sets()
 
-    util.report.save_report()
-    exit(0)
     # dim_reduction.tsne.tsne(mode="raw-cleaned", folder='./data/raw-cleaned')
 
-
     standardisation.standardise(dimension=dimension, mode=processing_mode)
+
     dim_reduction.tsne.tsne(mode=processing_mode, folder='./data/raw-cleaned-standardised')
     X, y = autoencoder.run_cae(epochs=epochs, mode=processing_mode, tqdm_mode=tqdm_mode)
-
-
 
     if args.report:
         print("Evaluating results and summarizing them in report")

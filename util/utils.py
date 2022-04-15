@@ -2,7 +2,15 @@ import os
 import logging
 from util.base_logger import logger
 
+root = None
 
+def set_root(_root):
+    global root
+    root = _root
+
+def get_root():
+    global root
+    return root
 
 def create_folder(path):
 

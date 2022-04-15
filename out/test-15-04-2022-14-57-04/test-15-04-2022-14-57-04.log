@@ -1,0 +1,39 @@
+2022-04-15 14:57:04,968 |     INFO | Program starting in test-mode
+2022-04-15 14:57:04,968 |     INFO | STARTING PROGRAM
+2022-04-15 14:57:04,968 |     INFO | Selected parameters:
+2022-04-15 14:57:04,968 |     INFO | epochs=1
+2022-04-15 14:57:04,968 |     INFO | dimension=28
+2022-04-15 14:57:04,969 |     INFO | processing_mode=gray-scale
+2022-04-15 14:57:04,969 |     INFO | tqdm_mode=True
+2022-04-15 14:57:04,969 |  WARNING | ./data/raw-cleaned already exists
+2022-04-15 14:57:04,969 |  WARNING | ./data/raw-cleaned-standardised already exists
+2022-04-15 14:57:04,969 |  WARNING | ./data/training-data already exists
+2022-04-15 14:57:04,970 |  WARNING | ./data/training-data-standardised already exists
+2022-04-15 14:57:04,970 |  WARNING | ./data/test-data already exists
+2022-04-15 14:57:04,970 |  WARNING | ./data/test-data-standardised already exists
+2022-04-15 14:57:04,970 |  WARNING | ./out already exists
+2022-04-15 14:57:04,971 |  WARNING | ./out/tsne already exists
+2022-04-15 14:57:04,971 |  WARNING | ./out/tsne/CovAE already exists
+2022-04-15 14:57:04,971 |  WARNING | ./out/tsne/CovAE/otsu/ already exists
+2022-04-15 14:57:04,971 |  WARNING | ./out/tsne/CovAE/gray-scale/ already exists
+2022-04-15 14:57:06,002 |     INFO | total files found in alpha:1137
+2022-04-15 14:57:06,002 |     INFO | total training files in alpha:1024
+2022-04-15 14:57:06,002 |     INFO | total testing files in alpha:113
+2022-04-15 14:57:08,388 |     INFO | total files found in beta:69
+2022-04-15 14:57:08,388 |     INFO | total training files in beta:63
+2022-04-15 14:57:08,388 |     INFO | total testing files in beta:6
+2022-04-15 14:57:08,856 |     INFO | total files found in delta:272
+2022-04-15 14:57:08,856 |     INFO | total training files in delta:245
+2022-04-15 14:57:08,856 |     INFO | total testing files in delta:27
+2022-04-15 14:57:10,736 |     INFO | total files found in epsilon:1223
+2022-04-15 14:57:10,736 |     INFO | total training files in epsilon:1101
+2022-04-15 14:57:10,736 |     INFO | total testing files in epsilon:122
+2022-04-15 14:57:13,345 |     INFO | total files found in gamma:176
+2022-04-15 14:57:13,345 |     INFO | total training files in gamma:159
+2022-04-15 14:57:13,345 |     INFO | total testing files in gamma:17
+2022-04-15 14:57:13,658 |     INFO | total files found:2877
+2022-04-15 14:57:13,658 |     INFO | total training files:2592
+2022-04-15 14:57:13,658 |     INFO | total testing files:285
+2022-04-15 14:57:39,127 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-15 14:57:39,127 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-15 14:57:51,830 |     INFO | plot saved ./out/test-15-04-2022-14-57-04/resolution_distribution.png

@@ -18,6 +18,10 @@ def set_mdPath(root_path):
     global mdPath
     mdPath = root_path
 
+def get_mdPath():
+    global mdPath
+    return mdPath
+
 
 def create_report(filename, title=""):
     global mdPath

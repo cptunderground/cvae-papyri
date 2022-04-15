@@ -2,15 +2,22 @@ import gzip
 import math
 import random
 from time import sleep
-
+import numpy as np
+import matplotlib.pyplot as plt
 import cv2
 from PIL import Image
 import os
 import shutil
 from array import *
 from random import shuffle
+
+import main
+
 import preprocessing.padding
 import logging
+
+import util.report
+import util.utils
 from util.base_logger import logger
 
 def png_to_ipx3():
@@ -170,6 +177,8 @@ def standardise(dimension=28, mode="gray-scale"):
                     img_height = img.shape[0]
                     img_width = img.shape[1]
 
+
+
                     img_max_res = max(img_height, img_width)
                     img_min_res = min(img_height, img_width)
 
@@ -200,6 +209,60 @@ def standardise(dimension=28, mode="gray-scale"):
     logger.info(f"Global maximum resolution={max_resolution} - file={max_resolution_name}")
     logger.info(f"Global minimum resolution={min_resolution} - file={min_resolution_name}")
     sleep(10)
+
+    data = np.zeros((max_resolution, max_resolution))
+
+    for tup in paths:
+        src_directory = tup[0]
+        dst_directory = tup[1]
+
+        logger.debug(src_directory, dst_directory)
+
+        for dir in os.listdir(src_directory):
+            logger.debug(dir)
+
+            for file in os.listdir(f"{src_directory}/{dir}"):
+                logger.debug(file)
+                filename = os.fsdecode(file)
+
+                if filename.endswith(".png"):
+                    # read img as bw
+
+                    logger.debug((src_directory, filename))
+
+                    img = cv2.imread(f'{src_directory}/{dir}/{filename}', 0)
+
+                    img_height = img.shape[0]
+                    img_width = img.shape[1]
+
+                    img_max_res = max(img_height, img_width)
+                    img_min_res = min(img_height, img_width)
+
+                    data[img_width - 1][img_height - 1] += 1
+
+                    continue
+                else:
+                    continue
+
+    logger.debug(data)
+
+    nx, ny = max_resolution, max_resolution
+    x = range(nx)
+    y = range(ny)
+
+    hf = plt.figure()
+    ha = hf.add_subplot(111, projection='3d')
+
+    X, Y = np.meshgrid(x, y)  # `plot_surface` expects `x` and `y` data to be 2D
+    ha.plot_surface(X, Y, data)
+
+    name = "resolution_distribution.png"
+
+    plt.savefig(f"./{util.utils.get_root()}/{name}")
+    logger.info(f"plot saved ./{util.utils.get_root()}/{name}")
+    util.report.image_to_report(name, "Resolution Distribution of Cliplets")
+    plt.show()
+
     return mode
 
 def setup():
@@ -287,6 +350,7 @@ def generate_training_sets():
             logger.warning(f"{path} already exists")
         else:
             os.mkdir(path)
+            logger.info(f"Created folder {path}")
 
     """
     if (os.path.isdir(path_train)):
