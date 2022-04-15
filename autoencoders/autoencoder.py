@@ -253,7 +253,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
                 ax.get_xaxis().set_visible(False)
                 ax.get_yaxis().set_visible(False)
 
-        plt.show()
+
         fig.savefig('images/original_decoded.png', bbox_inches='tight')
         plt.close()
 
@@ -265,7 +265,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax.set_title(f'feature map: {fm}')
             ax.imshow(encoded_img[fm], cmap='gray')
 
-        plt.show()
+
         fig.savefig('images/encoded_img_alpha')
         plt.close()
 
@@ -277,7 +277,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax.set_title(f'feature map: {fm}')
             ax.imshow(encoded_img[fm], cmap='gray')
 
-        plt.show()
+
         fig.savefig('images/encoded_img_epsilon')
         plt.close()
 

@@ -205,7 +205,7 @@ def tsne(mode, folder):
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
 
     plt.savefig(f'./out/tsne_{mode}.png')
-    plt.show()
+    plt.close
 
 
 

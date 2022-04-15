@@ -11,6 +11,7 @@ from array import *
 from random import shuffle
 import preprocessing.padding
 import logging
+from util.base_logger import logger
 
 def png_to_ipx3():
     Names = [['./data/training-data-standardised/alpha', 'train'], ['./data/test-data-standardised/alpha', 't10k']]
@@ -25,7 +26,7 @@ def png_to_ipx3():
         path = f"{name[0]}"  # os.path.join(name[0], dirname)
         # print(path)
         for filename in os.listdir(path):
-            logging.debug((name[0], filename))
+            logger.debug((name[0], filename))
             if filename.endswith(".png"):
                 FileList.append(f"{name[0]}/{filename}")  # os.path.join(name[0], dirname, filename))
 
@@ -89,7 +90,7 @@ def png_to_ipx3():
 
 
 def crop_img(img):
-    logging.debug(img.shape)  # Print image shape
+    logger.debug(img.shape)  # Print image shape
     height, width = img.shape
 
     if (height > width):
@@ -105,7 +106,7 @@ def crop_img(img):
     if (width == height):
         cropped_img = img
 
-    logging.debug(cropped_img.shape)
+    logger.debug(cropped_img.shape)
     return cropped_img
 
 
@@ -150,19 +151,19 @@ def standardise(dimension=28, mode="gray-scale"):
         src_directory = tup[0]
         dst_directory = tup[1]
 
-        logging.debug(src_directory, dst_directory)
+        logger.debug(src_directory, dst_directory)
 
         for dir in os.listdir(src_directory):
-            logging.debug(dir)
+            logger.debug(dir)
 
             for file in os.listdir(f"{src_directory}/{dir}"):
-                logging.debug(file)
+                logger.debug(file)
                 filename = os.fsdecode(file)
 
                 if filename.endswith(".png"):
                     # read img as bw
 
-                    logging.debug((src_directory, filename))
+                    logger.debug((src_directory, filename))
 
                     img = cv2.imread(f'{src_directory}/{dir}/{filename}', 0)
 
@@ -190,14 +191,14 @@ def standardise(dimension=28, mode="gray-scale"):
 
                     # save image to folder
                     final_label = f'{dst_directory}/{dir}/{filename[:-4]}-std.png'
-                    logging.debug(final_label)
+                    logger.debug(final_label)
                     cv2.imwrite(final_label, img)
                     continue
                 else:
                     continue
     sleep(2)
-    logging.info(f"Global maximum resolution={max_resolution} - file={max_resolution_name}")
-    logging.info(f"Global minimum resolution={min_resolution} - file={min_resolution_name}")
+    logger.info(f"Global maximum resolution={max_resolution} - file={max_resolution_name}")
+    logger.info(f"Global minimum resolution={min_resolution} - file={min_resolution_name}")
     sleep(10)
     return mode
 
@@ -242,7 +243,7 @@ def setup():
             shutil.rmtree(path)
             os.mkdir(path)
         else:
-            logging.warning(f"{path} already exists")
+            logger.warning(f"{path} already exists")
 
 def generate_training_sets():
     path_raw = "./data/raw"
@@ -283,7 +284,7 @@ def generate_training_sets():
 
     for path in (paths + out_paths):
         if (os.path.isdir(path)):
-            logging.warning(f"{path} already exists")
+            logger.warning(f"{path} already exists")
         else:
             os.mkdir(path)
 
@@ -311,7 +312,7 @@ def generate_training_sets():
         total_train_files = 0
         total_test_files = 0
         for entry in entries:
-            logging.debug(entry)
+            logger.debug(entry)
 
             for path in paths:
                 if (os.path.isdir(f"{path}/{entry.name}")):
@@ -350,9 +351,9 @@ def generate_training_sets():
                 num_test = math.floor(num_files / 10)
                 num_train = num_files - num_test
 
-                logging.info(f"total files found in {entry.name}:{num_files}")
-                logging.info(f"total training files in {entry.name}:{num_train}")
-                logging.info(f"total testing files in {entry.name}:{num_test}")
+                logger.info(f"total files found in {entry.name}:{num_files}")
+                logger.info(f"total training files in {entry.name}:{num_train}")
+                logger.info(f"total testing files in {entry.name}:{num_test}")
 
                 total_files += num_files
                 total_train_files += num_train
@@ -382,6 +383,6 @@ def generate_training_sets():
                     file_name = f'{entry.name}{file_name[1:-4].replace(".", "_")}.png'
                     shutil.copy(f'{path_raw}/{entry.name}/{file}', f'{path_test}/{entry.name}/{file_name}')
 
-        logging.info(f"total files found:{total_files}")
-        logging.info(f"total training files:{total_train_files}")
-        logging.info(f"total testing files:{total_test_files}")
+        logger.info(f"total files found:{total_files}")
+        logger.info(f"total training files:{total_train_files}")
+        logger.info(f"total testing files:{total_test_files}")
