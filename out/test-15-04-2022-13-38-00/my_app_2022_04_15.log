@@ -1,0 +1,36 @@
+2022-04-15 13:38:00,692 |     INFO | Program starting in test-mode
+2022-04-15 13:38:00,693 |     INFO | STARTING PROGRAM
+2022-04-15 13:38:00,693 |     INFO | Selected parameters:
+2022-04-15 13:38:00,693 |     INFO | epochs=1
+2022-04-15 13:38:00,693 |     INFO | dimension=28
+2022-04-15 13:38:00,693 |     INFO | processing_mode=gray-scale
+2022-04-15 13:38:00,693 |     INFO | tqdm_mode=True
+2022-04-15 13:38:00,693 |  WARNING | ./data/raw-cleaned already exists
+2022-04-15 13:38:00,693 |  WARNING | ./data/raw-cleaned-standardised already exists
+2022-04-15 13:38:00,694 |  WARNING | ./data/training-data already exists
+2022-04-15 13:38:00,694 |  WARNING | ./data/training-data-standardised already exists
+2022-04-15 13:38:00,694 |  WARNING | ./data/test-data already exists
+2022-04-15 13:38:00,694 |  WARNING | ./data/test-data-standardised already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out/tsne already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out/tsne/CovAE already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out/tsne/CovAE/otsu/ already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out/tsne/CovAE/gray-scale/ already exists
+2022-04-15 13:38:02,178 |     INFO | total files found in alpha:1137
+2022-04-15 13:38:02,179 |     INFO | total training files in alpha:1024
+2022-04-15 13:38:02,179 |     INFO | total testing files in alpha:113
+2022-04-15 13:38:04,492 |     INFO | total files found in beta:69
+2022-04-15 13:38:04,492 |     INFO | total training files in beta:63
+2022-04-15 13:38:04,492 |     INFO | total testing files in beta:6
+2022-04-15 13:38:04,997 |     INFO | total files found in delta:272
+2022-04-15 13:38:04,997 |     INFO | total training files in delta:245
+2022-04-15 13:38:04,997 |     INFO | total testing files in delta:27
+2022-04-15 13:38:06,852 |     INFO | total files found in epsilon:1223
+2022-04-15 13:38:06,852 |     INFO | total training files in epsilon:1101
+2022-04-15 13:38:06,852 |     INFO | total testing files in epsilon:122
+2022-04-15 13:38:09,554 |     INFO | total files found in gamma:176
+2022-04-15 13:38:09,555 |     INFO | total training files in gamma:159
+2022-04-15 13:38:09,555 |     INFO | total testing files in gamma:17
+2022-04-15 13:38:09,883 |     INFO | total files found:2877
+2022-04-15 13:38:09,883 |     INFO | total training files:2592
+2022-04-15 13:38:09,883 |     INFO | total testing files:285

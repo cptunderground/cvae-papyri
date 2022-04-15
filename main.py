@@ -5,6 +5,7 @@ import dim_reduction.custom_tsne
 import dim_reduction.tsne
 import util.utils
 import util.report
+import util.base_logger
 from autoencoders import autoencoder
 from preprocessing import standardisation
 from util.base_logger import logger
@@ -63,6 +64,9 @@ if __name__ == '__main__':
     run_root = run_path
 
     util.utils.create_folder(run_path)
+
+    util.base_logger.set_FileHandler(run_root, name)
+
     util.report.set_mdPath(run_root)
     util.report.create_report(f"report-{name}", title=f"Report for {name}")
     util.report.write_to_report(f"This is your Report for the run {name}. It summarizes all calculations made.")
@@ -109,7 +113,8 @@ if __name__ == '__main__':
     if args.generate:
         standardisation.generate_training_sets()
 
-
+    util.report.save_report()
+    exit(0)
     # dim_reduction.tsne.tsne(mode="raw-cleaned", folder='./data/raw-cleaned')
 
 

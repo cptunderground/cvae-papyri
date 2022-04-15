@@ -11698,3 +11698,117 @@
 2022-04-15 13:26:20,077 |     INFO | tqdm_mode=True
 2022-04-15 13:26:42,258 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
 2022-04-15 13:26:42,258 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-15 13:38:00,691 |  WARNING | ./out already exists
+2022-04-15 13:38:00,692 |     INFO | Created folder ./out/test-15-04-2022-13-38-00
+2022-04-15 13:38:00,692 |     INFO | Program starting in test-mode
+2022-04-15 13:38:00,693 |     INFO | STARTING PROGRAM
+2022-04-15 13:38:00,693 |     INFO | Selected parameters:
+2022-04-15 13:38:00,693 |     INFO | epochs=1
+2022-04-15 13:38:00,693 |     INFO | dimension=28
+2022-04-15 13:38:00,693 |     INFO | processing_mode=gray-scale
+2022-04-15 13:38:00,693 |     INFO | tqdm_mode=True
+2022-04-15 13:38:00,693 |  WARNING | ./data/raw-cleaned already exists
+2022-04-15 13:38:00,693 |  WARNING | ./data/raw-cleaned-standardised already exists
+2022-04-15 13:38:00,694 |  WARNING | ./data/training-data already exists
+2022-04-15 13:38:00,694 |  WARNING | ./data/training-data-standardised already exists
+2022-04-15 13:38:00,694 |  WARNING | ./data/test-data already exists
+2022-04-15 13:38:00,694 |  WARNING | ./data/test-data-standardised already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out/tsne already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out/tsne/CovAE already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out/tsne/CovAE/otsu/ already exists
+2022-04-15 13:38:00,695 |  WARNING | ./out/tsne/CovAE/gray-scale/ already exists
+2022-04-15 13:38:02,178 |     INFO | total files found in alpha:1137
+2022-04-15 13:38:02,179 |     INFO | total training files in alpha:1024
+2022-04-15 13:38:02,179 |     INFO | total testing files in alpha:113
+2022-04-15 13:38:04,492 |     INFO | total files found in beta:69
+2022-04-15 13:38:04,492 |     INFO | total training files in beta:63
+2022-04-15 13:38:04,492 |     INFO | total testing files in beta:6
+2022-04-15 13:38:04,997 |     INFO | total files found in delta:272
+2022-04-15 13:38:04,997 |     INFO | total training files in delta:245
+2022-04-15 13:38:04,997 |     INFO | total testing files in delta:27
+2022-04-15 13:38:06,852 |     INFO | total files found in epsilon:1223
+2022-04-15 13:38:06,852 |     INFO | total training files in epsilon:1101
+2022-04-15 13:38:06,852 |     INFO | total testing files in epsilon:122
+2022-04-15 13:38:09,554 |     INFO | total files found in gamma:176
+2022-04-15 13:38:09,555 |     INFO | total training files in gamma:159
+2022-04-15 13:38:09,555 |     INFO | total testing files in gamma:17
+2022-04-15 13:38:09,883 |     INFO | total files found:2877
+2022-04-15 13:38:09,883 |     INFO | total training files:2592
+2022-04-15 13:38:09,883 |     INFO | total testing files:285
+2022-04-15 13:39:36,125 |  WARNING | ./out already exists
+2022-04-15 13:39:36,125 |     INFO | Created folder ./out/test-15-04-2022-13-39-36
+2022-04-15 13:39:36,126 |     INFO | Program starting in test-mode
+2022-04-15 13:39:36,126 |     INFO | STARTING PROGRAM
+2022-04-15 13:39:36,126 |     INFO | Selected parameters:
+2022-04-15 13:39:36,126 |     INFO | epochs=1
+2022-04-15 13:39:36,126 |     INFO | dimension=28
+2022-04-15 13:39:36,127 |     INFO | processing_mode=gray-scale
+2022-04-15 13:39:36,127 |     INFO | tqdm_mode=True
+2022-04-15 13:39:36,127 |  WARNING | ./data/raw-cleaned already exists
+2022-04-15 13:39:36,127 |  WARNING | ./data/raw-cleaned-standardised already exists
+2022-04-15 13:39:36,127 |  WARNING | ./data/training-data already exists
+2022-04-15 13:39:36,127 |  WARNING | ./data/training-data-standardised already exists
+2022-04-15 13:39:36,128 |  WARNING | ./data/test-data already exists
+2022-04-15 13:39:36,128 |  WARNING | ./data/test-data-standardised already exists
+2022-04-15 13:39:36,128 |  WARNING | ./out already exists
+2022-04-15 13:39:36,128 |  WARNING | ./out/tsne already exists
+2022-04-15 13:39:36,128 |  WARNING | ./out/tsne/CovAE already exists
+2022-04-15 13:39:36,128 |  WARNING | ./out/tsne/CovAE/otsu/ already exists
+2022-04-15 13:39:36,129 |  WARNING | ./out/tsne/CovAE/gray-scale/ already exists
+2022-04-15 13:39:36,763 |     INFO | total files found in alpha:1137
+2022-04-15 13:39:36,763 |     INFO | total training files in alpha:1024
+2022-04-15 13:39:36,763 |     INFO | total testing files in alpha:113
+2022-04-15 13:39:39,210 |     INFO | total files found in beta:69
+2022-04-15 13:39:39,211 |     INFO | total training files in beta:63
+2022-04-15 13:39:39,211 |     INFO | total testing files in beta:6
+2022-04-15 13:39:39,516 |     INFO | total files found in delta:272
+2022-04-15 13:39:39,516 |     INFO | total training files in delta:245
+2022-04-15 13:39:39,516 |     INFO | total testing files in delta:27
+2022-04-15 13:39:40,845 |     INFO | total files found in epsilon:1223
+2022-04-15 13:39:40,845 |     INFO | total training files in epsilon:1101
+2022-04-15 13:39:40,845 |     INFO | total testing files in epsilon:122
+2022-04-15 13:39:43,345 |     INFO | total files found in gamma:176
+2022-04-15 13:39:43,345 |     INFO | total training files in gamma:159
+2022-04-15 13:39:43,345 |     INFO | total testing files in gamma:17
+2022-04-15 13:39:43,666 |     INFO | total files found:2877
+2022-04-15 13:39:43,667 |     INFO | total training files:2592
+2022-04-15 13:39:43,667 |     INFO | total testing files:285
+2022-04-15 13:43:00,677 |  WARNING | ./out already exists
+2022-04-15 13:43:00,678 |     INFO | Created folder ./out/test-15-04-2022-13-43-00
+2022-04-15 13:43:00,678 |     INFO | Program starting in test-mode
+2022-04-15 13:43:00,679 |     INFO | STARTING PROGRAM
+2022-04-15 13:43:00,679 |     INFO | Selected parameters:
+2022-04-15 13:43:00,679 |     INFO | epochs=1
+2022-04-15 13:43:00,679 |     INFO | dimension=28
+2022-04-15 13:43:00,679 |     INFO | processing_mode=gray-scale
+2022-04-15 13:43:00,679 |     INFO | tqdm_mode=True
+2022-04-15 13:43:00,679 |  WARNING | ./data/raw-cleaned already exists
+2022-04-15 13:43:00,680 |  WARNING | ./data/raw-cleaned-standardised already exists
+2022-04-15 13:43:00,680 |  WARNING | ./data/training-data already exists
+2022-04-15 13:43:00,680 |  WARNING | ./data/training-data-standardised already exists
+2022-04-15 13:43:00,680 |  WARNING | ./data/test-data already exists
+2022-04-15 13:43:00,680 |  WARNING | ./data/test-data-standardised already exists
+2022-04-15 13:43:00,681 |  WARNING | ./out already exists
+2022-04-15 13:43:00,681 |  WARNING | ./out/tsne already exists
+2022-04-15 13:43:00,681 |  WARNING | ./out/tsne/CovAE already exists
+2022-04-15 13:43:00,681 |  WARNING | ./out/tsne/CovAE/otsu/ already exists
+2022-04-15 13:43:00,681 |  WARNING | ./out/tsne/CovAE/gray-scale/ already exists
+2022-04-15 13:43:01,369 |     INFO | total files found in alpha:1137
+2022-04-15 13:43:01,369 |     INFO | total training files in alpha:1024
+2022-04-15 13:43:01,369 |     INFO | total testing files in alpha:113
+2022-04-15 13:43:03,636 |     INFO | total files found in beta:69
+2022-04-15 13:43:03,636 |     INFO | total training files in beta:63
+2022-04-15 13:43:03,637 |     INFO | total testing files in beta:6
+2022-04-15 13:43:03,929 |     INFO | total files found in delta:272
+2022-04-15 13:43:03,929 |     INFO | total training files in delta:245
+2022-04-15 13:43:03,929 |     INFO | total testing files in delta:27
+2022-04-15 13:43:05,195 |     INFO | total files found in epsilon:1223
+2022-04-15 13:43:05,195 |     INFO | total training files in epsilon:1101
+2022-04-15 13:43:05,195 |     INFO | total testing files in epsilon:122
+2022-04-15 13:43:07,642 |     INFO | total files found in gamma:176
+2022-04-15 13:43:07,643 |     INFO | total training files in gamma:159
+2022-04-15 13:43:07,643 |     INFO | total testing files in gamma:17
+2022-04-15 13:43:08,003 |     INFO | total files found:2877
+2022-04-15 13:43:08,003 |     INFO | total training files:2592
+2022-04-15 13:43:08,003 |     INFO | total testing files:285
