@@ -132,6 +132,8 @@ def otsu(img):
 
 def standardise(dimension=28, mode="gray-scale"):
     print(f"cv2.version={cv2.__version__}")
+    util.report.header1("Preprocessing")
+
 
     path_raw = "./data/raw"
 
@@ -207,7 +209,10 @@ def standardise(dimension=28, mode="gray-scale"):
                     continue
     sleep(2)
     logger.info(f"Global maximum resolution={max_resolution} - file={max_resolution_name}")
+    util.report.write_to_report(f"Global maximum resolution={max_resolution} - file={max_resolution_name}")
     logger.info(f"Global minimum resolution={min_resolution} - file={min_resolution_name}")
+    util.report.write_to_report(f"Global minimum resolution={min_resolution} - file={min_resolution_name}")
+
     sleep(10)
 
     data = np.zeros((max_resolution, max_resolution))
@@ -275,6 +280,7 @@ def standardise(dimension=28, mode="gray-scale"):
                 logger.info(f"Found more frequent resolution={most_frequent_res} with count={count}")
 
     logger.info(f"Setting padding resolution to {most_frequent_res}")
+    util.report.write_to_report(f"Setting padding resolution to {most_frequent_res}")
 
 
 
@@ -465,3 +471,8 @@ def generate_training_sets():
         logger.info(f"total files found:{total_files}")
         logger.info(f"total training files:{total_train_files}")
         logger.info(f"total testing files:{total_test_files}")
+
+        util.report.header2("Processed Files")
+        util.report.write_to_report(f"total files found:{total_files}")
+        util.report.write_to_report(f"total training files:{total_train_files}")
+        util.report.write_to_report(f"total testing files:{total_test_files}")

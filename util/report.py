@@ -38,6 +38,13 @@ def write_to_report(string):
     mdFile.new_line(string)
     pass
 
+def header2(headertext: str):
+    global mdFile
+    mdFile.new_header(level=2, title=headertext)
+
+def header1(headertext: str):
+    global mdFile
+    mdFile.new_header(level=1, title=headertext)
 
 def image_to_report(path, title, text=""):
     global mdFile

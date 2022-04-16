@@ -1,6 +1,6 @@
 import logging
 import time
-
+import util.report
 import numpy as np
 import torch
 from sklearn.datasets import load_digits
@@ -29,6 +29,8 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot
 from matplotlib.pyplot import imshow
 import seaborn as sns
+
+import util.utils
 
 
 def fit(X,y, eps, n_components, perplexity):
@@ -204,7 +206,8 @@ def tsne(mode, folder):
 
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
 
-    plt.savefig(f'./out/tsne_{mode}.png')
+    plt.savefig(f'./{util.utils.get_root()}/tsne_{mode}.png')
+    util.report.image_to_report(f'tsne_{mode}.png',"TSNE of whole training space")
     plt.close
 
 

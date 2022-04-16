@@ -113,6 +113,13 @@ if __name__ == '__main__':
     logger.info(f'processing_mode={processing_mode}')
     logger.info(f'tqdm_mode={tqdm_mode}')
 
+    util.report.header1("Config")
+    util.report.write_to_report(f"Epochs={epochs}")
+    util.report.write_to_report(f"Dimensions={dimension}")
+    util.report.write_to_report(f"processing_mode={processing_mode}")
+    util.report.write_to_report(f"tqdm_mode={tqdm_mode}")
+
+
     if args.generate:
         standardisation.generate_training_sets()
 

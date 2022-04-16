@@ -1,7 +1,9 @@
 import logging
 import random
 import time
-
+import util.report
+import util.utils
+from util.base_logger import logger
 import numpy as np
 import torch
 from sklearn.datasets import load_digits
@@ -148,6 +150,8 @@ def get_label(label):
     return switcher.get(label)
 
 def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
+    util.report.header1("Auto-Encoder")
+
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
     train_set = datasets.ImageFolder(
@@ -167,16 +171,18 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
 
     train_loader = torch.utils.data.DataLoader(train_set)
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=2877)
-    logging.debug(test_loader.batch_size)
+    logger.debug(test_loader.batch_size)
 
     # take 5 random letters from testset
 
     pretrained_model = Network()
-    logging.info(pretrained_model)
+    logger.info(pretrained_model)
+    #util.report.write_to_report(pretrained_model)
+
     # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
     model = ConvAutoEncoder(pretrained_model)
-    logging.info(model)
+    logger.info(model)
 
     b = torch.randn(16, 1, 5, 5)
 
@@ -185,7 +191,11 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
     torch.onnx.export(model, b, 'AE.onnx', input_names=input_names, output_names=output_names)
 
 
-    summary(model, (1, 28, 28), 2592)
+    logger.info(summary(model, (1, 28, 28), 2592))
+    """
+    TODO FIX
+    """
+    #util.report.write_to_report(summary(model, (1, 28, 28), 2592))
     # to check if our weight transfer was successful or not
     # list(list(pretrained_model.layer2.children())[0].parameters()) == list(
     #    list(model.encoder.children())[4].parameters())
@@ -224,11 +234,12 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             if tqdm_mode:
                 loop.set_description(f'Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop.set_postfix(loss=train_loss)
-        logging.info(f'Epoch={epoch} done.')
+        logger.info(f'Epoch={epoch} done.')
 
         scheduler.step(train_loss)
 
         torch.save(model.state_dict(), f'./models/models-autoencoder{mode}.pth')
+        torch.save(model.state_dict(), f'./{util.utils.get_root()}/models-autoencoder{mode}.pth')
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
@@ -254,7 +265,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
                 ax.get_yaxis().set_visible(False)
 
 
-        fig.savefig('images/original_decoded.png', bbox_inches='tight')
+        fig.savefig(f'./{util.utils.get_root()}/original_decoded.png', bbox_inches='tight')
         plt.close()
 
         encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
@@ -266,7 +277,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax.imshow(encoded_img[fm], cmap='gray')
 
 
-        fig.savefig('images/encoded_img_alpha')
+        fig.savefig(f'./{util.utils.get_root()}/encoded_img_alpha')
         plt.close()
 
         encoded_img = encoded_imgs[3]  # get 1st image from the batch (here '7')
@@ -278,7 +289,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax.imshow(encoded_img[fm], cmap='gray')
 
 
-        fig.savefig('images/encoded_img_epsilon')
+        fig.savefig(f'./{util.utils.get_root()}/encoded_img_epsilon')
         plt.close()
 
         # X, y = load_digits(return_X_y=True)
@@ -337,7 +348,9 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
         plt.title(f"tsne_{name}_epoch_{epoch}_mode_{mode}")
-        plt.savefig(f'./out/tsne/{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png')
+        util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
+        plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png')
+        util.report.image_to_report(f"{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png", f"TSNE Epoch {epoch}")
         plt.show(block=True)
 
     summary(model, (1, 28, 28))
