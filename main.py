@@ -47,7 +47,7 @@ if __name__ == '__main__':
         'tqdm': True
     }
 
-    # logging.basicConfig(level=logging.INFO)
+
 
     parser = argparse.ArgumentParser(description="papyri-cvae arguments")
     parser.add_argument('mode', metavar='MODE', type=str, nargs=1,
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     if not (mode in modes):
         logger.info(f'Your given mode \'{mode}\' was not found in the available modes of {modes}.')
         logger.info(f'Starting program in default mode')
-        logger.basicConfig(level=logging.INFO, filename=f'{run_path}/log-{name}.log')
+        logger.setLevel(level=logging.INFO)
         dimension = 28
         epochs = 30
         processing_mode = 'gray-scale'
@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     else:
         selected_config = eval(f'{mode}_config')
-        # logger.basicConfig(level=selected_config['logging_lvl'], filename=f'log-{name}.log')
+        logger.setLevel(level=selected_config['logging_lvl'])
         dimension = selected_config['dimension']
         epochs = selected_config['epochs']
         processing_mode = selected_config['processing_mode']

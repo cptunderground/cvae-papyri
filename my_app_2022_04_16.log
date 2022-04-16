@@ -1,0 +1,142 @@
+2022-04-16 11:52:53,479 |  WARNING | ./out already exists
+2022-04-16 11:52:53,480 |     INFO | Created folder ./out/test-16-04-2022-11-52-53
+2022-04-16 11:52:53,480 |     INFO | Program starting in test-mode
+2022-04-16 11:52:53,481 |     INFO | STARTING PROGRAM
+2022-04-16 11:52:53,481 |     INFO | Selected parameters:
+2022-04-16 11:52:53,481 |     INFO | epochs=1
+2022-04-16 11:52:53,481 |     INFO | dimension=28
+2022-04-16 11:52:53,481 |     INFO | processing_mode=gray-scale
+2022-04-16 11:52:53,481 |     INFO | tqdm_mode=True
+2022-04-16 11:52:53,481 |  WARNING | ./data/raw-cleaned already exists
+2022-04-16 11:52:53,482 |  WARNING | ./data/raw-cleaned-standardised already exists
+2022-04-16 11:52:53,482 |  WARNING | ./data/training-data already exists
+2022-04-16 11:52:53,482 |  WARNING | ./data/training-data-standardised already exists
+2022-04-16 11:52:53,482 |  WARNING | ./data/test-data already exists
+2022-04-16 11:52:53,483 |  WARNING | ./data/test-data-standardised already exists
+2022-04-16 11:52:53,483 |  WARNING | ./out already exists
+2022-04-16 11:52:53,483 |  WARNING | ./out/tsne already exists
+2022-04-16 11:52:53,483 |  WARNING | ./out/tsne/CovAE already exists
+2022-04-16 11:52:53,483 |  WARNING | ./out/tsne/CovAE/otsu/ already exists
+2022-04-16 11:52:53,483 |  WARNING | ./out/tsne/CovAE/gray-scale/ already exists
+2022-04-16 11:52:54,956 |     INFO | total files found in alpha:1137
+2022-04-16 11:52:54,956 |     INFO | total training files in alpha:1024
+2022-04-16 11:52:54,956 |     INFO | total testing files in alpha:113
+2022-04-16 11:52:57,946 |     INFO | total files found in beta:69
+2022-04-16 11:52:57,947 |     INFO | total training files in beta:63
+2022-04-16 11:52:57,947 |     INFO | total testing files in beta:6
+2022-04-16 11:52:58,483 |     INFO | total files found in delta:272
+2022-04-16 11:52:58,484 |     INFO | total training files in delta:245
+2022-04-16 11:52:58,484 |     INFO | total testing files in delta:27
+2022-04-16 11:53:00,543 |     INFO | total files found in epsilon:1223
+2022-04-16 11:53:00,544 |     INFO | total training files in epsilon:1101
+2022-04-16 11:53:00,544 |     INFO | total testing files in epsilon:122
+2022-04-16 11:53:03,696 |     INFO | total files found in gamma:176
+2022-04-16 11:53:03,697 |     INFO | total training files in gamma:159
+2022-04-16 11:53:03,697 |     INFO | total testing files in gamma:17
+2022-04-16 11:53:04,093 |     INFO | total files found:2877
+2022-04-16 11:53:04,093 |     INFO | total training files:2592
+2022-04-16 11:53:04,093 |     INFO | total testing files:285
+2022-04-16 11:53:36,494 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-16 11:53:36,499 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-16 11:53:50,457 |     INFO | plot saved ./out/test-16-04-2022-11-52-53/resolution_distribution.png
+2022-04-16 11:53:50,971 |     INFO | Setting padding resolution to (0, 0)
+2022-04-16 11:55:32,775 |     INFO | (200, 200)
+2022-04-16 11:55:35,318 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-16 11:55:35,318 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-16 11:55:37,935 |     INFO | [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+2022-04-16 11:55:38,384 |     INFO | Setting padding resolution to (0, 0)
+2022-04-16 11:55:57,475 |     INFO | (200, 200)
+2022-04-16 11:56:00,182 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-16 11:56:00,183 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-16 11:56:02,839 |     INFO | [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+2022-04-16 11:56:03,194 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-16 11:56:03,194 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-16 11:56:03,195 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-16 11:56:03,195 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-16 11:56:03,196 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-16 11:56:03,197 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-16 11:56:03,219 |     INFO | Setting padding resolution to (29, 42)
+2022-04-16 11:57:23,266 |     INFO | (200, 200)
+2022-04-16 11:57:25,635 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-16 11:57:25,635 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-16 11:57:28,370 |     INFO | [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+2022-04-16 11:57:28,673 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-16 11:57:28,673 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-16 11:57:28,674 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-16 11:57:28,674 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-16 11:57:28,675 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-16 11:57:28,676 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-16 11:57:28,698 |     INFO | Found most frequent resolution (29, 42)
+2022-04-16 11:57:28,698 |     INFO | Setting padding resolution to (29, 42)
+2022-04-16 11:57:38,452 |     INFO | (200, 200)
+2022-04-16 11:57:40,967 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-16 11:57:40,967 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-16 11:57:43,780 |     INFO | [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+2022-04-16 11:57:44,158 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-16 11:57:44,158 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-16 11:57:44,159 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-16 11:57:44,159 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-16 11:57:44,160 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-16 11:57:44,161 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-16 11:57:44,186 |     INFO | Found most frequent resolution (29, 42)
+2022-04-16 11:57:44,186 |     INFO | Setting padding resolution to (42, 42)
+2022-04-16 12:08:28,257 |     INFO | (200, 200)
+2022-04-16 12:08:31,310 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-16 12:08:31,310 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-16 12:08:34,292 |     INFO | [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+2022-04-16 12:08:34,619 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-16 12:08:34,619 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-16 12:08:34,620 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-16 12:08:34,620 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-16 12:08:34,621 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-16 12:08:34,621 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-16 12:08:34,645 |     INFO | Found most frequent resolution (29, 42)
+2022-04-16 12:08:34,646 |     INFO | Setting padding resolution to (42, 42)
+2022-04-16 12:10:50,681 |     INFO | (200, 200)
+2022-04-16 12:10:53,413 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-16 12:10:53,413 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-16 12:10:56,405 |     INFO | [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+2022-04-16 12:10:56,756 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-16 12:10:56,757 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-16 12:10:56,757 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-16 12:10:56,758 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-16 12:10:56,759 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-16 12:10:56,759 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-16 12:10:56,780 |     INFO | Found most frequent resolution (29, 42)
+2022-04-16 12:10:56,781 |     INFO | Setting padding resolution to 42x42

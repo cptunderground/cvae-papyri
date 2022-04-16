@@ -263,6 +263,21 @@ def standardise(dimension=28, mode="gray-scale"):
     util.report.image_to_report(name, "Resolution Distribution of Cliplets")
     plt.show()
 
+    most_frequent_res = (0,0)
+    count = 0
+
+    for i in x:
+        for j in y:
+            if max(data[i][j], count) < count:
+                most_frequent_res = i,j
+                count = data[i][j]
+
+                logger.info(f"Found more frequent resolution={most_frequent_res} with count={count}")
+
+    logger.info(f"Setting padding resolution to {most_frequent_res}")
+
+
+
     return mode
 
 def setup():
