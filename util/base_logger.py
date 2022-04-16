@@ -27,7 +27,7 @@ class CustomFormatter(logging.Formatter):
 
 def set_FileHandler(path, name):
     file_handler = logging.FileHandler(f'./{path}/{name}.log')
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(logging.Formatter(fmt))
     logger.addHandler(file_handler)
 
