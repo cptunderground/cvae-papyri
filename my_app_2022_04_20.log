@@ -1,0 +1,538 @@
+2022-04-20 10:50:00,419 |     INFO | (200, 200)
+2022-04-20 10:50:08,198 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-20 10:50:08,199 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-20 10:50:11,508 |     INFO | [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+2022-04-20 10:50:12,126 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-20 10:50:12,127 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-20 10:50:12,127 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-20 10:50:12,128 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-20 10:50:12,129 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-20 10:50:12,129 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-20 10:50:12,160 |     INFO | Found most frequent resolution (29, 42)
+2022-04-20 10:50:12,160 |     INFO | Setting padding resolution to 42x42
+2022-04-20 10:50:58,429 |     INFO | (200, 200)
+2022-04-20 10:51:01,293 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-20 10:51:01,293 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-20 10:51:04,167 |     INFO | [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+2022-04-20 10:51:04,494 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-20 10:51:04,496 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-20 10:51:04,496 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-20 10:51:04,497 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-20 10:51:04,498 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-20 10:51:04,498 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-20 10:51:04,520 |     INFO | Found most frequent resolution (29, 42)
+2022-04-20 10:51:04,520 |     INFO | Setting padding resolution to 42x42
+2022-04-20 10:58:54,297 |  WARNING | ./out already exists
+2022-04-20 10:58:54,297 |     INFO | Created folder ./out/test-20-04-2022-10-58-54
+2022-04-20 10:58:54,298 |     INFO | Program starting in test-mode
+2022-04-20 10:58:54,298 |     INFO | STARTING PROGRAM
+2022-04-20 10:58:54,298 |     INFO | Selected parameters:
+2022-04-20 10:58:54,298 |     INFO | epochs=1
+2022-04-20 10:58:54,298 |     INFO | dimension=28
+2022-04-20 10:58:54,298 |     INFO | processing_mode=gray-scale
+2022-04-20 10:58:54,298 |     INFO | tqdm_mode=True
+2022-04-20 10:58:54,299 |  WARNING | ./data/raw-cleaned already exists
+2022-04-20 10:58:54,299 |  WARNING | ./data/raw-cleaned-standardised already exists
+2022-04-20 10:58:54,299 |  WARNING | ./data/training-data already exists
+2022-04-20 10:58:54,299 |  WARNING | ./data/training-data-standardised already exists
+2022-04-20 10:58:54,300 |  WARNING | ./data/test-data already exists
+2022-04-20 10:58:54,300 |  WARNING | ./data/test-data-standardised already exists
+2022-04-20 10:58:54,300 |  WARNING | ./out already exists
+2022-04-20 10:58:54,300 |     INFO | Created folder ./out/tsne
+2022-04-20 10:58:54,300 |     INFO | Created folder ./out/tsne/CovAE
+2022-04-20 10:58:54,301 |     INFO | Created folder ./out/tsne/CovAE/otsu/
+2022-04-20 10:58:54,301 |     INFO | Created folder ./out/tsne/CovAE/gray-scale/
+2022-04-20 10:58:55,633 |     INFO | total files found in alpha:1137
+2022-04-20 10:58:55,633 |     INFO | total training files in alpha:1024
+2022-04-20 10:58:55,633 |     INFO | total testing files in alpha:113
+2022-04-20 10:58:58,416 |     INFO | total files found in beta:69
+2022-04-20 10:58:58,416 |     INFO | total training files in beta:63
+2022-04-20 10:58:58,416 |     INFO | total testing files in beta:6
+2022-04-20 10:58:58,937 |     INFO | total files found in delta:272
+2022-04-20 10:58:58,937 |     INFO | total training files in delta:245
+2022-04-20 10:58:58,937 |     INFO | total testing files in delta:27
+2022-04-20 10:59:00,973 |     INFO | total files found in epsilon:1223
+2022-04-20 10:59:00,973 |     INFO | total training files in epsilon:1101
+2022-04-20 10:59:00,973 |     INFO | total testing files in epsilon:122
+2022-04-20 10:59:04,177 |     INFO | total files found in gamma:176
+2022-04-20 10:59:04,178 |     INFO | total training files in gamma:159
+2022-04-20 10:59:04,178 |     INFO | total testing files in gamma:17
+2022-04-20 10:59:04,668 |     INFO | total files found:2877
+2022-04-20 10:59:04,668 |     INFO | total training files:2592
+2022-04-20 10:59:04,668 |     INFO | total testing files:285
+2022-04-20 10:59:27,769 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-20 10:59:27,769 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-20 10:59:40,918 |     INFO | plot saved ./out/test-20-04-2022-10-58-54/resolution_distribution.png
+2022-04-20 10:59:41,167 |     INFO | Setting padding resolution to (0, 0)
+2022-04-20 10:59:41,167 |     INFO | Setting padding resolution to 0x0
+2022-04-20 11:05:34,523 |  WARNING | ./out already exists
+2022-04-20 11:05:34,523 |     INFO | Created folder ./out/test-20-04-2022-11-05-34
+2022-04-20 11:05:34,524 |     INFO | Program starting in test-mode
+2022-04-20 11:05:34,524 |     INFO | STARTING PROGRAM
+2022-04-20 11:05:34,524 |     INFO | Selected parameters:
+2022-04-20 11:05:34,524 |     INFO | epochs=1
+2022-04-20 11:05:34,524 |     INFO | dimension=28
+2022-04-20 11:05:34,524 |     INFO | processing_mode=gray-scale
+2022-04-20 11:05:34,525 |     INFO | tqdm_mode=True
+2022-04-20 11:05:34,525 |  WARNING | ./data/raw-cleaned already exists
+2022-04-20 11:05:34,525 |  WARNING | ./data/raw-cleaned-standardised already exists
+2022-04-20 11:05:34,525 |  WARNING | ./data/training-data already exists
+2022-04-20 11:05:34,526 |  WARNING | ./data/training-data-standardised already exists
+2022-04-20 11:05:34,526 |  WARNING | ./data/test-data already exists
+2022-04-20 11:05:34,526 |  WARNING | ./data/test-data-standardised already exists
+2022-04-20 11:05:34,526 |  WARNING | ./out already exists
+2022-04-20 11:05:34,526 |  WARNING | ./out/tsne already exists
+2022-04-20 11:05:34,526 |  WARNING | ./out/tsne/CovAE already exists
+2022-04-20 11:05:34,526 |  WARNING | ./out/tsne/CovAE/otsu/ already exists
+2022-04-20 11:05:34,527 |  WARNING | ./out/tsne/CovAE/gray-scale/ already exists
+2022-04-20 11:05:35,145 |     INFO | total files found in alpha:1137
+2022-04-20 11:05:35,146 |     INFO | total training files in alpha:1024
+2022-04-20 11:05:35,146 |     INFO | total testing files in alpha:113
+2022-04-20 11:05:37,318 |     INFO | total files found in beta:69
+2022-04-20 11:05:37,318 |     INFO | total training files in beta:63
+2022-04-20 11:05:37,318 |     INFO | total testing files in beta:6
+2022-04-20 11:05:37,636 |     INFO | total files found in delta:272
+2022-04-20 11:05:37,636 |     INFO | total training files in delta:245
+2022-04-20 11:05:37,637 |     INFO | total testing files in delta:27
+2022-04-20 11:05:38,876 |     INFO | total files found in epsilon:1223
+2022-04-20 11:05:38,876 |     INFO | total training files in epsilon:1101
+2022-04-20 11:05:38,876 |     INFO | total testing files in epsilon:122
+2022-04-20 11:05:41,330 |     INFO | total files found in gamma:176
+2022-04-20 11:05:41,331 |     INFO | total training files in gamma:159
+2022-04-20 11:05:41,331 |     INFO | total testing files in gamma:17
+2022-04-20 11:05:41,706 |     INFO | total files found:2877
+2022-04-20 11:05:41,706 |     INFO | total training files:2592
+2022-04-20 11:05:41,706 |     INFO | total testing files:285
+2022-04-20 11:06:01,397 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-20 11:06:01,398 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-20 11:06:14,575 |     INFO | plot saved ./out/test-20-04-2022-11-05-34/resolution_distribution.png
+2022-04-20 11:06:14,750 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-20 11:06:14,751 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-20 11:06:14,751 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-20 11:06:14,751 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-20 11:06:14,752 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-20 11:06:14,753 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-20 11:06:14,771 |     INFO | Setting padding resolution to (29, 42)
+2022-04-20 11:06:14,772 |     INFO | Setting padding resolution to 28x28
+2022-04-20 11:06:48,935 |     INFO | Network(
+  (layer1): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (layer2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Sequential(
+    (0): Linear(in_features=1568, out_features=256, bias=True)
+    (1): Dropout(p=0.2, inplace=False)
+    (2): ReLU()
+  )
+  (out): Linear(in_features=256, out_features=5, bias=True)
+)
+2022-04-20 11:06:48,939 |     INFO | ConvAutoEncoder(
+  (encoder): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (8): Conv2d(32, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(4, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): ReLU()
+  )
+  (decoder): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Upsample(scale_factor=2.0, mode=nearest)
+    (4): Conv2d(32, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): Upsample(scale_factor=2.0, mode=nearest)
+    (8): Conv2d(16, 1, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (9): BatchNorm2d(1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): Sigmoid()
+  )
+)
+2022-04-20 11:06:49,229 |     INFO | None
+2022-04-20 11:09:55,133 |  WARNING | ./out already exists
+2022-04-20 11:09:55,134 |     INFO | Created folder ./out/test-20-04-2022-11-09-55
+2022-04-20 11:09:55,134 |     INFO | Program starting in test-mode
+2022-04-20 11:09:55,135 |     INFO | STARTING PROGRAM
+2022-04-20 11:09:55,135 |     INFO | Selected parameters:
+2022-04-20 11:09:55,135 |     INFO | epochs=1
+2022-04-20 11:09:55,135 |     INFO | dimension=4
+2022-04-20 11:09:55,135 |     INFO | processing_mode=gray-scale
+2022-04-20 11:09:55,135 |     INFO | tqdm_mode=True
+2022-04-20 11:09:55,135 |  WARNING | ./data/raw-cleaned already exists
+2022-04-20 11:09:55,135 |  WARNING | ./data/raw-cleaned-standardised already exists
+2022-04-20 11:09:55,136 |  WARNING | ./data/training-data already exists
+2022-04-20 11:09:55,137 |  WARNING | ./data/training-data-standardised already exists
+2022-04-20 11:09:55,137 |  WARNING | ./data/test-data already exists
+2022-04-20 11:09:55,137 |  WARNING | ./data/test-data-standardised already exists
+2022-04-20 11:09:55,137 |  WARNING | ./out already exists
+2022-04-20 11:09:55,137 |  WARNING | ./out/tsne already exists
+2022-04-20 11:09:55,137 |  WARNING | ./out/tsne/CovAE already exists
+2022-04-20 11:09:55,137 |  WARNING | ./out/tsne/CovAE/otsu/ already exists
+2022-04-20 11:09:55,138 |  WARNING | ./out/tsne/CovAE/gray-scale/ already exists
+2022-04-20 11:09:56,416 |     INFO | total files found in alpha:1137
+2022-04-20 11:09:56,416 |     INFO | total training files in alpha:1024
+2022-04-20 11:09:56,417 |     INFO | total testing files in alpha:113
+2022-04-20 11:09:58,598 |     INFO | total files found in beta:69
+2022-04-20 11:09:58,599 |     INFO | total training files in beta:63
+2022-04-20 11:09:58,599 |     INFO | total testing files in beta:6
+2022-04-20 11:09:59,044 |     INFO | total files found in delta:272
+2022-04-20 11:09:59,044 |     INFO | total training files in delta:245
+2022-04-20 11:09:59,044 |     INFO | total testing files in delta:27
+2022-04-20 11:10:00,784 |     INFO | total files found in epsilon:1223
+2022-04-20 11:10:00,784 |     INFO | total training files in epsilon:1101
+2022-04-20 11:10:00,784 |     INFO | total testing files in epsilon:122
+2022-04-20 11:10:03,466 |     INFO | total files found in gamma:176
+2022-04-20 11:10:03,466 |     INFO | total training files in gamma:159
+2022-04-20 11:10:03,466 |     INFO | total testing files in gamma:17
+2022-04-20 11:10:03,835 |     INFO | total files found:2877
+2022-04-20 11:10:03,836 |     INFO | total training files:2592
+2022-04-20 11:10:03,836 |     INFO | total testing files:285
+2022-04-20 11:10:52,983 |  WARNING | ./out already exists
+2022-04-20 11:10:52,984 |     INFO | Created folder ./out/test-20-04-2022-11-10-52
+2022-04-20 11:10:52,984 |     INFO | Program starting in test-mode
+2022-04-20 11:10:52,985 |     INFO | STARTING PROGRAM
+2022-04-20 11:10:52,985 |     INFO | Selected parameters:
+2022-04-20 11:10:52,985 |     INFO | epochs=1
+2022-04-20 11:10:52,985 |     INFO | dimension=4
+2022-04-20 11:10:52,985 |     INFO | processing_mode=gray-scale
+2022-04-20 11:10:52,985 |     INFO | tqdm_mode=True
+2022-04-20 11:11:12,443 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-20 11:11:12,443 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-20 11:11:25,861 |     INFO | plot saved ./out/test-20-04-2022-11-10-52/resolution_distribution.png
+2022-04-20 11:11:26,134 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-20 11:11:26,135 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-20 11:11:26,135 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-20 11:11:26,136 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-20 11:11:26,137 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-20 11:11:26,137 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-20 11:11:26,156 |     INFO | Setting padding resolution to (29, 42)
+2022-04-20 11:11:26,156 |     INFO | Setting padding resolution to 4x4
+2022-04-20 11:11:57,944 |     INFO | Network(
+  (layer1): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (layer2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Sequential(
+    (0): Linear(in_features=1568, out_features=256, bias=True)
+    (1): Dropout(p=0.2, inplace=False)
+    (2): ReLU()
+  )
+  (out): Linear(in_features=256, out_features=5, bias=True)
+)
+2022-04-20 11:11:57,946 |     INFO | ConvAutoEncoder(
+  (encoder): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (8): Conv2d(32, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(4, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): ReLU()
+  )
+  (decoder): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Upsample(scale_factor=2.0, mode=nearest)
+    (4): Conv2d(32, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): Upsample(scale_factor=2.0, mode=nearest)
+    (8): Conv2d(16, 1, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (9): BatchNorm2d(1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): Sigmoid()
+  )
+)
+2022-04-20 11:11:58,133 |     INFO | None
+2022-04-20 11:12:11,679 |  WARNING | ./out already exists
+2022-04-20 11:12:11,679 |     INFO | Created folder ./out/test-20-04-2022-11-12-11
+2022-04-20 11:12:11,680 |     INFO | Program starting in test-mode
+2022-04-20 11:12:11,680 |     INFO | STARTING PROGRAM
+2022-04-20 11:12:11,680 |     INFO | Selected parameters:
+2022-04-20 11:12:11,680 |     INFO | epochs=1
+2022-04-20 11:12:11,681 |     INFO | dimension=4
+2022-04-20 11:12:11,681 |     INFO | processing_mode=gray-scale
+2022-04-20 11:12:11,681 |     INFO | tqdm_mode=True
+2022-04-20 11:12:11,726 |     INFO | Network(
+  (layer1): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (layer2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Sequential(
+    (0): Linear(in_features=1568, out_features=256, bias=True)
+    (1): Dropout(p=0.2, inplace=False)
+    (2): ReLU()
+  )
+  (out): Linear(in_features=256, out_features=5, bias=True)
+)
+2022-04-20 11:12:11,729 |     INFO | ConvAutoEncoder(
+  (encoder): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (8): Conv2d(32, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(4, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): ReLU()
+  )
+  (decoder): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Upsample(scale_factor=2.0, mode=nearest)
+    (4): Conv2d(32, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): Upsample(scale_factor=2.0, mode=nearest)
+    (8): Conv2d(16, 1, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (9): BatchNorm2d(1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): Sigmoid()
+  )
+)
+2022-04-20 11:12:11,912 |     INFO | None
+2022-04-20 11:13:23,287 |  WARNING | ./out already exists
+2022-04-20 11:13:23,287 |     INFO | Created folder ./out/test-20-04-2022-11-13-23
+2022-04-20 11:13:23,288 |     INFO | Program starting in test-mode
+2022-04-20 11:13:23,288 |     INFO | STARTING PROGRAM
+2022-04-20 11:13:23,288 |     INFO | Selected parameters:
+2022-04-20 11:13:23,288 |     INFO | epochs=1
+2022-04-20 11:13:23,289 |     INFO | dimension=28
+2022-04-20 11:13:23,289 |     INFO | processing_mode=gray-scale
+2022-04-20 11:13:23,289 |     INFO | tqdm_mode=True
+2022-04-20 11:13:23,332 |     INFO | Network(
+  (layer1): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (layer2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Sequential(
+    (0): Linear(in_features=1568, out_features=256, bias=True)
+    (1): Dropout(p=0.2, inplace=False)
+    (2): ReLU()
+  )
+  (out): Linear(in_features=256, out_features=5, bias=True)
+)
+2022-04-20 11:13:23,335 |     INFO | ConvAutoEncoder(
+  (encoder): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (8): Conv2d(32, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(4, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): ReLU()
+  )
+  (decoder): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Upsample(scale_factor=2.0, mode=nearest)
+    (4): Conv2d(32, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): Upsample(scale_factor=2.0, mode=nearest)
+    (8): Conv2d(16, 1, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (9): BatchNorm2d(1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): Sigmoid()
+  )
+)
+2022-04-20 11:13:23,514 |     INFO | None
+2022-04-20 11:13:36,106 |  WARNING | ./out already exists
+2022-04-20 11:13:36,106 |     INFO | Created folder ./out/test-20-04-2022-11-13-36
+2022-04-20 11:13:36,107 |     INFO | Program starting in test-mode
+2022-04-20 11:13:36,107 |     INFO | STARTING PROGRAM
+2022-04-20 11:13:36,107 |     INFO | Selected parameters:
+2022-04-20 11:13:36,107 |     INFO | epochs=1
+2022-04-20 11:13:36,108 |     INFO | dimension=28
+2022-04-20 11:13:36,108 |     INFO | processing_mode=gray-scale
+2022-04-20 11:13:36,108 |     INFO | tqdm_mode=True
+2022-04-20 11:13:41,007 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-20 11:13:41,007 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-20 11:13:54,627 |     INFO | plot saved ./out/test-20-04-2022-11-13-36/resolution_distribution.png
+2022-04-20 11:13:54,786 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-20 11:13:54,786 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-20 11:13:54,787 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-20 11:13:54,787 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-20 11:13:54,788 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-20 11:13:54,789 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-20 11:13:54,806 |     INFO | Setting padding resolution to (29, 42)
+2022-04-20 11:13:54,806 |     INFO | Setting padding resolution to 28x28
+2022-04-20 11:14:29,962 |     INFO | Network(
+  (layer1): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (layer2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Sequential(
+    (0): Linear(in_features=1568, out_features=256, bias=True)
+    (1): Dropout(p=0.2, inplace=False)
+    (2): ReLU()
+  )
+  (out): Linear(in_features=256, out_features=5, bias=True)
+)
+2022-04-20 11:14:29,965 |     INFO | ConvAutoEncoder(
+  (encoder): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (8): Conv2d(32, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(4, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): ReLU()
+  )
+  (decoder): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Upsample(scale_factor=2.0, mode=nearest)
+    (4): Conv2d(32, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): Upsample(scale_factor=2.0, mode=nearest)
+    (8): Conv2d(16, 1, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (9): BatchNorm2d(1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): Sigmoid()
+  )
+)
+2022-04-20 11:14:30,161 |     INFO | None
+2022-04-20 11:28:21,510 |  WARNING | ./out already exists
+2022-04-20 11:28:21,511 |     INFO | Created folder ./out/test-20-04-2022-11-28-21
+2022-04-20 11:28:21,512 |     INFO | Program starting in test-mode
+2022-04-20 11:28:21,512 |     INFO | STARTING PROGRAM
+2022-04-20 11:28:21,512 |     INFO | Selected parameters:
+2022-04-20 11:28:21,512 |     INFO | epochs=1
+2022-04-20 11:28:21,512 |     INFO | dimension=28
+2022-04-20 11:28:21,512 |     INFO | processing_mode=gray-scale
+2022-04-20 11:28:21,512 |     INFO | tqdm_mode=True
+2022-04-20 11:28:26,181 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-20 11:28:26,181 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-20 11:28:39,823 |     INFO | plot saved ./out/test-20-04-2022-11-28-21/resolution_distribution.png
+2022-04-20 11:28:39,978 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-20 11:28:39,978 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-20 11:28:39,979 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-20 11:28:39,979 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-20 11:28:39,980 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-20 11:28:39,981 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-20 11:28:39,998 |     INFO | Setting padding resolution to (29, 42)
+2022-04-20 11:28:39,998 |     INFO | Setting padding resolution to 28x28
+2022-04-20 11:29:13,247 |     INFO | Network(
+  (layer1): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (layer2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Sequential(
+    (0): Linear(in_features=1568, out_features=256, bias=True)
+    (1): Dropout(p=0.2, inplace=False)
+    (2): ReLU()
+  )
+  (out): Linear(in_features=256, out_features=5, bias=True)
+)
+2022-04-20 11:29:13,250 |     INFO | ConvAutoEncoder(
+  (encoder): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (8): Conv2d(32, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(4, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): ReLU()
+  )
+  (decoder): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Upsample(scale_factor=2.0, mode=nearest)
+    (4): Conv2d(32, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): Upsample(scale_factor=2.0, mode=nearest)
+    (8): Conv2d(16, 1, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (9): BatchNorm2d(1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): Sigmoid()
+  )
+)
+2022-04-20 11:29:13,440 |     INFO | None

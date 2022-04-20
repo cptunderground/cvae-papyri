@@ -57,6 +57,7 @@ if __name__ == '__main__':
     parser.add_argument('--generate', action='store_true')
     parser.add_argument('--report', action='store_true')
     parser.add_argument('--name', type=str)
+    parser.add_argument('--dim', type=int)
 
     args = parser.parse_args()
     mode = args.mode[0]
@@ -105,6 +106,8 @@ if __name__ == '__main__':
         epochs = args.epochs
     if args.processing_mode is not None:
         processing_mode = args.processing_mode
+    if args.dim is not None:
+        dimension = args.dim
 
     logger.info('STARTING PROGRAM')
     logger.info('Selected parameters:')

@@ -10,7 +10,7 @@ import os
 import shutil
 from array import *
 from random import shuffle
-
+import mahotas
 import main
 
 import preprocessing.padding
@@ -96,6 +96,115 @@ def png_to_ipx3():
         output_file.close()
 
 
+def com_cropping(image, resolution=math.inf):
+    original = image
+    image = preprocessing.standardisation.otsu(image)
+    image = cv2.bitwise_not(image)
+    image_array = np.asarray(image)
+    center = mahotas.center_of_mass(image_array)
+    print(center)
+
+    x, y = center
+    x = math.floor(x)
+    y = math.floor(y)
+    print(f"center_x={x}")
+    print(f"center_y={y}")
+
+    image = cv2.bitwise_not(image)
+    image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    image[x][y] = [0, 255, 0]
+
+    crop_resolution = 0
+    crop_resolution_type = None
+    height = image.shape[0]
+    width = image.shape[1]
+
+    print(f"height={height}")
+    print(f"width={width}")
+
+    if resolution == math.inf:
+        crop_resolution = min(width, height)
+
+    else:
+        crop_resolution = resolution
+
+    crop_resolution_type = "even" if crop_resolution % 2 == 0 else "odd"
+    half_crop_resolution = math.floor(crop_resolution / 2)
+
+    offset_x_left = 0
+    offset_x_right = 0
+    offset_y_top = 0
+    offset_y_bottom = 0
+
+    if crop_resolution_type == "even":
+        offset_x_left = x - half_crop_resolution
+        offset_x_right = x + half_crop_resolution
+        offset_y_top = y - half_crop_resolution
+        offset_y_bottom = y + half_crop_resolution
+
+    else:
+        offset_x_left = x - half_crop_resolution
+        offset_x_right = x + half_crop_resolution
+        offset_y_top = y - half_crop_resolution
+        offset_y_bottom = y + half_crop_resolution
+
+    ### now check for over and underflows to get cropping intervals
+
+    print(f"crop_dim={crop_resolution}, half={half_crop_resolution}")
+    print()
+    print(f"offset_x_left={offset_x_left}")
+    print(f"offset_x_right={offset_x_right}")
+    print(f"offset_y_top={offset_y_top}")
+    print(f"offset_y_bottom={offset_y_bottom}")
+
+    # overflow x_right
+    if offset_x_right > width:
+        delta = offset_x_right - width
+        offset_x_right = width
+        offset_x_left -= delta
+        print(f"delta={delta}")
+
+        print(f"in IF overflow X offset_x_left={offset_x_left}")
+        print(f"in IF overflow X offset_x_right={offset_x_right}")
+
+    # underflow x_left
+    elif offset_x_left <= 0:
+        delta = (0 - offset_x_left)
+        offset_x_left = 0
+        offset_x_right += delta
+        print(f"delta={delta}")
+
+        print(f"in IF underflow X offset_x_left={offset_x_left}")
+        print(f"in IF underflow X offset_x_right={offset_x_right}")
+
+    # overflow y_bottom
+    if offset_y_bottom > height:
+        delta = offset_y_bottom - height
+        offset_y_bottom = height
+        offset_y_top -= delta
+        print(f"delta={delta}")
+
+        print(f"in IF overflow Y offset_y_top={offset_y_top}")
+        print(f"in IF overflow Y offset_y_bottom={offset_y_bottom}")
+
+    # underflow y_top
+    elif offset_y_top <= 0:
+        delta = (0 - offset_y_top)
+        offset_y_top = 0
+        offset_y_bottom += delta
+        print(f"delta={delta}")
+        print(f"in IF underflow Y offset_y_top={offset_y_top}")
+        print(f"in IF underflow Y offset_y_bottom={offset_y_bottom}")
+
+    print()
+    print(f"after calculation")
+    print(f"offset_x_left={offset_x_left}")
+    print(f"offset_x_right={offset_x_right}")
+    print(f"offset_y_top={offset_y_top}")
+    print(f"offset_y_bottom={offset_y_bottom}")
+    cropped_img = original[offset_y_top:offset_y_bottom + 1, offset_x_left:offset_x_right + 1]
+    return cropped_img
+
 def crop_img(img):
     logger.debug(img.shape)  # Print image shape
     height, width = img.shape
@@ -130,7 +239,7 @@ def otsu(img):
     return otsu_img[1]
 
 
-def standardise(dimension=28, mode="gray-scale"):
+def standardise(dimension=None, mode="gray-scale"):
     print(f"cv2.version={cv2.__version__}")
     util.report.header1("Preprocessing")
 
@@ -192,18 +301,6 @@ def standardise(dimension=28, mode="gray-scale"):
                         min_resolution = img_min_res
                         min_resolution_name = filename
 
-                    if (mode == "otsu"):
-                        img = otsu(img)
-                    #img = preprocessing.padding.pad(img,200)
-
-
-                    img = crop_img(img)
-                    img = scale_img(img, dimension)
-
-                    # save image to folder
-                    final_label = f'{dst_directory}/{dir}/{filename[:-4]}-std.png'
-                    logger.debug(final_label)
-                    cv2.imwrite(final_label, img)
                     continue
                 else:
                     continue
@@ -240,9 +337,6 @@ def standardise(dimension=28, mode="gray-scale"):
                     img_height = img.shape[0]
                     img_width = img.shape[1]
 
-                    img_max_res = max(img_height, img_width)
-                    img_min_res = min(img_height, img_width)
-
                     data[img_width - 1][img_height - 1] += 1
 
                     continue
@@ -273,7 +367,7 @@ def standardise(dimension=28, mode="gray-scale"):
 
     for i in x:
         for j in y:
-            if max(data[i][j], count) < count:
+            if max(data[i][j], count) > count:
                 most_frequent_res = i,j
                 count = data[i][j]
 
@@ -282,9 +376,64 @@ def standardise(dimension=28, mode="gray-scale"):
     logger.info(f"Setting padding resolution to {most_frequent_res}")
     util.report.write_to_report(f"Setting padding resolution to {most_frequent_res}")
 
+    if dimension == None:
+        padding_res = max(most_frequent_res)
+    else:
+        padding_res = dimension
+
+    logger.info(f"Setting padding resolution to {padding_res}x{padding_res}")
+
+    for tup in paths:
+        src_directory = tup[0]
+        dst_directory = tup[1]
+
+        logger.debug(src_directory, dst_directory)
+
+        for dir in os.listdir(src_directory):
+            logger.debug(dir)
+
+            for file in os.listdir(f"{src_directory}/{dir}"):
+                logger.debug(file)
+                filename = os.fsdecode(file)
+
+                if filename.endswith(".png"):
+                    # read img as bw
+
+                    img = cv2.imread(f'{src_directory}/{dir}/{filename}', 0)
+
+                    img_height = img.shape[0]
+                    img_width = img.shape[1]
+
+                    # discard too small
+                    if max(img_height, img_width) < math.floor(padding_res / 2):
+                        logger.debug(f"Discarding resolution={(img_width, img_height)} of file {filename}")
+                        continue
+
+                    # crop
+                    if max(img_width, img_width) > padding_res:
+                        img = com_cropping(img)
+                        img = preprocessing.standardisation.scale_img(img, padding_res)
+
+                    # pad
+                    if math.floor(padding_res / 2) <= max(img_width, img_height) < padding_res:
+                        img = preprocessing.padding.pad(img, padding_res)
+
+                    if (mode == "otsu"):
+                        img = otsu(img)
+
+
+                    final_label = f'{dst_directory}/{dir}/{filename[:-4]}-std.png'
+                    logger.debug(final_label)
+                    cv2.imwrite(final_label, img)
+
+                    continue
+                else:
+                    continue
 
 
     return mode
+
+
 
 def setup():
     path_raw = "./data/raw"

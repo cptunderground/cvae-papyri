@@ -12,25 +12,7 @@ from util.base_logger import logger
 import os
 import cv2
 
-def com_cropping(image, resolution: int):
-    image = cv2.imread("./data/raw-cleaned/gamma/gamma_59170_Yale_[3]_bt1_147_8.png",0)
-    image = preprocessing.standardisation.otsu(image)
-    image = cv2.bitwise_not(image)
-    image_array = np.asarray(image)
-    center = mahotas.center_of_mass(image_array)
-    print(center)
 
-
-    x,y = center
-    x=math.floor(x)
-    y=math.floor(y)
-    print(x)
-    print(y)
-
-    image = cv2.bitwise_not(image)
-    image = cv2.cvtColor(image,cv2.COLOR_GRAY2RGB)
-    image[x][y] = [0,255,0]
-    cv2.imwrite("com_image.png",image)
 
 
 
@@ -38,12 +20,13 @@ if __name__ == '__main__':
     print(f"cv2.version={cv2.__version__}")
     logger.setLevel(level=logging.DEBUG)
 
-    com_cropping(None, None)
 
-
-
+    image = cv2.imread("./data/raw-cleaned/epsilon/epsilon_60583_[-0_5-0_5]_bt1_Iliad_14_266_27.png",0)
+    srp_img = preprocessing.standardisation.com_cropping(image)
+    cv2.imwrite("test.png", srp_img)
 
     exit(0)
+
     path_raw = "./data/raw"
 
     path_train = "./data/training-data"
@@ -197,20 +180,19 @@ if __name__ == '__main__':
                     img_width = img.shape[1]
 
                     # discard too small
-                    if max(img_height, img_width) < math.floor(padding_res/2):
+                    if max(img_height, img_width) < math.floor(padding_res / 2):
                         logger.debug(f"Discarding resolution={(img_width, img_height)} of file {filename}")
                         continue
 
                     # crop
                     if max(img_width, img_width) > padding_res:
-                        img = preprocessing.standardisation.crop_img(img)
+                        img = com_cropping(img)
                         img = preprocessing.standardisation.scale_img(img, padding_res)
 
                     # pad
-                    if math.floor(padding_res/2) <= max(img_width, img_height) < padding_res:
+                    if math.floor(padding_res / 2) <= max(img_width, img_height) < padding_res:
                         img = preprocessing.padding.pad(img, padding_res)
 
                     final_label = f'{dst_directory}/{dir}/{filename[:-4]}-std.png'
                     logger.debug(final_label)
                     cv2.imwrite(final_label, img)
-

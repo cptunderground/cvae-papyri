@@ -1,0 +1,67 @@
+2022-04-20 11:28:21,512 |     INFO | Program starting in test-mode
+2022-04-20 11:28:21,512 |     INFO | STARTING PROGRAM
+2022-04-20 11:28:21,512 |     INFO | Selected parameters:
+2022-04-20 11:28:21,512 |     INFO | epochs=1
+2022-04-20 11:28:21,512 |     INFO | dimension=28
+2022-04-20 11:28:21,512 |     INFO | processing_mode=gray-scale
+2022-04-20 11:28:21,512 |     INFO | tqdm_mode=True
+2022-04-20 11:28:26,181 |     INFO | Global maximum resolution=199 - file=alpha_60867_[3]_bt1_Iliad_2_672_19.png
+2022-04-20 11:28:26,181 |     INFO | Global minimum resolution=11 - file=alpha_60283_[-0_5-0_5]_bt1_Iliad_4_533_27.png
+2022-04-20 11:28:39,823 |     INFO | plot saved ./out/test-20-04-2022-11-28-21/resolution_distribution.png
+2022-04-20 11:28:39,978 |     INFO | Found more frequent resolution=(10, 19) with count=2.0
+2022-04-20 11:28:39,978 |     INFO | Found more frequent resolution=(14, 23) with count=6.0
+2022-04-20 11:28:39,979 |     INFO | Found more frequent resolution=(16, 21) with count=8.0
+2022-04-20 11:28:39,979 |     INFO | Found more frequent resolution=(18, 21) with count=10.0
+2022-04-20 11:28:39,980 |     INFO | Found more frequent resolution=(25, 25) with count=12.0
+2022-04-20 11:28:39,981 |     INFO | Found more frequent resolution=(29, 42) with count=16.0
+2022-04-20 11:28:39,998 |     INFO | Setting padding resolution to (29, 42)
+2022-04-20 11:28:39,998 |     INFO | Setting padding resolution to 28x28
+2022-04-20 11:29:13,247 |     INFO | Network(
+  (layer1): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (layer2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Sequential(
+    (0): Linear(in_features=1568, out_features=256, bias=True)
+    (1): Dropout(p=0.2, inplace=False)
+    (2): ReLU()
+  )
+  (out): Linear(in_features=256, out_features=5, bias=True)
+)
+2022-04-20 11:29:13,250 |     INFO | ConvAutoEncoder(
+  (encoder): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (8): Conv2d(32, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(4, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): ReLU()
+  )
+  (decoder): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Upsample(scale_factor=2.0, mode=nearest)
+    (4): Conv2d(32, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): Upsample(scale_factor=2.0, mode=nearest)
+    (8): Conv2d(16, 1, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (9): BatchNorm2d(1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): Sigmoid()
+  )
+)
+2022-04-20 11:29:13,440 |     INFO | None
