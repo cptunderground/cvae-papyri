@@ -170,7 +170,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
     )
 
     train_loader = torch.utils.data.DataLoader(train_set)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=2877)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=2767)
     logger.debug(test_loader.batch_size)
 
     # take 5 random letters from testset

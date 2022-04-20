@@ -135,7 +135,6 @@ if __name__ == '__main__':
 
     if args.report:
         print("Evaluating results and summarizing them in report")
-
     util.report.save_report()
     # unused
     # standardisation.png_to_ipx3()

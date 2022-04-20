@@ -19,13 +19,13 @@ import cv2
 if __name__ == '__main__':
     print(f"cv2.version={cv2.__version__}")
     logger.setLevel(level=logging.DEBUG)
-
+    dimension = 28
 
     image = cv2.imread("./data/raw-cleaned/epsilon/epsilon_60583_[-0_5-0_5]_bt1_Iliad_14_266_27.png",0)
     srp_img = preprocessing.standardisation.com_cropping(image)
     cv2.imwrite("test.png", srp_img)
 
-    exit(0)
+
 
     path_raw = "./data/raw"
 
@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
     logger.info(f"Found most frequent resolution {most_frequent_res}")
 
-    padding_res = max(most_frequent_res)
+    padding_res = dimension
 
     logger.info(f"Setting padding resolution to {padding_res}x{padding_res}")
 
@@ -186,13 +186,21 @@ if __name__ == '__main__':
 
                     # crop
                     if max(img_width, img_width) > padding_res:
-                        img = com_cropping(img)
+                        img = preprocessing.standardisation.com_cropping(img)
                         img = preprocessing.standardisation.scale_img(img, padding_res)
 
                     # pad
-                    if math.floor(padding_res / 2) <= max(img_width, img_height) < padding_res:
+                    if math.floor(padding_res / 2) <= max(img_width, img_height) <= padding_res:
                         img = preprocessing.padding.pad(img, padding_res)
+
 
                     final_label = f'{dst_directory}/{dir}/{filename[:-4]}-std.png'
                     logger.debug(final_label)
-                    cv2.imwrite(final_label, img)
+
+                    trigger = 0
+                    what = img.shape[0] == dimension
+                    this = img.shape[1] == dimension
+                    combo = what and this
+                    if img.shape[0] == dimension == img.shape[0]:
+                        trigger += 1
+                        cv2.imwrite(final_label, img)

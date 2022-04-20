@@ -102,13 +102,13 @@ def com_cropping(image, resolution=math.inf):
     image = cv2.bitwise_not(image)
     image_array = np.asarray(image)
     center = mahotas.center_of_mass(image_array)
-    print(center)
+    logger.debug(center)
 
     x, y = center
     x = math.floor(x)
     y = math.floor(y)
-    print(f"center_x={x}")
-    print(f"center_y={y}")
+    logger.debug(f"center_x={x}")
+    logger.debug(f"center_y={y}")
 
     image = cv2.bitwise_not(image)
     image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
@@ -119,8 +119,8 @@ def com_cropping(image, resolution=math.inf):
     height = image.shape[0]
     width = image.shape[1]
 
-    print(f"height={height}")
-    print(f"width={width}")
+    logger.debug(f"height={height}")
+    logger.debug(f"width={width}")
 
     if resolution == math.inf:
         crop_resolution = min(width, height)
@@ -144,65 +144,65 @@ def com_cropping(image, resolution=math.inf):
 
     else:
         offset_x_left = x - half_crop_resolution
-        offset_x_right = x + half_crop_resolution
+        offset_x_right = x + half_crop_resolution + 1
         offset_y_top = y - half_crop_resolution
-        offset_y_bottom = y + half_crop_resolution
+        offset_y_bottom = y + half_crop_resolution + 1
 
     ### now check for over and underflows to get cropping intervals
 
-    print(f"crop_dim={crop_resolution}, half={half_crop_resolution}")
-    print()
-    print(f"offset_x_left={offset_x_left}")
-    print(f"offset_x_right={offset_x_right}")
-    print(f"offset_y_top={offset_y_top}")
-    print(f"offset_y_bottom={offset_y_bottom}")
+    logger.debug(f"crop_dim={crop_resolution}, half={half_crop_resolution}")
+    logger.debug("")
+    logger.debug(f"offset_x_left={offset_x_left}")
+    logger.debug(f"offset_x_right={offset_x_right}")
+    logger.debug(f"offset_y_top={offset_y_top}")
+    logger.debug(f"offset_y_bottom={offset_y_bottom}")
 
     # overflow x_right
     if offset_x_right > width:
         delta = offset_x_right - width
         offset_x_right = width
         offset_x_left -= delta
-        print(f"delta={delta}")
+        logger.debug(f"delta={delta}")
 
-        print(f"in IF overflow X offset_x_left={offset_x_left}")
-        print(f"in IF overflow X offset_x_right={offset_x_right}")
+        logger.debug(f"in IF overflow X offset_x_left={offset_x_left}")
+        logger.debug(f"in IF overflow X offset_x_right={offset_x_right}")
 
     # underflow x_left
-    elif offset_x_left <= 0:
+    elif offset_x_left < 0:
         delta = (0 - offset_x_left)
         offset_x_left = 0
         offset_x_right += delta
-        print(f"delta={delta}")
+        logger.debug(f"delta={delta}")
 
-        print(f"in IF underflow X offset_x_left={offset_x_left}")
-        print(f"in IF underflow X offset_x_right={offset_x_right}")
+        logger.debug(f"in IF underflow X offset_x_left={offset_x_left}")
+        logger.debug(f"in IF underflow X offset_x_right={offset_x_right}")
 
     # overflow y_bottom
     if offset_y_bottom > height:
         delta = offset_y_bottom - height
         offset_y_bottom = height
         offset_y_top -= delta
-        print(f"delta={delta}")
+        logger.debug(f"delta={delta}")
 
-        print(f"in IF overflow Y offset_y_top={offset_y_top}")
-        print(f"in IF overflow Y offset_y_bottom={offset_y_bottom}")
+        logger.debug(f"in IF overflow Y offset_y_top={offset_y_top}")
+        logger.debug(f"in IF overflow Y offset_y_bottom={offset_y_bottom}")
 
     # underflow y_top
-    elif offset_y_top <= 0:
+    elif offset_y_top < 0:
         delta = (0 - offset_y_top)
         offset_y_top = 0
         offset_y_bottom += delta
-        print(f"delta={delta}")
-        print(f"in IF underflow Y offset_y_top={offset_y_top}")
-        print(f"in IF underflow Y offset_y_bottom={offset_y_bottom}")
+        logger.debug(f"delta={delta}")
+        logger.debug(f"in IF underflow Y offset_y_top={offset_y_top}")
+        logger.debug(f"in IF underflow Y offset_y_bottom={offset_y_bottom}")
 
-    print()
-    print(f"after calculation")
-    print(f"offset_x_left={offset_x_left}")
-    print(f"offset_x_right={offset_x_right}")
-    print(f"offset_y_top={offset_y_top}")
-    print(f"offset_y_bottom={offset_y_bottom}")
-    cropped_img = original[offset_y_top:offset_y_bottom + 1, offset_x_left:offset_x_right + 1]
+    logger.debug("")
+    logger.debug(f"after calculation")
+    logger.debug(f"offset_x_left={offset_x_left}")
+    logger.debug(f"offset_x_right={offset_x_right}")
+    logger.debug(f"offset_y_top={offset_y_top}")
+    logger.debug(f"offset_y_bottom={offset_y_bottom}")
+    cropped_img = original[offset_y_top:offset_y_bottom, offset_x_left:offset_x_right]
     return cropped_img
 
 def crop_img(img):
@@ -415,7 +415,7 @@ def standardise(dimension=None, mode="gray-scale"):
                         img = preprocessing.standardisation.scale_img(img, padding_res)
 
                     # pad
-                    if math.floor(padding_res / 2) <= max(img_width, img_height) < padding_res:
+                    if math.floor(padding_res / 2) <= max(img_width, img_height) <= padding_res:
                         img = preprocessing.padding.pad(img, padding_res)
 
                     if (mode == "otsu"):
@@ -424,8 +424,11 @@ def standardise(dimension=None, mode="gray-scale"):
 
                     final_label = f'{dst_directory}/{dir}/{filename[:-4]}-std.png'
                     logger.debug(final_label)
-                    cv2.imwrite(final_label, img)
 
+
+
+                    if img.shape[0] == dimension and img.shape[0] == dimension:
+                        cv2.imwrite(final_label, img)
                     continue
                 else:
                     continue
