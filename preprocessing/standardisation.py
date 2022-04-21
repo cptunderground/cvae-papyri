@@ -358,6 +358,7 @@ def standardise(dimension=None, mode="gray-scale"):
     name = "resolution_distribution.png"
 
     plt.savefig(f"./{util.utils.get_root()}/{name}")
+    plt.close()
     logger.info(f"plot saved ./{util.utils.get_root()}/{name}")
     util.report.image_to_report(name, "Resolution Distribution of Cliplets")
 

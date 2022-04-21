@@ -340,7 +340,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
         plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png')
         util.report.image_to_report(f"{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png", f"TSNE Epoch {epoch}")
-
+        plt.close()
     summary(model, (1, 28, 28))
 
     return features, images
