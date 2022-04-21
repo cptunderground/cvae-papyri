@@ -11,7 +11,7 @@ from scipy.spatial.distance import squareform
 from sklearn.manifold import TSNE
 from sklearn.manifold._t_sne import _joint_probabilities
 from sklearn.metrics import pairwise_distances
-
+from util.base_logger import logger
 import util.report
 import util.utils
 
@@ -99,7 +99,7 @@ def _gradient_descent(obj_func, p0,y, args, it=0, n_iter=100,
         grad *= gains
         update = momentum * update - learning_rate * grad
         p += update
-        print("[t-SNE] Iteration %d: error = %.7f,"
+        logger.info("[t-SNE] Iteration %d: error = %.7f,"
               " gradient norm = %.7f"
               % (i + 1, error, grad_norm))
 

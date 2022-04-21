@@ -272,13 +272,13 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         y = images
         X = np.array(features)
 
-        print(X.shape)
+        logger.debug(X.shape)
         X.reshape(-1)
-        print(X.shape)
+        logger.debug(X.shape)
         X.ravel()
-        print(X.shape)
+        logger.debug(X.shape)
         X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
-        print(X.shape)
+        logger.debug(X.shape)
 
         y_list = list(y)
 
@@ -288,10 +288,10 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
 
         y = tuple(y_list)
 
-        print(y)
+        logger.debug(y)
         y_set = set(y)
         y_len = len(y_set)
-        print(y_len)
+        logger.debug(y_len)
         palette = sns.color_palette("bright", y_len)
         MACHINE_EPSILON = np.finfo(np.double).eps
         n_components = 2
@@ -312,7 +312,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
         plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png')
         util.report.image_to_report(f"{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png", f"TSNE Epoch {epoch}")
-        plt.show(block=True)
+
 
     summary(model, (1, 28, 28))
 

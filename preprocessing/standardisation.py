@@ -360,7 +360,6 @@ def standardise(dimension=None, mode="gray-scale"):
     plt.savefig(f"./{util.utils.get_root()}/{name}")
     logger.info(f"plot saved ./{util.utils.get_root()}/{name}")
     util.report.image_to_report(name, "Resolution Distribution of Cliplets")
-    plt.show()
 
     most_frequent_res = (0,0)
     count = 0
