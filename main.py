@@ -133,9 +133,9 @@ if __name__ == '__main__':
 
     if args.report:
         print("Evaluating results and summarizing them in report")
-    util.report.save_report()
+    util.report.save_report()                               
     # unused
-    # standardisation.png_to_ipx3()
+    # standardisation.png_to_ipx3()     
     # mnist_reader.mnist_read()
 
     # autoencoder.run_ae()
