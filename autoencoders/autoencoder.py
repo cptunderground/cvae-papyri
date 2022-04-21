@@ -101,14 +101,35 @@ class ConvAutoEncoder(nn.Module):
 
 def get_label(label):
     switcher = {
-        "tensor(0)":"alpha",
-        "tensor(1)":"beta",
-        "tensor(2)":"delta",
-        "tensor(3)":"epsilon",
-        "tensor(4)":"gamma",
+        "tensor(0)": "alpha",
+        "tensor(1)": "beta",
+        "tensor(2)": "chi",
+        "tensor(3)": "delta",
+        "tensor(4)": "epsilon",
+        "tensor(5)": "eta",
+        "tensor(6)": "gamma",
+        "tensor(7)": "iota",
+        "tensor(8)": "kappa",
+        "tensor(9)": "lambda",
+        "tensor(10)": "mu",
+        "tensor(11)": "nu",
+        "tensor(12)": "omega",
+        "tensor(13)": "omicron",
+        "tensor(14)": "phi",
+        "tensor(15)": "pi",
+        "tensor(16)": "psi",
+        "tensor(17)": "rho",
+        "tensor(18)": "sigma",
+        "tensor(19)": "tau",
+        "tensor(20)": "theta",
+        "tensor(21)": "xi",
+        "tensor(22)": "ypsilon",
+        "tensor(23)": "zeta",
+
     }
 
     return switcher.get(label)
+
 
 def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
     util.report.header1("Auto-Encoder")
@@ -130,15 +151,16 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
 
+
     train_loader = torch.utils.data.DataLoader(train_set)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=2767)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=11082)
     logger.debug(test_loader.batch_size)
 
     # take 5 random letters from testset
 
     pretrained_model = Network()
     logger.info(pretrained_model)
-    #util.report.write_to_report(pretrained_model)
+    # util.report.write_to_report(pretrained_model)
 
     # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
@@ -151,12 +173,11 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
     output_names = ['Label']
     torch.onnx.export(model, b, 'AE.onnx', input_names=input_names, output_names=output_names)
 
-
     logger.info(summary(model, (1, 28, 28), 2592))
     """
     TODO FIX
     """
-    #util.report.write_to_report(summary(model, (1, 28, 28), 2592))
+    # util.report.write_to_report(summary(model, (1, 28, 28), 2592))
     # to check if our weight transfer was successful or not
     # list(list(pretrained_model.layer2.children())[0].parameters()) == list(
     #    list(model.encoder.children())[4].parameters())
@@ -180,8 +201,10 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         ###################
         # train the models #
         ###################
-        if tqdm_mode: loop = tqdm(train_loader, total=len(train_loader))
-        else: loop = train_loader
+        if tqdm_mode:
+            loop = tqdm(train_loader, total=len(train_loader))
+        else:
+            loop = train_loader
 
         for batch in loop:
             images = batch[0].to(device)
@@ -225,7 +248,6 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
                 ax.get_xaxis().set_visible(False)
                 ax.get_yaxis().set_visible(False)
 
-
         fig.savefig(f'./{util.utils.get_root()}/original_decoded.png', bbox_inches='tight')
         plt.close()
 
@@ -237,7 +259,6 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax.set_title(f'feature map: {fm}')
             ax.imshow(encoded_img[fm], cmap='gray')
 
-
         fig.savefig(f'./{util.utils.get_root()}/encoded_img_alpha')
         plt.close()
 
@@ -248,7 +269,6 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax = fig.add_subplot(2, 2, fm + 1, xticks=[], yticks=[])
             ax.set_title(f'feature map: {fm}')
             ax.imshow(encoded_img[fm], cmap='gray')
-
 
         fig.savefig(f'./{util.utils.get_root()}/encoded_img_epsilon')
         plt.close()
@@ -281,9 +301,9 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         logger.debug(X.shape)
 
         y_list = list(y)
-
+        y_list_old = y_list
+        y_old = y
         for item in range(len(y_list)):
-
             y_list[item] = get_label(str(y_list[item]))
 
         y = tuple(y_list)
@@ -291,7 +311,15 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         logger.debug(y)
         y_set = set(y)
         y_len = len(y_set)
-        logger.debug(y_len)
+
+
+        logger.info(f"y_old={y_old}")
+        logger.info(f"y_list_old={y_list_old}")
+        logger.info(y_list)
+        logger.info(y)
+        logger.info(f"y_set {y_set}")
+        logger.info(f"y_len{y_len}")
+
         palette = sns.color_palette("bright", y_len)
         MACHINE_EPSILON = np.finfo(np.double).eps
         n_components = 2
@@ -312,7 +340,6 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
         plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png')
         util.report.image_to_report(f"{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png", f"TSNE Epoch {epoch}")
-
 
     summary(model, (1, 28, 28))
 

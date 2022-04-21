@@ -128,7 +128,7 @@ def _gradient_descent(obj_func, p0,y, args, it=0, n_iter=100,
 
 def tsne(mode, folder):
     #sns.set(rc={'figure.figsize': (11.7, 8.27)})
-    palette = sns.color_palette("bright", 5)
+    palette = sns.color_palette("bright", 24)
 
     #X, y = load_digits(return_X_y=True)
 
