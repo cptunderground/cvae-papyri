@@ -1,59 +1,20 @@
-import logging
-import random
-import time
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torchvision.transforms as transforms
+from sklearn.manifold import TSNE
+from torch.utils.data import dataset
+from torchsummary import summary
+from torchvision import datasets
+from torchvision.transforms import transforms
+from tqdm import tqdm
+
 import util.report
 import util.utils
 from util.base_logger import logger
-import numpy as np
-import torch
-from sklearn.datasets import load_digits
-from scipy.spatial.distance import pdist
-
-from sklearn.manifold._t_sne import _joint_probabilities
-from scipy import linalg
-from sklearn.metrics import pairwise_distances
-from scipy.spatial.distance import squareform
-from sklearn.manifold import TSNE
-from matplotlib import pyplot as plt
-import seaborn as sns
-from torch.utils.data import dataset
-from torchvision.transforms import transforms
-import matplotlib.pyplot as plt
-import cv2
-import os
-import random
-import numpy as np
-import matplotlib.pyplot as plt
-from PIL import Image
-from sklearn.feature_extraction import image
-from skimage import io
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
-import matplotlib.pyplot
-from matplotlib.pyplot import imshow
-import seaborn as sns
-import torch
-from sklearn.manifold import TSNE
-from torch.autograd import Variable
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchvision
-from mnist import MNIST
-from torchvision import datasets, transforms
-from torchviz import make_dot
-
-import torch
-import torch.nn as nn
-import torch.optim as optim
-
-import torchvision
-import torchvision.transforms as transforms
-from torchsummary import summary
-
-import numpy as np
-import matplotlib.pyplot as plt
-from tqdm import tqdm
 
 
 class Network(nn.Module):

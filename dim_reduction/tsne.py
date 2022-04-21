@@ -1,35 +1,18 @@
 import logging
-import time
-import util.report
-import numpy as np
-import torch
-from sklearn.datasets import load_digits
-from scipy.spatial.distance import pdist
+import os
 
-from sklearn.manifold._t_sne import _joint_probabilities
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 from scipy import linalg
-from sklearn.metrics import pairwise_distances
+from scipy.spatial.distance import pdist
 from scipy.spatial.distance import squareform
 from sklearn.manifold import TSNE
-from matplotlib import pyplot as plt
-import seaborn as sns
-from torch.utils.data import dataset
-from torchvision.transforms import transforms
-import matplotlib.pyplot as plt
-import cv2
-import os
-import random
-import numpy as np
-import matplotlib.pyplot as plt
-from PIL import Image
-from sklearn.feature_extraction import image
-from skimage import io
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
-import matplotlib.pyplot
-from matplotlib.pyplot import imshow
-import seaborn as sns
+from sklearn.manifold._t_sne import _joint_probabilities
+from sklearn.metrics import pairwise_distances
 
+import util.report
 import util.utils
 
 

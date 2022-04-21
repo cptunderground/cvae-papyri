@@ -1,6 +1,5 @@
 import logging
-import util
-from datetime import datetime
+
 
 class CustomFormatter(logging.Formatter):
 

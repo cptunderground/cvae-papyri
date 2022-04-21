@@ -1,16 +1,14 @@
-import os
+import argparse
+import logging
 from datetime import datetime
 
-import dim_reduction.custom_tsne
 import dim_reduction.tsne
-import util.utils
-import util.report
 import util.base_logger
+import util.report
+import util.utils
 from autoencoders import autoencoder
 from preprocessing import standardisation
 from util.base_logger import logger
-import argparse
-import logging
 
 
 def get_root():
