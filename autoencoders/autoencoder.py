@@ -12,6 +12,9 @@ from torchvision import datasets
 from torchvision.transforms import transforms
 from tqdm import tqdm
 
+import umap
+
+
 import util.report
 import util.utils
 from util.base_logger import logger
@@ -130,6 +133,26 @@ def get_label(label):
 
     return switcher.get(label)
 
+def plot_latent_var_pyro(autoencoder, device, data,nei, num_batches=100):
+    stack=[]
+    stacky=[]
+    autoencoder = autoencoder.eval()
+    with torch.no_grad():
+        for i, d in enumerate(data):
+            x=d['re_image']
+            y=d['target'].to('cpu').detach().numpy().tolist()
+            z,sigma = autoencoder.encoder(x.to(device))
+            z = z.to('cpu').detach().numpy().tolist()
+            stack.extend(z)
+            stacky.extend(y)
+            if i > num_batches:
+                umaper = umap.UMAP(n_components=2,n_neighbors=nei)
+                x_umap = umaper.fit_transform(stack)
+                plt.scatter(x_umap[:, 0], x_umap[:, 1],s=2, c=stacky, cmap='tab10')
+                plt.colorbar()
+                plt.xlabel('UMAP 1')
+                plt.ylabel('UMAP 2')
+                break
 
 def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
     util.report.header1("Auto-Encoder")
@@ -237,6 +260,9 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         # use detach when it's an output that requires_grad
         encoded_imgs = encoded_imgs.detach().cpu().numpy()
         decoded_imgs = decoded_imgs.detach().cpu().numpy()
+
+
+        plot_latent_var_pyro(model,device, train_loader,100)
 
         # plot the first ten input images and then reconstructed images
         fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(12, 4))

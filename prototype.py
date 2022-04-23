@@ -1,206 +1,306 @@
-import logging
 import math
-import mahotas
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
-import preprocessing.padding
-import preprocessing.standardisation
-from util.base_logger import logger
-
-import os
 import cv2
+import umap.umap_ as umap
+
+
+from pyro.infer import SVI, Trace_ELBO
+from pyro.optim import Adam
+
+from sklearn.datasets import fetch_openml
+from sklearn.utils import check_random_state
+from sklearn.model_selection import train_test_split
+import os
+
+import numpy as np
+import scipy
+import torch
+
+import torch.nn as nn
+
+import pyro
+import pyro.distributions as dist
+
+import torch;
+from torchvision import datasets, transforms
+
+torch.manual_seed(0)
+
+import torch.nn.functional as F
+import torch.utils
+import torch.distributions
+import numpy as np
+import matplotlib.pyplot as plt;plt.rcParams['figure.dpi'] = 200
+
+from torch.utils.data import Dataset, DataLoader
+
+
+class Decoder_pyro(nn.Module):
+    def __init__(self, z_dim, hidden_dim):
+        super().__init__()
+        # setup the two linear transformations used
+        self.fc1 = nn.Linear(z_dim, hidden_dim)
+        self.fc21 = nn.Linear(hidden_dim, 784)
+        # setup the non-linearities
+        self.softplus = nn.Softplus()
+        # self.sigmoid = nn.Sigmoid()
+
+    def forward(self, z):
+        # define the forward computation on the latent z
+        # first compute the hidden units
+        hidden = self.softplus(self.fc1(z))
+        # return the parameter for the output Bernoulli
+        # each is of size batch_size x 784
+        loc_img = self.fc21(hidden)
+        return loc_img
+
+
+class Encoder_pyro(nn.Module):
+    def __init__(self, z_dim, hidden_dim):
+        super().__init__()
+        # setup the three linear transformations used
+        self.fc1 = nn.Linear(784, hidden_dim)
+        self.fc21 = nn.Linear(hidden_dim, z_dim)
+        self.fc22 = nn.Linear(hidden_dim, z_dim)
+        # setup the non-linearities
+        self.softplus = nn.Softplus()
+
+    def forward(self, x):
+        # define the forward computation on the image x
+        # first shape the mini-batch to have pixels in the rightmost dimension
+        x = x.reshape(-1, 784)
+        # then compute the hidden units
+        hidden = self.softplus(self.fc1(x))
+        # then return a mean vector and a (positive) square root covariance
+        # each of size batch_size x z_dim
+        z_loc = self.fc21(hidden)
+        z_scale = torch.exp(self.fc22(hidden))
+        return z_loc, z_scale
+
+
+class VAE(nn.Module):
+    # by default our latent space is 50-dimensional
+    # and we use 500 hidden units
+    def __init__(self, z_dim=50, hidden_dim=500, use_cuda=False):
+        super().__init__()
+        # create the encoder and decoder networks
+        self.encoder = Encoder_pyro(z_dim, hidden_dim)
+        self.decoder = Decoder_pyro(z_dim, hidden_dim)
+
+        if use_cuda:
+            # calling cuda() here will put all the parameters of
+            # the encoder and decoder networks into gpu memory
+            self.cuda()
+        self.use_cuda = use_cuda
+        self.z_dim = z_dim
+
+    # define the model p(x|z)p(z)
+    def model(self, x):
+        # register PyTorch module `decoder` with Pyro
+        pyro.module("decoder", self.decoder)
+        with pyro.plate("data", x.shape[0]):
+            # setup hyperparameters for prior p(z)
+            z_loc = x.new_zeros(torch.Size((x.shape[0], self.z_dim)))
+            z_scale = x.new_ones(torch.Size((x.shape[0], self.z_dim)))
+            # sample from prior (value will be sampled by guide when computing the ELBO)
+            z = pyro.sample("latent", dist.Normal(z_loc, z_scale).to_event(1))
+            # decode the latent code z
+            loc_img = torch.sigmoid(self.decoder(z))
+
+            pyro.sample("obs", dist.ContinuousBernoulli(probs=loc_img).to_event(1), obs=x.reshape(-1, 784))
+
+    # define the guide (i.e. variational distribution) q(z|x)
+    def guide(self, x):
+        # register PyTorch module `encoder` with Pyro
+        pyro.module("encoder", self.encoder)
+        with pyro.plate("data", x.shape[0]):
+            # use the encoder to get the parameters used to define q(z|x)
+            z_loc, z_scale = self.encoder(x)
+            # sample the latent code z
+            pyro.sample("latent", dist.Normal(z_loc, z_scale).to_event(1))
+
+    # define a helper function for reconstructing images
+    def reconstruct_img(self, x):
+        # encode image x
+        z_loc, z_scale = self.encoder(x)
+        # sample in latent space
+        z = dist.Normal(z_loc, z_scale).sample()
+        # decode the image (note we don't sample in image space)
+        loc_img = torch.sigmoid(self.decoder(z))
+        out = loc_img / (2 * loc_img - 1) + 1. / (2 * torch.atanh(1 - 2 * loc_img))
+        out[out == float('inf')] = 0.5
+        return out.to(device)
+        # return loc_img
+
+
+def train(svi, train_loader, use_cuda=False):
+    # initialize loss accumulator
+    epoch_loss = 0.
+    # do a training epoch over each mini-batch x returned
+    # by the data loader
+    for d in train_loader:
+        # if on GPU put mini-batch into CUDA memory
+        x = d['re_image']
+        if use_cuda:
+            x = x.cuda()
+        # do ELBO gradient and accumulate loss
+        epoch_loss += svi.step(x)
+
+    # return epoch loss
+    normalizer_train = len(train_loader.dataset)
+    total_epoch_loss_train = epoch_loss / normalizer_train
+    return total_epoch_loss_train
+
+
+class ImgFolderWithLabel(datasets.ImageFolder):
+    def __getitem__(self, item):
+        img, target = super(ImgFolderWithLabel, self).__getitem__(item)
+        return img, target
+
+
+def loss_plot_pyro(loss):
+    fig = plt.figure(figsize=(5, 5))
+    plt.plot(np.arange(len(loss)), loss)
+    plt.xlabel('Epochs')
+    plt.ylabel('ELBO')
+    plt.savefig("loss.png")
+    plt.close()
 
 
 
+class Papyri_dataset(Dataset):
+    def __init__(self, images, targets):
+        self.images = images
+        self.targets = targets
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, item):
+        image = self.images[item]
+        re_image = image / 255
+        target = int(self.targets[item])
+        return {'re_image': torch.tensor(re_image.reshape(28, 28)[np.newaxis, :, :], dtype=torch.float32),
+                'target': torch.tensor(target, dtype=torch.long)
+                }
+
+
+def plot_latent_var_pyro(autoencoder, data, nei, num_batches=100):
+    stack = []
+    stacky = []
+    autoencoder = autoencoder.eval()
+    with torch.no_grad():
+        for i, d in enumerate(data):
+            x = d['re_image']
+            y = d['target'].to('cpu').detach().numpy().tolist()
+            z, sigma = autoencoder.encoder(x.to(device))
+            z = z.to('cpu').detach().numpy().tolist()
+            stack.extend(z)
+            stacky.extend(y)
+            if i > num_batches:
+                umaper = umap.UMAP(n_components=2, n_neighbors=nei)
+                x_umap = umaper.fit_transform(stack)
+                plt.scatter(x_umap[:, 0], x_umap[:, 1], s=2, c=stacky, cmap='tab10')
+                plt.colorbar()
+                plt.xlabel('UMAP 1')
+                plt.ylabel('UMAP 2')
+                plt.savefig("umap.png")
+                plt.close()
+                break
+
+
+class Mnist_dataset(Dataset):
+    def __init__(self, images, targets):
+        self.images = images
+        self.targets = targets
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, item):
+        image = self.images[item]
+        re_image = image / 255
+        target = int(self.targets[item])
+        return {'re_image': torch.tensor(re_image.reshape(28, 28)[np.newaxis, :, :], dtype=torch.float32),
+                'target': torch.tensor(target, dtype=torch.long)
+                }
 
 
 if __name__ == '__main__':
-    print(f"cv2.version={cv2.__version__}")
-    logger.setLevel(level=logging.DEBUG)
-    dimension = 28
+    # assert pyro.__version__.startswith('1.7.0')
+    print(f"start programm")
 
-    image = cv2.imread("./data/raw-cleaned/epsilon/epsilon_60583_[-0_5-0_5]_bt1_Iliad_14_266_27.png",0)
-    srp_img = preprocessing.standardisation.com_cropping(image)
-    cv2.imwrite("test.png", srp_img)
+    dataset = datasets.ImageFolder(
+        './data/test-data-standardised',
+        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+    )
 
+    dataloader = DataLoader(dataset)
+    images = dataset.imgs
+    targets = dataset.targets
+    train_samples = len(images)
+    train_samples = math.floor(train_samples / 2)
 
+    X = []
 
-    path_raw = "./data/raw"
+    for i in images:
+        img = cv2.imread(str(i[0]).replace("\\\\", "/"), 0)
+        if img is not None:
+            X.append(img)
 
-    path_train = "./data/training-data"
-    path_test = "./data/test-data"
-    path_raw_cleaned = "./data/raw-cleaned"
-
-    path_train_std = "./data/training-data-standardised"
-    path_test_std = "./data/test-data-standardised"
-    path_raw_cleaned_std = "./data/raw-cleaned-standardised"
-
-    paths = []
-    paths.append((path_train, path_train_std))
-    paths.append((path_test, path_test_std))
-    paths.append((path_raw_cleaned, path_raw_cleaned_std))
-
-    max_resolution = 0
-    min_resolution = 1000
-    max_resolution_name = None
-    min_resolution_name = None
-
-    data = np.zeros((200, 200))
-    logger.info(data.shape)
-
-    for tup in paths:
-        src_directory = tup[0]
-        dst_directory = tup[1]
-
-        logger.debug(src_directory, dst_directory)
-
-        for dir in os.listdir(src_directory):
-            logger.debug(dir)
-
-            for file in os.listdir(f"{src_directory}/{dir}"):
-                logger.debug(file)
-                filename = os.fsdecode(file)
-
-                if filename.endswith(".png"):
-                    # read img as bw
-
-                    logger.debug((src_directory, filename))
-
-                    img = cv2.imread(f'{src_directory}/{dir}/{filename}', 0)
-
-                    img_height = img.shape[0]
-                    img_width = img.shape[1]
-
-                    img_max_res = max(img_height, img_width)
-                    img_min_res = min(img_height, img_width)
-
-                    if (img_max_res > max_resolution):
-                        max_resolution = img_max_res
-                        max_resolution_name = filename
-
-                    if (img_min_res < min_resolution):
-                        min_resolution = img_min_res
-                        min_resolution_name = filename
-
-                    continue
-                else:
-                    continue
-
-    logger.info(f"Global maximum resolution={max_resolution} - file={max_resolution_name}")
-    logger.info(f"Global minimum resolution={min_resolution} - file={min_resolution_name}")
-
-    data = np.zeros((max_resolution, max_resolution))
-
-    for tup in paths:
-        src_directory = tup[0]
-        dst_directory = tup[1]
-
-        logger.debug(src_directory, dst_directory)
-
-        for dir in os.listdir(src_directory):
-            logger.debug(dir)
-
-            for file in os.listdir(f"{src_directory}/{dir}"):
-                logger.debug(file)
-                filename = os.fsdecode(file)
-
-                if filename.endswith(".png"):
-                    # read img as bw
-
-                    logger.debug((src_directory, filename))
-
-                    img = cv2.imread(f'{src_directory}/{dir}/{filename}', 0)
-
-                    img_height = img.shape[0]
-                    img_width = img.shape[1]
-
-                    img_max_res = max(img_height, img_width)
-                    img_min_res = min(img_height, img_width)
-
-                    data[img_width - 1][img_height - 1] += 1
-
-                    continue
-                else:
-                    continue
-
-    logger.info(data)
-
-    nx, ny = max_resolution, max_resolution
-    x = range(nx)
-    y = range(ny)
-
-    hf = plt.figure()
-    ha = hf.add_subplot(111, projection='3d')
-
-    X, Y = np.meshgrid(x, y)  # `plot_surface` expects `x` and `y` data to be 2D
-    ha.plot_surface(X, Y, data)
-
-    plt.show()
-
-    most_frequent_res = (0, 0)
-    count = 0
-
-    for i in x:
-        for j in y:
-            if max(data[i][j], count) > count:
-                most_frequent_res = i, j
-                count = data[i][j]
-
-                logger.info(f"Found more frequent resolution={most_frequent_res} with count={count}")
-
-    logger.info(f"Found most frequent resolution {most_frequent_res}")
-
-    padding_res = dimension
-
-    logger.info(f"Setting padding resolution to {padding_res}x{padding_res}")
-
-    for tup in paths:
-        src_directory = tup[0]
-        dst_directory = tup[1]
-
-        logger.debug(src_directory, dst_directory)
-
-        for dir in os.listdir(src_directory):
-            logger.debug(dir)
-
-            for file in os.listdir(f"{src_directory}/{dir}"):
-                logger.debug(file)
-                filename = os.fsdecode(file)
-
-                if filename.endswith(".png"):
-                    # read img as bw
-
-                    logger.debug((src_directory, filename))
-
-                    img = cv2.imread(f'{src_directory}/{dir}/{filename}', 0)
-
-                    img_height = img.shape[0]
-                    img_width = img.shape[1]
-
-                    # discard too small
-                    if max(img_height, img_width) < math.floor(padding_res / 2):
-                        logger.debug(f"Discarding resolution={(img_width, img_height)} of file {filename}")
-                        continue
-
-                    # crop
-                    if max(img_width, img_width) > padding_res:
-                        img = preprocessing.standardisation.com_cropping(img)
-                        img = preprocessing.standardisation.scale_img(img, padding_res)
-
-                    # pad
-                    if math.floor(padding_res / 2) <= max(img_width, img_height) <= padding_res:
-                        img = preprocessing.padding.pad(img, padding_res)
+    X = np.array(X)
+    y = np.array(targets)
 
 
-                    final_label = f'{dst_directory}/{dir}/{filename[:-4]}-std.png'
-                    logger.debug(final_label)
 
-                    trigger = 0
-                    what = img.shape[0] == dimension
-                    this = img.shape[1] == dimension
-                    combo = what and this
-                    if img.shape[0] == dimension == img.shape[0]:
-                        trigger += 1
-                        cv2.imwrite(final_label, img)
+    X, y = fetch_openml('mnist_784', version=1, return_X_y=True, as_frame=False)
+    train_samples = 60000
+
+
+
+    random_state = check_random_state(0)
+    permutation = random_state.permutation(X.shape[0])
+    X = X[permutation]
+    y = y[permutation]
+    X = X.reshape((X.shape[0], -1))
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=math.floor(train_samples / 2), test_size=50)
+
+    pyro.distributions.enable_validation(False)
+    pyro.set_rng_seed(0)
+
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    USE_CUDA = True if torch.cuda.is_available() else False
+
+    LEARNING_RATE = 3.0e-4
+
+    NUM_EPOCHS = 1
+
+    i_dataset = Mnist_dataset(images=X_train, targets=y_train)
+
+    i_data_loader = torch.utils.data.DataLoader(i_dataset, batch_size=128, num_workers=16)
+
+    pyro.clear_param_store()
+
+    # setup the VAE
+    vae = VAE(use_cuda=USE_CUDA)
+
+    # setup the optimizer
+    adam_args = {"lr": LEARNING_RATE}
+    optimizer = Adam(adam_args)
+
+    # setup the inference algorithm
+    svi = SVI(vae.model, vae.guide, optimizer, loss=Trace_ELBO())
+
+    train_elbo = []
+    test_elbo = []
+    # training loop
+    for epoch in range(NUM_EPOCHS):
+        total_epoch_loss_train = train(svi, i_data_loader, use_cuda=USE_CUDA)
+        train_elbo.append(-total_epoch_loss_train)
+        # print("[epoch %03d]  average training loss: %.4f" % (epoch, total_epoch_loss_train))
+
+    torch.save(vae.state_dict(), f'./models/models-vae.pth')
+    loss_plot_pyro(train_elbo)
+    plot_latent_var_pyro(vae, i_data_loader, 100)
