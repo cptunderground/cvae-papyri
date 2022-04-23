@@ -23,6 +23,7 @@ import pyro.distributions as dist
 
 import torch;
 from torchvision import datasets, transforms
+from tqdm import tqdm
 
 torch.manual_seed(0)
 
@@ -138,7 +139,8 @@ def train(svi, train_loader, use_cuda=False):
     epoch_loss = 0.
     # do a training epoch over each mini-batch x returned
     # by the data loader
-    for d in train_loader:
+    loop = tqdm(train_loader, total=len(train_loader))
+    for d in loop:
         # if on GPU put mini-batch into CUDA memory
         x = d['re_image']
         if use_cuda:
@@ -185,12 +187,14 @@ class Papyri_dataset(Dataset):
                 }
 
 
-def plot_latent_var_pyro(autoencoder, data, nei, num_batches=100):
+def plot_latent_var_pyro(epoch, autoencoder, data, nei, num_batches=100):
+    print("in umap plot")
     stack = []
     stacky = []
     autoencoder = autoencoder.eval()
     with torch.no_grad():
         for i, d in enumerate(data):
+
             x = d['re_image']
             y = d['target'].to('cpu').detach().numpy().tolist()
             z, sigma = autoencoder.encoder(x.to(device))
@@ -198,15 +202,20 @@ def plot_latent_var_pyro(autoencoder, data, nei, num_batches=100):
             stack.extend(z)
             stacky.extend(y)
             if i > num_batches:
+
                 umaper = umap.UMAP(n_components=2, n_neighbors=nei)
                 x_umap = umaper.fit_transform(stack)
                 plt.scatter(x_umap[:, 0], x_umap[:, 1], s=2, c=stacky, cmap='tab10')
                 plt.colorbar()
                 plt.xlabel('UMAP 1')
                 plt.ylabel('UMAP 2')
-                plt.savefig("umap.png")
-                plt.close()
+
+
                 break
+
+    plt.savefig(f"./umap/umap{epoch}.png")
+    plt.close()
+
 
 
 class Mnist_dataset(Dataset):
@@ -231,15 +240,20 @@ if __name__ == '__main__':
     print(f"start programm")
 
     dataset = datasets.ImageFolder(
-        './data/test-data-standardised',
+        './data/raw-cleaned-standardised',
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
 
     dataloader = DataLoader(dataset)
     images = dataset.imgs
     targets = dataset.targets
-    train_samples = len(images)
-    train_samples = math.floor(train_samples / 2)
+    samples = len(images)
+    test_samples = math.floor(samples / 10)
+    train_samples = samples - test_samples
+
+
+    print(f"test_samples={test_samples}")
+    print(f"trains_samples={train_samples}")
 
     X = []
 
@@ -249,14 +263,17 @@ if __name__ == '__main__':
             X.append(img)
 
     X = np.array(X)
+    X = np.reshape(X,(X.shape[0], X.shape[1]**2))
     y = np.array(targets)
 
 
 
-    #X, y = fetch_openml('mnist_784', version=1, return_X_y=True, as_frame=False)
-    #train_samples = 60000
+    #_X, _y = fetch_openml('mnist_784', version=1, return_X_y=True, as_frame=False)
+    #_train_samples = 60000
+    #_test_samples =10000
+    #print(_X,_y)
 
-
+    print(X,y)
 
     random_state = check_random_state(0)
     permutation = random_state.permutation(X.shape[0])
@@ -265,7 +282,7 @@ if __name__ == '__main__':
     X = X.reshape((X.shape[0], -1))
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, train_size=math.floor(train_samples / 2), test_size=50)
+        X, y, train_size=test_samples, test_size=test_samples)
 
     pyro.distributions.enable_validation(False)
     pyro.set_rng_seed(0)
@@ -279,7 +296,7 @@ if __name__ == '__main__':
 
     i_dataset = Mnist_dataset(images=X_train, targets=y_train)
 
-    i_data_loader = torch.utils.data.DataLoader(i_dataset, batch_size=128, num_workers=8)
+    i_data_loader = torch.utils.data.DataLoader(i_dataset, num_workers=8)
 
     pyro.clear_param_store()
 
@@ -299,8 +316,10 @@ if __name__ == '__main__':
     for epoch in range(NUM_EPOCHS):
         total_epoch_loss_train = train(svi, i_data_loader, use_cuda=USE_CUDA)
         train_elbo.append(-total_epoch_loss_train)
-        # print("[epoch %03d]  average training loss: %.4f" % (epoch, total_epoch_loss_train))
+        print("[epoch %03d]  average training loss: %.4f" % (epoch, total_epoch_loss_train))
+        plot_latent_var_pyro(epoch, vae, i_data_loader, 100)
+        print("epoch end")
 
     torch.save(vae.state_dict(), f'./models/models-vae.pth')
     loss_plot_pyro(train_elbo)
-    plot_latent_var_pyro(vae, i_data_loader, 100)
+    plot_latent_var_pyro(epoch, vae, i_data_loader, 100)
