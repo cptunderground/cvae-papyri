@@ -253,8 +253,8 @@ if __name__ == '__main__':
 
 
 
-    X, y = fetch_openml('mnist_784', version=1, return_X_y=True, as_frame=False)
-    train_samples = 60000
+    #X, y = fetch_openml('mnist_784', version=1, return_X_y=True, as_frame=False)
+    #train_samples = 60000
 
 
 
@@ -275,11 +275,11 @@ if __name__ == '__main__':
 
     LEARNING_RATE = 3.0e-4
 
-    NUM_EPOCHS = 1
+    NUM_EPOCHS = 30
 
     i_dataset = Mnist_dataset(images=X_train, targets=y_train)
 
-    i_data_loader = torch.utils.data.DataLoader(i_dataset, batch_size=128, num_workers=16)
+    i_data_loader = torch.utils.data.DataLoader(i_dataset, batch_size=128, num_workers=8)
 
     pyro.clear_param_store()
 
