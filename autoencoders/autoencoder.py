@@ -11,6 +11,7 @@ from torchsummary import summary
 from torchvision import datasets
 from torchvision.transforms import transforms
 from tqdm import tqdm
+from umap.umap_ import UMAP
 
 import umap
 
@@ -262,7 +263,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         decoded_imgs = decoded_imgs.detach().cpu().numpy()
 
 
-        plot_latent_var_pyro(model,device, train_loader,100)
+
 
         # plot the first ten input images and then reconstructed images
         fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(12, 4))
@@ -359,6 +360,8 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         tsne = TSNE()
         X_embedded = tsne.fit_transform(X)
 
+        umap = UMAP()
+
         sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
         # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
@@ -366,6 +369,20 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
         plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png')
         util.report.image_to_report(f"{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png", f"TSNE Epoch {epoch}")
+        plt.close()
+
+        umap = UMAP()
+        X_embedded = umap.fit_transform(X)
+
+
+
+        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+        # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
+
+        plt.title(f"umap_{name}_epoch_{epoch}_mode_{mode}")
+        util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
+        plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/umap_{name}_epoch_{epoch}_mode_{mode}.png')
+        util.report.image_to_report(f"{name}/{mode}/umap_{name}_epoch_{epoch}_mode_{mode}.png", f"UMAP Epoch {epoch}")
         plt.close()
     summary(model, (1, 28, 28))
 
