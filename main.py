@@ -92,8 +92,7 @@ if __name__ == '__main__':
     #dim_reduction.tsne.tsne(mode=run.mode, folder='./data/raw-cleaned-standardised')
     X, y = autoencoder.run_cae(run)
 
-    if args.report:
-        print("Evaluating results and summarizing them in report")
+    print("Evaluating results and summarizing them in report")
     util.report.save_report()                               
     # unused
     # standardisation.png_to_ipx3()     
