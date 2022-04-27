@@ -84,14 +84,18 @@ if __name__ == '__main__':
 
     if args.generate:
         standardisation.generate_training_sets()
+        standardisation.standardise(run)
 
     #dim_reduction.tsne.tsne(mode="raw-cleaned", folder='./data/raw-cleaned')
 
-    standardisation.standardise(run)
+
 
     #dim_reduction.tsne.tsne(mode=run.mode, folder='./data/raw-cleaned-standardised')
-    X, y = autoencoder.run_cae(run)
 
+    if run.train:
+        X, y = autoencoder.train(run)
+    else:
+        autoencoder.evaluate(run)
     print("Evaluating results and summarizing them in report")
     util.report.save_report()                               
     # unused

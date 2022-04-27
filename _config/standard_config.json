@@ -3,7 +3,8 @@
   "train": true,
   "model": "../models/models-autoencodergray-scale.pth",
   "letters": [
-    "alpha"
+    "alpha",
+    "delta"
   ],
   "logging": 40,
   "mode": "default",

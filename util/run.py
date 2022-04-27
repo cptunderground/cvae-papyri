@@ -12,7 +12,7 @@ processing_modes = ['gray-scale', 'otsu']
 
 class Run:
     def __init__(self, name: str = "unnamed", letters: list = None,
-                 train: bool = False, model: str = f'../models/models-autoencodergray-scale.pth',
+                 train: bool = False, model: str = f'./models/models-autoencodergray-scale.pth',
                  mode: str = "default", epochs: int = 30, dimensions: int = 28,
                  tqdm: bool = False, processing: str = "gray-scale"):
         checkArgs(mode, processing)
