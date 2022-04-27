@@ -180,13 +180,10 @@ def train(run: Run):
     idx = [i for i in range(len(test_set)) if
            test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
     # build the appropriate subset
-    subset = Subset(dataset, idx)
-    print(idx)
-    print(test_set.imgs[1][1])
-    exit(0)
+    subset = Subset(test_set, idx)
 
-    train_loader = torch.utils.data.DataLoader(train_set)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=11082)
+    train_loader = torch.utils.data.DataLoader(subset)
+    test_loader = torch.utils.data.DataLoader(subset, batch_size=11082)
     logger.debug(test_loader.batch_size)
 
     # take 5 random letters from testset
@@ -255,8 +252,8 @@ def train(run: Run):
 
         scheduler.step(train_loss)
 
-        torch.save(model.state_dict(), f'./models/models-autoencoder-{run.processing}.pth')
-        torch.save(model.state_dict(), f'./{run.root}/models-autoencoder-{run.processing}.pth')
+        torch.save(model.state_dict(), f'./models/models-autoencoder-{run.name}.pth')
+        torch.save(model.state_dict(), f'./{run.root}/models-autoencoder-{run.name}.pth')
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
@@ -408,7 +405,14 @@ def evaluate(run):
     )
 
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=11082)
+    idx = [i for i in range(len(test_set)) if
+           test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
+    # build the appropriate subset
+    subset = Subset(test_set, idx)
 
+    train_loader = torch.utils.data.DataLoader(subset)
+    test_loader = torch.utils.data.DataLoader(subset, batch_size=11082)
+    logger.debug(test_loader.batch_size)
     model = Network()
     model = ConvAutoEncoder(model)
     model.load_state_dict(torch.load(run.model))
