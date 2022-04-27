@@ -1,5 +1,9 @@
 import json
 import logging
+
+import torch
+
+import autoencoders.autoencoder
 from base_logger import logger
 
 modes = ['default', 'testing', 'cluster', 'full', 'init']
@@ -7,11 +11,19 @@ processing_modes = ['gray-scale', 'otsu']
 
 
 class Run:
-    def __init__(self, name: str = "unnamed", mode: str = "default", epochs: int = 30, dimensions: int = 28,
+    def __init__(self, name: str = "unnamed", letters: list = None,
+                 train: bool = False, model: str = f'../models/models-autoencodergray-scale.pth',
+                 mode: str = "default", epochs: int = 30, dimensions: int = 28,
                  tqdm: bool = False, processing: str = "gray-scale"):
         checkArgs(mode, processing)
 
         self.name = name
+
+        self.train = train
+        self.model = model
+        #model_cls = autoencoders.autoencoder.Network()
+        #self.model = autoencoders.autoencoder.ConvAutoEncoder(model_cls.load_state_dict(torch.load(model)))
+        self.letters = letters
         self.logging = logging.ERROR
         self.mode = mode
         self.epochs = epochs
@@ -20,6 +32,16 @@ class Run:
         self.processing = processing
         self.root = None
 
+    @classmethod
+    def fromfile(self, path_to_file):
+        with open(path_to_file, encoding="UTF-8") as file:
+            data = json.load(file)
+            run = Run(name=data["name"], train=data["train"], letters=data["letters"],
+                      mode=data["mode"], epochs=data["epochs"], dimensions=data["dimensions"],
+                      tqdm=data["tqdm"],
+                      processing=data["processing"])
+            return run
+
     def __repr__(self):
         return str(self.__dict__)
 
@@ -27,7 +49,7 @@ class Run:
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def saveJSON(self) -> None:
-        with open('run.json', 'w') as outfile:
+        with open(f'{self.name}.json', 'w') as outfile:
             json.dump(self.__dict__, outfile)
 
     def setRoot(self, root_path: str):
@@ -49,16 +71,10 @@ def checkArgs(mode, proc):
     if ex:
         exit(1)
 
-
-def configFromJSON(path) -> Run:
-    with open('run.json') as json_file:
-        data = json.load(json_file)
-
-    run = Run(name=data["name"], mode=data["mode"], epochs=data["epochs"], dimensions=data["dimensions"], tqdm=data["tqdm"],
-              processing=data["processing"])
-    return run
-
-
 if __name__ == '__main__':
-    run1 = Run(mode="testing", epochs=3, dimensions=3, tqdm=True, processing="gray-scale")
-    print(run1)
+    standard_conf = Run(name="standard_config", letters=['alpha'], train=True, mode="default", epochs=3, dimensions=28,
+                        tqdm=False, processing="gray-scale")
+
+    standard_conf.saveJSON()
+    testi = Run.fromfile("./standard_config.json")
+    print(testi)

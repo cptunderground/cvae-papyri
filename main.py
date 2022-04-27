@@ -23,6 +23,7 @@ if __name__ == '__main__':
 
     modes = ['test', 'cluster', 'full', 'init']
     processing_modes = ['gray-scale', 'otsu']
+
     test_config = {
         'logging_lvl': logging.DEBUG,
         'epochs': 5,
