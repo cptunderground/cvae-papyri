@@ -19,6 +19,8 @@ import logging
 import util.report
 import util.utils
 from util.base_logger import logger
+from util.run import Run
+
 
 def png_to_ipx3():
     Names = [['./data/training-data-standardised/alpha', 'train'], ['./data/test-data-standardised/alpha', 't10k']]
@@ -239,7 +241,7 @@ def otsu(img):
     return otsu_img[1]
 
 
-def standardise(dimension=None, mode="gray-scale"):
+def standardise(run:Run):
     print(f"cv2.version={cv2.__version__}")
     util.report.header1("Preprocessing")
 
@@ -357,9 +359,9 @@ def standardise(dimension=None, mode="gray-scale"):
 
     name = "resolution_distribution.png"
 
-    plt.savefig(f"./{util.utils.get_root()}/{name}")
+    plt.savefig(f"./{run.root}/{name}")
     plt.close()
-    logger.info(f"plot saved ./{util.utils.get_root()}/{name}")
+    logger.info(f"plot saved ./{run.root}/{name}")
     util.report.image_to_report(name, "Resolution Distribution of Cliplets")
 
     most_frequent_res = (0,0)
@@ -376,10 +378,10 @@ def standardise(dimension=None, mode="gray-scale"):
     logger.info(f"Setting padding resolution to {most_frequent_res}")
     util.report.write_to_report(f"Setting padding resolution to {most_frequent_res}")
 
-    if dimension == None:
+    if run.dimensions == None:
         padding_res = max(most_frequent_res)
     else:
-        padding_res = dimension
+        padding_res = run.dimensions
 
     logger.info(f"Setting padding resolution to {padding_res}x{padding_res}")
 
@@ -418,7 +420,7 @@ def standardise(dimension=None, mode="gray-scale"):
                     if math.floor(padding_res / 2) <= max(img_width, img_height) <= padding_res:
                         img = preprocessing.padding.pad(img, padding_res)
 
-                    if (mode == "otsu"):
+                    if (run.mode == "otsu"):
                         img = otsu(img)
 
 
@@ -427,14 +429,14 @@ def standardise(dimension=None, mode="gray-scale"):
 
 
 
-                    if img.shape[0] == dimension and img.shape[0] == dimension:
+                    if img.shape[0] == run.dimensions and img.shape[0] == run.dimensions:
                         cv2.imwrite(final_label, img)
                     continue
                 else:
                     continue
 
 
-    return mode
+    return run.mode
 
 
 

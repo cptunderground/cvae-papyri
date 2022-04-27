@@ -19,6 +19,7 @@ import umap
 import util.report
 import util.utils
 from util.base_logger import logger
+from util.run import Run
 
 
 class Network(nn.Module):
@@ -155,7 +156,10 @@ def plot_latent_var_pyro(autoencoder, device, data,nei, num_batches=100):
                 plt.ylabel('UMAP 2')
                 break
 
-def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
+def run_cae(run:Run):
+
+
+
     util.report.header1("Auto-Encoder")
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -219,13 +223,13 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
     ], lr=0.01)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
-    num_epochs = epochs
+    num_epochs = run.epochs
     for epoch in range(num_epochs):
         train_loss = 0
         ###################
         # train the models #
         ###################
-        if tqdm_mode:
+        if run.tqdm:
             loop = tqdm(train_loader, total=len(train_loader))
         else:
             loop = train_loader
@@ -239,15 +243,15 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             optimizer.step()
 
             train_loss += loss.item() * images.size(0)
-            if tqdm_mode:
+            if run.tqdm:
                 loop.set_description(f'Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop.set_postfix(loss=train_loss)
         logger.info(f'Epoch={epoch} done.')
 
         scheduler.step(train_loss)
 
-        torch.save(model.state_dict(), f'./models/models-autoencoder{mode}.pth')
-        torch.save(model.state_dict(), f'./{util.utils.get_root()}/models-autoencoder{mode}.pth')
+        torch.save(model.state_dict(), f'./models/models-autoencoder-{run.processing}.pth')
+        torch.save(model.state_dict(), f'./{run.root}/models-autoencoder-{run.processing}.pth')
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
@@ -275,7 +279,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
                 ax.get_xaxis().set_visible(False)
                 ax.get_yaxis().set_visible(False)
 
-        fig.savefig(f'./{util.utils.get_root()}/original_decoded.png', bbox_inches='tight')
+        fig.savefig(f'./{run.root}/original_decoded.png', bbox_inches='tight')
         plt.close()
 
         encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
@@ -286,7 +290,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax.set_title(f'feature map: {fm}')
             ax.imshow(encoded_img[fm], cmap='gray')
 
-        fig.savefig(f'./{util.utils.get_root()}/encoded_img_alpha')
+        fig.savefig(f'./{run.root}/encoded_img_alpha')
         plt.close()
 
         encoded_img = encoded_imgs[3]  # get 1st image from the batch (here '7')
@@ -297,7 +301,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax.set_title(f'feature map: {fm}')
             ax.imshow(encoded_img[fm], cmap='gray')
 
-        fig.savefig(f'./{util.utils.get_root()}/encoded_img_epsilon')
+        fig.savefig(f'./{run.root}/encoded_img_epsilon')
         plt.close()
 
         # X, y = load_digits(return_X_y=True)
@@ -365,10 +369,10 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
         # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-        plt.title(f"tsne_{name}_epoch_{epoch}_mode_{mode}")
-        util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
-        plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png')
-        util.report.image_to_report(f"{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png", f"TSNE Epoch {epoch}")
+        plt.title(f"tsne_{name}_epoch_{epoch}_mode_{run.processing}")
+        util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
+        plt.savefig(f'./{run.root}/{name}/{run.processing}/tsne_{name}_epoch_{epoch}_mode_{run.processing}.png')
+        util.report.image_to_report(f"{name}/{run.processing}/tsne_{name}_epoch_{epoch}_mode_{run.processing}.png", f"TSNE Epoch {epoch}")
         plt.close()
 
         umap = UMAP()
@@ -379,10 +383,10 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
         # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-        plt.title(f"umap_{name}_epoch_{epoch}_mode_{mode}")
-        util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
-        plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/umap_{name}_epoch_{epoch}_mode_{mode}.png')
-        util.report.image_to_report(f"{name}/{mode}/umap_{name}_epoch_{epoch}_mode_{mode}.png", f"UMAP Epoch {epoch}")
+        plt.title(f"umap_{name}_epoch_{epoch}_mode_{run.processing}")
+        util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
+        plt.savefig(f'./{run.root}/{name}/{run.processing}/umap_{name}_epoch_{epoch}_mode_{run.processing}.png')
+        util.report.image_to_report(f"{name}/{run.processing}/umap_{name}_epoch_{epoch}_mode_{run.processing}.png", f"UMAP Epoch {epoch}")
         plt.close()
     summary(model, (1, 28, 28))
 

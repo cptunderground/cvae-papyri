@@ -1,7 +1,0 @@
-2022-04-21 17:16:47,371 |     INFO | Program starting in test-mode
-2022-04-21 17:16:47,371 |     INFO | STARTING PROGRAM
-2022-04-21 17:16:47,372 |     INFO | Selected parameters:
-2022-04-21 17:16:47,372 |     INFO | epochs=2
-2022-04-21 17:16:47,372 |     INFO | dimension=28
-2022-04-21 17:16:47,372 |     INFO | processing_mode=gray-scale
-2022-04-21 17:16:47,372 |     INFO | tqdm_mode=True

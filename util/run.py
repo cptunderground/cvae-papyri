@@ -3,8 +3,8 @@ import logging
 
 import torch
 
-import autoencoders.autoencoder
-from base_logger import logger
+
+from util.base_logger import logger
 
 modes = ['default', 'testing', 'cluster', 'full', 'init']
 processing_modes = ['gray-scale', 'otsu']
@@ -57,6 +57,9 @@ class Run:
 
     def getRoot(self):
         return self.root
+
+    def write_to_md(self):
+        pass
 
 
 def checkArgs(mode, proc):
