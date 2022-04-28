@@ -45,10 +45,10 @@ if __name__ == '__main__':
         config_file = args.config
     run = Run().fromfile(config_file)
 
-    run.name = f'{run.name}-{datetime.now().strftime("%d-%m-%Y-%H-%M-%S")}'
+    run.name_time = f'{run.name}-{datetime.now().strftime("%d-%m-%Y-%H-%M-%S")}'
 
 
-    run_path = f'out/{run.name}'
+    run_path = f'out/{run.name_time}'
 
     run.root= run_path
 

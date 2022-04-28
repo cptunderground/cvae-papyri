@@ -159,6 +159,8 @@ def plot_latent_var_pyro(autoencoder, device, data, nei, num_batches=100):
 
 def train(run: Run):
     util.report.header1("Auto-Encoder")
+    print(torch.cuda_version)
+    print(torch.cuda.is_available())
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
@@ -183,7 +185,7 @@ def train(run: Run):
     subset = Subset(test_set, idx)
 
     train_loader = torch.utils.data.DataLoader(subset)
-    test_loader = torch.utils.data.DataLoader(subset, batch_size=11082)
+    test_loader = torch.utils.data.DataLoader(subset, batch_size=128)
     logger.debug(test_loader.batch_size)
 
     
