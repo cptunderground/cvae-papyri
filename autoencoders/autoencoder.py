@@ -186,6 +186,7 @@ def train(run: Run):
     test_loader = torch.utils.data.DataLoader(subset, batch_size=11082)
     logger.debug(test_loader.batch_size)
 
+    
     # take 5 random letters from testset
 
     pretrained_model = Network()
@@ -201,9 +202,9 @@ def train(run: Run):
 
     input_names = ['Image']
     output_names = ['Label']
-    torch.onnx.export(model, b, 'AE.onnx', input_names=input_names, output_names=output_names)
+    
 
-    logger.info(summary(model, (1, 28, 28), 2592))
+    
     """
     TODO FIX
     """
@@ -322,13 +323,13 @@ def train(run: Run):
         y = images
         X = np.array(features)
 
-        logger.debug(X.shape)
+        
         X.reshape(-1)
-        logger.debug(X.shape)
+        
         X.ravel()
-        logger.debug(X.shape)
+        
         X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
-        logger.debug(X.shape)
+        
 
         y_list = list(y)
         y_list_old = y_list
@@ -338,16 +339,11 @@ def train(run: Run):
 
         y = tuple(y_list)
 
-        logger.debug(y)
+        
         y_set = set(y)
         y_len = len(y_set)
 
-        logger.info(f"y_old={y_old}")
-        logger.info(f"y_list_old={y_list_old}")
-        logger.info(y_list)
-        logger.info(y)
-        logger.info(f"y_set {y_set}")
-        logger.info(f"y_len{y_len}")
+        
 
         palette = sns.color_palette("bright", y_len)
         MACHINE_EPSILON = np.finfo(np.double).eps
@@ -386,7 +382,7 @@ def train(run: Run):
         util.report.image_to_report(f"{name}/{run.processing}/umap_{name}_epoch_{epoch}_mode_{run.processing}.png",
                                     f"UMAP Epoch {epoch}")
         plt.close()
-    summary(model, (1, 28, 28))
+    
 
     return features, images
 
@@ -491,13 +487,13 @@ def evaluate(run):
     y = images
     X = np.array(features)
 
-    logger.debug(X.shape)
+    
     X.reshape(-1)
-    logger.debug(X.shape)
+    
     X.ravel()
-    logger.debug(X.shape)
+    
     X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
-    logger.debug(X.shape)
+    
 
     y_list = list(y)
     y_list_old = y_list
@@ -507,16 +503,10 @@ def evaluate(run):
 
     y = tuple(y_list)
 
-    logger.debug(y)
     y_set = set(y)
     y_len = len(y_set)
 
-    logger.info(f"y_old={y_old}")
-    logger.info(f"y_list_old={y_list_old}")
-    logger.info(y_list)
-    logger.info(y)
-    logger.info(f"y_set {y_set}")
-    logger.info(f"y_len{y_len}")
+    
 
     palette = sns.color_palette("bright", y_len)
     MACHINE_EPSILON = np.finfo(np.double).eps

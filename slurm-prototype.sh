@@ -1,6 +1,6 @@
 #!/bin/bash 
-#SBATCH --job-name=cvae-cluster-testing     #Name of your job
-#SBATCH --cpus-per-task=1    #Number of cores to reserve
+#SBATCH --job-name=prototype-testing     #Name of your job
+#SBATCH --cpus-per-task=4    #Number of cores to reserve
 #SBATCH --mem-per-cpu=16G     #Amount of RAM/core to reserve
 #SBATCH --time=06:00:00      #Maximum allocated time
 #SBATCH --qos=6hours         #Selected queue to allocate your job
@@ -9,4 +9,4 @@
 
 ml Miniconda2
 source activate MA                 
-python main.py cluster --epochs=3 --generate
+python prototype.py
