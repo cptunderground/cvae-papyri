@@ -18,7 +18,7 @@ class Run:
         checkArgs(mode, processing)
 
         self.name = name
-        self.name_time
+        self.name_time = None
 
         self.train = train
         self.model = model
