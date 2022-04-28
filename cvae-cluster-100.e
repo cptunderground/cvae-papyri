@@ -397,3 +397,33 @@
 [33;20m2022-04-28 12:32:53,513 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48 already exists (utils.py:25)[0m
 [33;20m2022-04-28 12:32:53,514 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE already exists (utils.py:25)[0m
 [33;20m2022-04-28 12:32:53,514 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE/gray-scale already exists (utils.py:25)[0m
+[32m2022-04-28 12:56:28,438 - util.base_logger - INFO - Epoch=23 done. (autoencoder.py:252)[0m
+/scicore/home/dokman0000/jabjan00/venv_MA/lib/python3.6/site-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variables as keyword args: x, y. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+  FutureWarning
+[33;20m2022-04-28 12:57:21,833 - util.base_logger - WARNING - ./. already exists (utils.py:25)[0m
+[33;20m2022-04-28 12:57:21,833 - util.base_logger - WARNING - ././out already exists (utils.py:25)[0m
+[33;20m2022-04-28 12:57:21,833 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48 already exists (utils.py:25)[0m
+[33;20m2022-04-28 12:57:21,834 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE already exists (utils.py:25)[0m
+[33;20m2022-04-28 12:57:21,835 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE/gray-scale already exists (utils.py:25)[0m
+/scicore/home/dokman0000/jabjan00/venv_MA/lib/python3.6/site-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variables as keyword args: x, y. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+  FutureWarning
+[33;20m2022-04-28 12:57:33,422 - util.base_logger - WARNING - ./. already exists (utils.py:25)[0m
+[33;20m2022-04-28 12:57:33,422 - util.base_logger - WARNING - ././out already exists (utils.py:25)[0m
+[33;20m2022-04-28 12:57:33,422 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48 already exists (utils.py:25)[0m
+[33;20m2022-04-28 12:57:33,423 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE already exists (utils.py:25)[0m
+[33;20m2022-04-28 12:57:33,423 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE/gray-scale already exists (utils.py:25)[0m
+[32m2022-04-28 13:21:07,349 - util.base_logger - INFO - Epoch=24 done. (autoencoder.py:252)[0m
+/scicore/home/dokman0000/jabjan00/venv_MA/lib/python3.6/site-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variables as keyword args: x, y. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+  FutureWarning
+[33;20m2022-04-28 13:22:02,181 - util.base_logger - WARNING - ./. already exists (utils.py:25)[0m
+[33;20m2022-04-28 13:22:02,182 - util.base_logger - WARNING - ././out already exists (utils.py:25)[0m
+[33;20m2022-04-28 13:22:02,182 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48 already exists (utils.py:25)[0m
+[33;20m2022-04-28 13:22:02,182 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE already exists (utils.py:25)[0m
+[33;20m2022-04-28 13:22:02,183 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE/gray-scale already exists (utils.py:25)[0m
+/scicore/home/dokman0000/jabjan00/venv_MA/lib/python3.6/site-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variables as keyword args: x, y. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+  FutureWarning
+[33;20m2022-04-28 13:22:15,474 - util.base_logger - WARNING - ./. already exists (utils.py:25)[0m
+[33;20m2022-04-28 13:22:15,474 - util.base_logger - WARNING - ././out already exists (utils.py:25)[0m
+[33;20m2022-04-28 13:22:15,474 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48 already exists (utils.py:25)[0m
+[33;20m2022-04-28 13:22:15,474 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE already exists (utils.py:25)[0m
+[33;20m2022-04-28 13:22:15,475 - util.base_logger - WARNING - ././out/cluster_100-28-04-2022-02-37-48/CovAE/gray-scale already exists (utils.py:25)[0m
