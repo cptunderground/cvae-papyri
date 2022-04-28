@@ -1,0 +1,1152 @@
+2022-04-28 14:47:02,179 |     INFO | Program starting in cluster-mode
+2022-04-28 14:47:02,179 |     INFO | STARTING PROGRAM
+2022-04-28 14:47:02,179 |     INFO | Selected parameters:
+2022-04-28 14:47:02,179 |     INFO | {'name': 'cluster_100', 'name_time': 'cluster_100-28-04-2022-14-47-02', 'train': True, 'model': './models/models-autoencodergray-scale.pth', 'letters': ['alpha', 'beta', 'chi', 'delta', 'epsilon', 'eta', 'gamma', 'iota', 'kappa', 'lambda', 'mu', 'nu', 'omega', 'omicron', 'phi', 'pi', 'psi', 'rho', 'sigma', 'tau', 'theta', 'xi', 'ypsilon', 'zeta'], 'logging': 40, 'mode': 'cluster', 'epochs': 100, 'dimensions': 28, 'tqdm': False, 'processing': 'gray-scale', 'root': 'out/cluster_100-28-04-2022-14-47-02'}
+2022-04-28 14:47:02,398 |     INFO | Network(
+  (layer1): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (layer2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Sequential(
+    (0): Linear(in_features=1568, out_features=256, bias=True)
+    (1): Dropout(p=0.2, inplace=False)
+    (2): ReLU()
+  )
+  (out): Linear(in_features=256, out_features=5, bias=True)
+)
+2022-04-28 14:47:02,402 |     INFO | ConvAutoEncoder(
+  (encoder): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (8): Conv2d(32, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(4, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): ReLU()
+  )
+  (decoder): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Upsample(scale_factor=2.0, mode=nearest)
+    (4): Conv2d(32, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): Upsample(scale_factor=2.0, mode=nearest)
+    (8): Conv2d(16, 1, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (9): BatchNorm2d(1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): Sigmoid()
+  )
+)
+2022-04-28 14:48:03,946 |     INFO | Epoch=0 done.
+2022-04-28 14:48:05,479 |  WARNING | ./. already exists
+2022-04-28 14:48:05,485 |  WARNING | ././out already exists
+2022-04-28 14:48:05,485 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:48:05,486 |     INFO | Created folder ././out/cluster_100-28-04-2022-14-47-02/CovAE
+2022-04-28 14:48:05,486 |     INFO | Created folder ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale
+2022-04-28 14:48:15,569 |  WARNING | ./. already exists
+2022-04-28 14:48:15,570 |  WARNING | ././out already exists
+2022-04-28 14:48:15,570 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:48:15,570 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:48:15,570 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:49:10,467 |     INFO | Epoch=1 done.
+2022-04-28 14:49:11,821 |  WARNING | ./. already exists
+2022-04-28 14:49:11,827 |  WARNING | ././out already exists
+2022-04-28 14:49:11,827 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:49:11,827 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:49:11,827 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:49:15,501 |  WARNING | ./. already exists
+2022-04-28 14:49:15,501 |  WARNING | ././out already exists
+2022-04-28 14:49:15,502 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:49:15,502 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:49:15,502 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:50:11,698 |     INFO | Epoch=2 done.
+2022-04-28 14:50:13,151 |  WARNING | ./. already exists
+2022-04-28 14:50:13,151 |  WARNING | ././out already exists
+2022-04-28 14:50:13,151 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:50:13,151 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:50:13,151 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:50:16,826 |  WARNING | ./. already exists
+2022-04-28 14:50:16,827 |  WARNING | ././out already exists
+2022-04-28 14:50:16,827 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:50:16,827 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:50:16,827 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:51:13,828 |     INFO | Epoch=3 done.
+2022-04-28 14:51:15,327 |  WARNING | ./. already exists
+2022-04-28 14:51:15,327 |  WARNING | ././out already exists
+2022-04-28 14:51:15,327 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:51:15,327 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:51:15,327 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:51:18,993 |  WARNING | ./. already exists
+2022-04-28 14:51:18,993 |  WARNING | ././out already exists
+2022-04-28 14:51:18,993 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:51:18,993 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:51:18,993 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:52:14,064 |     INFO | Epoch=4 done.
+2022-04-28 14:52:15,552 |  WARNING | ./. already exists
+2022-04-28 14:52:15,552 |  WARNING | ././out already exists
+2022-04-28 14:52:15,552 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:52:15,552 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:52:15,552 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:52:19,227 |  WARNING | ./. already exists
+2022-04-28 14:52:19,227 |  WARNING | ././out already exists
+2022-04-28 14:52:19,228 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:52:19,228 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:52:19,228 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:53:14,397 |     INFO | Epoch=5 done.
+2022-04-28 14:53:15,916 |  WARNING | ./. already exists
+2022-04-28 14:53:15,916 |  WARNING | ././out already exists
+2022-04-28 14:53:15,916 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:53:15,916 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:53:15,916 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:53:19,639 |  WARNING | ./. already exists
+2022-04-28 14:53:19,639 |  WARNING | ././out already exists
+2022-04-28 14:53:19,639 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:53:19,639 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:53:19,640 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:54:14,852 |     INFO | Epoch=6 done.
+2022-04-28 14:54:16,338 |  WARNING | ./. already exists
+2022-04-28 14:54:16,339 |  WARNING | ././out already exists
+2022-04-28 14:54:16,339 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:54:16,339 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:54:16,339 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:54:20,024 |  WARNING | ./. already exists
+2022-04-28 14:54:20,024 |  WARNING | ././out already exists
+2022-04-28 14:54:20,024 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:54:20,024 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:54:20,025 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:55:15,234 |     INFO | Epoch=7 done.
+2022-04-28 14:55:16,598 |  WARNING | ./. already exists
+2022-04-28 14:55:16,598 |  WARNING | ././out already exists
+2022-04-28 14:55:16,598 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:55:16,598 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:55:16,598 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:55:20,317 |  WARNING | ./. already exists
+2022-04-28 14:55:20,317 |  WARNING | ././out already exists
+2022-04-28 14:55:20,317 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:55:20,317 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:55:20,317 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:56:15,554 |     INFO | Epoch=8 done.
+2022-04-28 14:56:17,072 |  WARNING | ./. already exists
+2022-04-28 14:56:17,073 |  WARNING | ././out already exists
+2022-04-28 14:56:17,073 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:56:17,073 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:56:17,073 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:56:20,768 |  WARNING | ./. already exists
+2022-04-28 14:56:20,769 |  WARNING | ././out already exists
+2022-04-28 14:56:20,769 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:56:20,769 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:56:20,769 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:57:16,002 |     INFO | Epoch=9 done.
+2022-04-28 14:57:17,503 |  WARNING | ./. already exists
+2022-04-28 14:57:17,503 |  WARNING | ././out already exists
+2022-04-28 14:57:17,503 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:57:17,503 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:57:17,503 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:57:21,189 |  WARNING | ./. already exists
+2022-04-28 14:57:21,189 |  WARNING | ././out already exists
+2022-04-28 14:57:21,189 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:57:21,189 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:57:21,189 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:58:16,285 |     INFO | Epoch=10 done.
+2022-04-28 14:58:17,792 |  WARNING | ./. already exists
+2022-04-28 14:58:17,793 |  WARNING | ././out already exists
+2022-04-28 14:58:17,793 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:58:17,793 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:58:17,793 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:58:21,484 |  WARNING | ./. already exists
+2022-04-28 14:58:21,484 |  WARNING | ././out already exists
+2022-04-28 14:58:21,485 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:58:21,485 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:58:21,485 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:59:16,735 |     INFO | Epoch=11 done.
+2022-04-28 14:59:18,252 |  WARNING | ./. already exists
+2022-04-28 14:59:18,252 |  WARNING | ././out already exists
+2022-04-28 14:59:18,252 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:59:18,253 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:59:18,253 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 14:59:21,943 |  WARNING | ./. already exists
+2022-04-28 14:59:21,943 |  WARNING | ././out already exists
+2022-04-28 14:59:21,943 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 14:59:21,943 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 14:59:21,943 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:00:17,171 |     INFO | Epoch=12 done.
+2022-04-28 15:00:18,661 |  WARNING | ./. already exists
+2022-04-28 15:00:18,682 |  WARNING | ././out already exists
+2022-04-28 15:00:18,682 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:00:18,682 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:00:18,682 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:00:22,372 |  WARNING | ./. already exists
+2022-04-28 15:00:22,373 |  WARNING | ././out already exists
+2022-04-28 15:00:22,373 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:00:22,373 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:00:22,373 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:01:17,664 |     INFO | Epoch=13 done.
+2022-04-28 15:01:19,147 |  WARNING | ./. already exists
+2022-04-28 15:01:19,147 |  WARNING | ././out already exists
+2022-04-28 15:01:19,147 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:01:19,147 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:01:19,147 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:01:22,865 |  WARNING | ./. already exists
+2022-04-28 15:01:22,865 |  WARNING | ././out already exists
+2022-04-28 15:01:22,865 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:01:22,865 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:01:22,865 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:02:18,078 |     INFO | Epoch=14 done.
+2022-04-28 15:02:19,529 |  WARNING | ./. already exists
+2022-04-28 15:02:19,530 |  WARNING | ././out already exists
+2022-04-28 15:02:19,530 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:02:19,530 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:02:19,530 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:02:23,254 |  WARNING | ./. already exists
+2022-04-28 15:02:23,254 |  WARNING | ././out already exists
+2022-04-28 15:02:23,254 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:02:23,254 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:02:23,255 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:03:18,552 |     INFO | Epoch=15 done.
+2022-04-28 15:03:20,061 |  WARNING | ./. already exists
+2022-04-28 15:03:20,062 |  WARNING | ././out already exists
+2022-04-28 15:03:20,062 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:03:20,062 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:03:20,062 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:03:23,782 |  WARNING | ./. already exists
+2022-04-28 15:03:23,783 |  WARNING | ././out already exists
+2022-04-28 15:03:23,783 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:03:23,783 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:03:23,783 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:04:19,119 |     INFO | Epoch=16 done.
+2022-04-28 15:04:20,487 |  WARNING | ./. already exists
+2022-04-28 15:04:20,488 |  WARNING | ././out already exists
+2022-04-28 15:04:20,488 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:04:20,488 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:04:20,488 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:04:24,205 |  WARNING | ./. already exists
+2022-04-28 15:04:24,206 |  WARNING | ././out already exists
+2022-04-28 15:04:24,206 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:04:24,206 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:04:24,206 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:05:19,610 |     INFO | Epoch=17 done.
+2022-04-28 15:05:21,102 |  WARNING | ./. already exists
+2022-04-28 15:05:21,102 |  WARNING | ././out already exists
+2022-04-28 15:05:21,102 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:05:21,102 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:05:21,102 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:05:24,834 |  WARNING | ./. already exists
+2022-04-28 15:05:24,835 |  WARNING | ././out already exists
+2022-04-28 15:05:24,835 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:05:24,835 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:05:24,835 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:06:20,213 |     INFO | Epoch=18 done.
+2022-04-28 15:06:21,708 |  WARNING | ./. already exists
+2022-04-28 15:06:21,709 |  WARNING | ././out already exists
+2022-04-28 15:06:21,709 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:06:21,709 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:06:21,709 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:06:25,211 |  WARNING | ./. already exists
+2022-04-28 15:06:25,212 |  WARNING | ././out already exists
+2022-04-28 15:06:25,212 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:06:25,212 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:06:25,212 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:07:20,827 |     INFO | Epoch=19 done.
+2022-04-28 15:07:22,304 |  WARNING | ./. already exists
+2022-04-28 15:07:22,306 |  WARNING | ././out already exists
+2022-04-28 15:07:22,306 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:07:22,306 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:07:22,306 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:07:25,838 |  WARNING | ./. already exists
+2022-04-28 15:07:25,838 |  WARNING | ././out already exists
+2022-04-28 15:07:25,838 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:07:25,838 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:07:25,838 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:08:21,439 |     INFO | Epoch=20 done.
+2022-04-28 15:08:22,891 |  WARNING | ./. already exists
+2022-04-28 15:08:22,892 |  WARNING | ././out already exists
+2022-04-28 15:08:22,892 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:08:22,892 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:08:22,892 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:08:26,419 |  WARNING | ./. already exists
+2022-04-28 15:08:26,419 |  WARNING | ././out already exists
+2022-04-28 15:08:26,419 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:08:26,419 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:08:26,419 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:09:21,950 |     INFO | Epoch=21 done.
+2022-04-28 15:09:23,384 |  WARNING | ./. already exists
+2022-04-28 15:09:23,384 |  WARNING | ././out already exists
+2022-04-28 15:09:23,384 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:09:23,384 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:09:23,384 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:09:26,871 |  WARNING | ./. already exists
+2022-04-28 15:09:26,871 |  WARNING | ././out already exists
+2022-04-28 15:09:26,871 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:09:26,871 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:09:26,871 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:10:22,388 |     INFO | Epoch=22 done.
+2022-04-28 15:10:23,874 |  WARNING | ./. already exists
+2022-04-28 15:10:23,874 |  WARNING | ././out already exists
+2022-04-28 15:10:23,875 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:10:23,875 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:10:23,875 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:10:27,371 |  WARNING | ./. already exists
+2022-04-28 15:10:27,371 |  WARNING | ././out already exists
+2022-04-28 15:10:27,371 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:10:27,371 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:10:27,371 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:11:22,884 |     INFO | Epoch=23 done.
+2022-04-28 15:11:24,377 |  WARNING | ./. already exists
+2022-04-28 15:11:24,377 |  WARNING | ././out already exists
+2022-04-28 15:11:24,377 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:11:24,377 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:11:24,377 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:11:27,891 |  WARNING | ./. already exists
+2022-04-28 15:11:27,891 |  WARNING | ././out already exists
+2022-04-28 15:11:27,891 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:11:27,891 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:11:27,891 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:12:23,446 |     INFO | Epoch=24 done.
+2022-04-28 15:12:24,933 |  WARNING | ./. already exists
+2022-04-28 15:12:24,933 |  WARNING | ././out already exists
+2022-04-28 15:12:24,933 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:12:24,934 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:12:24,934 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:12:28,448 |  WARNING | ./. already exists
+2022-04-28 15:12:28,448 |  WARNING | ././out already exists
+2022-04-28 15:12:28,448 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:12:28,448 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:12:28,448 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:13:23,853 |     INFO | Epoch=25 done.
+2022-04-28 15:13:25,569 |  WARNING | ./. already exists
+2022-04-28 15:13:25,569 |  WARNING | ././out already exists
+2022-04-28 15:13:25,570 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:13:25,570 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:13:25,570 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:13:29,078 |  WARNING | ./. already exists
+2022-04-28 15:13:29,078 |  WARNING | ././out already exists
+2022-04-28 15:13:29,078 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:13:29,078 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:13:29,078 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:14:24,452 |     INFO | Epoch=26 done.
+2022-04-28 15:14:26,055 |  WARNING | ./. already exists
+2022-04-28 15:14:26,055 |  WARNING | ././out already exists
+2022-04-28 15:14:26,055 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:14:26,055 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:14:26,056 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:14:29,587 |  WARNING | ./. already exists
+2022-04-28 15:14:29,588 |  WARNING | ././out already exists
+2022-04-28 15:14:29,588 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:14:29,588 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:14:29,588 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:15:25,023 |     INFO | Epoch=27 done.
+2022-04-28 15:15:26,739 |  WARNING | ./. already exists
+2022-04-28 15:15:26,739 |  WARNING | ././out already exists
+2022-04-28 15:15:26,739 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:15:26,739 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:15:26,739 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:15:30,251 |  WARNING | ./. already exists
+2022-04-28 15:15:30,251 |  WARNING | ././out already exists
+2022-04-28 15:15:30,251 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:15:30,251 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:15:30,252 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:16:25,595 |     INFO | Epoch=28 done.
+2022-04-28 15:16:27,097 |  WARNING | ./. already exists
+2022-04-28 15:16:27,097 |  WARNING | ././out already exists
+2022-04-28 15:16:27,097 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:16:27,097 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:16:27,097 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:16:30,827 |  WARNING | ./. already exists
+2022-04-28 15:16:30,828 |  WARNING | ././out already exists
+2022-04-28 15:16:30,828 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:16:30,828 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:16:30,828 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:17:26,229 |     INFO | Epoch=29 done.
+2022-04-28 15:17:27,729 |  WARNING | ./. already exists
+2022-04-28 15:17:27,730 |  WARNING | ././out already exists
+2022-04-28 15:17:27,730 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:17:27,730 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:17:27,730 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:17:31,457 |  WARNING | ./. already exists
+2022-04-28 15:17:31,457 |  WARNING | ././out already exists
+2022-04-28 15:17:31,457 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:17:31,457 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:17:31,457 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:18:26,918 |     INFO | Epoch=30 done.
+2022-04-28 15:18:28,431 |  WARNING | ./. already exists
+2022-04-28 15:18:28,432 |  WARNING | ././out already exists
+2022-04-28 15:18:28,432 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:18:28,432 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:18:28,432 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:18:32,174 |  WARNING | ./. already exists
+2022-04-28 15:18:32,175 |  WARNING | ././out already exists
+2022-04-28 15:18:32,175 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:18:32,175 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:18:32,175 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:19:27,557 |     INFO | Epoch=31 done.
+2022-04-28 15:19:29,050 |  WARNING | ./. already exists
+2022-04-28 15:19:29,050 |  WARNING | ././out already exists
+2022-04-28 15:19:29,050 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:19:29,050 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:19:29,050 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:19:32,785 |  WARNING | ./. already exists
+2022-04-28 15:19:32,786 |  WARNING | ././out already exists
+2022-04-28 15:19:32,786 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:19:32,786 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:19:32,786 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:20:28,276 |     INFO | Epoch=32 done.
+2022-04-28 15:20:29,778 |  WARNING | ./. already exists
+2022-04-28 15:20:29,779 |  WARNING | ././out already exists
+2022-04-28 15:20:29,779 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:20:29,779 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:20:29,779 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:20:33,506 |  WARNING | ./. already exists
+2022-04-28 15:20:33,506 |  WARNING | ././out already exists
+2022-04-28 15:20:33,506 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:20:33,506 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:20:33,507 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:21:28,988 |     INFO | Epoch=33 done.
+2022-04-28 15:21:30,508 |  WARNING | ./. already exists
+2022-04-28 15:21:30,508 |  WARNING | ././out already exists
+2022-04-28 15:21:30,508 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:21:30,508 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:21:30,508 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:21:34,248 |  WARNING | ./. already exists
+2022-04-28 15:21:34,248 |  WARNING | ././out already exists
+2022-04-28 15:21:34,248 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:21:34,248 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:21:34,248 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:22:29,795 |     INFO | Epoch=34 done.
+2022-04-28 15:22:31,303 |  WARNING | ./. already exists
+2022-04-28 15:22:31,303 |  WARNING | ././out already exists
+2022-04-28 15:22:31,303 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:22:31,303 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:22:31,303 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:22:34,799 |  WARNING | ./. already exists
+2022-04-28 15:22:34,799 |  WARNING | ././out already exists
+2022-04-28 15:22:34,799 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:22:34,799 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:22:34,799 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:23:30,323 |     INFO | Epoch=35 done.
+2022-04-28 15:23:32,076 |  WARNING | ./. already exists
+2022-04-28 15:23:32,076 |  WARNING | ././out already exists
+2022-04-28 15:23:32,076 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:23:32,076 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:23:32,076 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:23:35,600 |  WARNING | ./. already exists
+2022-04-28 15:23:35,600 |  WARNING | ././out already exists
+2022-04-28 15:23:35,600 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:23:35,601 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:23:35,601 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:24:31,054 |     INFO | Epoch=36 done.
+2022-04-28 15:24:32,780 |  WARNING | ./. already exists
+2022-04-28 15:24:32,780 |  WARNING | ././out already exists
+2022-04-28 15:24:32,780 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:24:32,780 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:24:32,780 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:24:36,301 |  WARNING | ./. already exists
+2022-04-28 15:24:36,301 |  WARNING | ././out already exists
+2022-04-28 15:24:36,302 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:24:36,302 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:24:36,302 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:25:31,723 |     INFO | Epoch=37 done.
+2022-04-28 15:25:33,136 |  WARNING | ./. already exists
+2022-04-28 15:25:33,136 |  WARNING | ././out already exists
+2022-04-28 15:25:33,136 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:25:33,136 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:25:33,136 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:25:36,925 |  WARNING | ./. already exists
+2022-04-28 15:25:36,925 |  WARNING | ././out already exists
+2022-04-28 15:25:36,925 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:25:36,925 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:25:36,926 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:26:32,331 |     INFO | Epoch=38 done.
+2022-04-28 15:26:33,827 |  WARNING | ./. already exists
+2022-04-28 15:26:33,827 |  WARNING | ././out already exists
+2022-04-28 15:26:33,828 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:26:33,828 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:26:33,828 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:26:37,567 |  WARNING | ./. already exists
+2022-04-28 15:26:37,567 |  WARNING | ././out already exists
+2022-04-28 15:26:37,567 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:26:37,567 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:26:37,567 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:27:32,997 |     INFO | Epoch=39 done.
+2022-04-28 15:27:34,489 |  WARNING | ./. already exists
+2022-04-28 15:27:34,489 |  WARNING | ././out already exists
+2022-04-28 15:27:34,489 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:27:34,489 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:27:34,489 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:27:38,228 |  WARNING | ./. already exists
+2022-04-28 15:27:38,228 |  WARNING | ././out already exists
+2022-04-28 15:27:38,228 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:27:38,228 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:27:38,229 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:28:33,571 |     INFO | Epoch=40 done.
+2022-04-28 15:28:35,064 |  WARNING | ./. already exists
+2022-04-28 15:28:35,064 |  WARNING | ././out already exists
+2022-04-28 15:28:35,064 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:28:35,065 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:28:35,065 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:28:38,824 |  WARNING | ./. already exists
+2022-04-28 15:28:38,824 |  WARNING | ././out already exists
+2022-04-28 15:28:38,824 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:28:38,824 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:28:38,824 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:29:34,188 |     INFO | Epoch=41 done.
+2022-04-28 15:29:35,575 |  WARNING | ./. already exists
+2022-04-28 15:29:35,576 |  WARNING | ././out already exists
+2022-04-28 15:29:35,576 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:29:35,576 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:29:35,576 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:29:39,091 |  WARNING | ./. already exists
+2022-04-28 15:29:39,091 |  WARNING | ././out already exists
+2022-04-28 15:29:39,092 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:29:39,092 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:29:39,092 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:30:34,431 |     INFO | Epoch=42 done.
+2022-04-28 15:30:36,090 |  WARNING | ./. already exists
+2022-04-28 15:30:36,091 |  WARNING | ././out already exists
+2022-04-28 15:30:36,091 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:30:36,091 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:30:36,091 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:30:39,609 |  WARNING | ./. already exists
+2022-04-28 15:30:39,609 |  WARNING | ././out already exists
+2022-04-28 15:30:39,609 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:30:39,609 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:30:39,609 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:31:34,949 |     INFO | Epoch=43 done.
+2022-04-28 15:31:36,449 |  WARNING | ./. already exists
+2022-04-28 15:31:36,449 |  WARNING | ././out already exists
+2022-04-28 15:31:36,449 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:31:36,449 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:31:36,449 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:31:40,240 |  WARNING | ./. already exists
+2022-04-28 15:31:40,240 |  WARNING | ././out already exists
+2022-04-28 15:31:40,240 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:31:40,252 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:31:40,252 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:32:35,666 |     INFO | Epoch=44 done.
+2022-04-28 15:32:37,174 |  WARNING | ./. already exists
+2022-04-28 15:32:37,174 |  WARNING | ././out already exists
+2022-04-28 15:32:37,174 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:32:37,174 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:32:37,174 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:32:40,929 |  WARNING | ./. already exists
+2022-04-28 15:32:40,929 |  WARNING | ././out already exists
+2022-04-28 15:32:40,930 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:32:40,930 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:32:40,930 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:33:36,292 |     INFO | Epoch=45 done.
+2022-04-28 15:33:37,792 |  WARNING | ./. already exists
+2022-04-28 15:33:37,792 |  WARNING | ././out already exists
+2022-04-28 15:33:37,792 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:33:37,793 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:33:37,793 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:33:41,566 |  WARNING | ./. already exists
+2022-04-28 15:33:41,566 |  WARNING | ././out already exists
+2022-04-28 15:33:41,566 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:33:41,567 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:33:41,567 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:34:36,926 |     INFO | Epoch=46 done.
+2022-04-28 15:34:38,440 |  WARNING | ./. already exists
+2022-04-28 15:34:38,440 |  WARNING | ././out already exists
+2022-04-28 15:34:38,441 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:34:38,441 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:34:38,441 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:34:41,939 |  WARNING | ./. already exists
+2022-04-28 15:34:41,940 |  WARNING | ././out already exists
+2022-04-28 15:34:41,940 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:34:41,940 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:34:41,940 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:35:37,592 |     INFO | Epoch=47 done.
+2022-04-28 15:35:39,099 |  WARNING | ./. already exists
+2022-04-28 15:35:39,099 |  WARNING | ././out already exists
+2022-04-28 15:35:39,099 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:35:39,099 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:35:39,099 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:35:42,638 |  WARNING | ./. already exists
+2022-04-28 15:35:42,639 |  WARNING | ././out already exists
+2022-04-28 15:35:42,639 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:35:42,639 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:35:42,639 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:36:37,980 |     INFO | Epoch=48 done.
+2022-04-28 15:36:39,680 |  WARNING | ./. already exists
+2022-04-28 15:36:39,680 |  WARNING | ././out already exists
+2022-04-28 15:36:39,681 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:36:39,681 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:36:39,681 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:36:43,179 |  WARNING | ./. already exists
+2022-04-28 15:36:43,179 |  WARNING | ././out already exists
+2022-04-28 15:36:43,179 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:36:43,179 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:36:43,179 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:37:38,415 |     INFO | Epoch=49 done.
+2022-04-28 15:37:39,913 |  WARNING | ./. already exists
+2022-04-28 15:37:39,913 |  WARNING | ././out already exists
+2022-04-28 15:37:39,913 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:37:39,913 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:37:39,913 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:37:43,685 |  WARNING | ./. already exists
+2022-04-28 15:37:43,685 |  WARNING | ././out already exists
+2022-04-28 15:37:43,685 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:37:43,686 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:37:43,686 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:38:38,797 |     INFO | Epoch=50 done.
+2022-04-28 15:38:40,292 |  WARNING | ./. already exists
+2022-04-28 15:38:40,292 |  WARNING | ././out already exists
+2022-04-28 15:38:40,292 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:38:40,292 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:38:40,292 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:38:44,050 |  WARNING | ./. already exists
+2022-04-28 15:38:44,050 |  WARNING | ././out already exists
+2022-04-28 15:38:44,050 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:38:44,051 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:38:44,051 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:39:39,175 |     INFO | Epoch=51 done.
+2022-04-28 15:39:40,655 |  WARNING | ./. already exists
+2022-04-28 15:39:40,655 |  WARNING | ././out already exists
+2022-04-28 15:39:40,655 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:39:40,655 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:39:40,655 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:39:44,419 |  WARNING | ./. already exists
+2022-04-28 15:39:44,420 |  WARNING | ././out already exists
+2022-04-28 15:39:44,420 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:39:44,420 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:39:44,420 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:40:39,551 |     INFO | Epoch=52 done.
+2022-04-28 15:40:41,032 |  WARNING | ./. already exists
+2022-04-28 15:40:41,033 |  WARNING | ././out already exists
+2022-04-28 15:40:41,033 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:40:41,033 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:40:41,033 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:40:44,547 |  WARNING | ./. already exists
+2022-04-28 15:40:44,547 |  WARNING | ././out already exists
+2022-04-28 15:40:44,547 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:40:44,547 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:40:44,547 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:41:39,790 |     INFO | Epoch=53 done.
+2022-04-28 15:41:41,516 |  WARNING | ./. already exists
+2022-04-28 15:41:41,516 |  WARNING | ././out already exists
+2022-04-28 15:41:41,516 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:41:41,516 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:41:41,516 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:41:45,028 |  WARNING | ./. already exists
+2022-04-28 15:41:45,029 |  WARNING | ././out already exists
+2022-04-28 15:41:45,029 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:41:45,029 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:41:45,029 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:42:40,236 |     INFO | Epoch=54 done.
+2022-04-28 15:42:41,736 |  WARNING | ./. already exists
+2022-04-28 15:42:41,736 |  WARNING | ././out already exists
+2022-04-28 15:42:41,736 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:42:41,736 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:42:41,737 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:42:45,518 |  WARNING | ./. already exists
+2022-04-28 15:42:45,518 |  WARNING | ././out already exists
+2022-04-28 15:42:45,518 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:42:45,518 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:42:45,519 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:43:40,734 |     INFO | Epoch=55 done.
+2022-04-28 15:43:42,148 |  WARNING | ./. already exists
+2022-04-28 15:43:42,148 |  WARNING | ././out already exists
+2022-04-28 15:43:42,149 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:43:42,149 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:43:42,149 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:43:45,903 |  WARNING | ./. already exists
+2022-04-28 15:43:45,903 |  WARNING | ././out already exists
+2022-04-28 15:43:45,904 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:43:45,904 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:43:45,904 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:44:41,069 |     INFO | Epoch=56 done.
+2022-04-28 15:44:42,554 |  WARNING | ./. already exists
+2022-04-28 15:44:42,554 |  WARNING | ././out already exists
+2022-04-28 15:44:42,554 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:44:42,555 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:44:42,555 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:44:46,323 |  WARNING | ./. already exists
+2022-04-28 15:44:46,323 |  WARNING | ././out already exists
+2022-04-28 15:44:46,323 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:44:46,323 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:44:46,324 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:45:41,457 |     INFO | Epoch=57 done.
+2022-04-28 15:45:42,945 |  WARNING | ./. already exists
+2022-04-28 15:45:42,945 |  WARNING | ././out already exists
+2022-04-28 15:45:42,945 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:45:42,946 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:45:42,946 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:45:46,465 |  WARNING | ./. already exists
+2022-04-28 15:45:46,465 |  WARNING | ././out already exists
+2022-04-28 15:45:46,465 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:45:46,466 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:45:46,466 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:46:41,748 |     INFO | Epoch=58 done.
+2022-04-28 15:46:43,509 |  WARNING | ./. already exists
+2022-04-28 15:46:43,509 |  WARNING | ././out already exists
+2022-04-28 15:46:43,510 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:46:43,510 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:46:43,510 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:46:47,038 |  WARNING | ./. already exists
+2022-04-28 15:46:47,038 |  WARNING | ././out already exists
+2022-04-28 15:46:47,039 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:46:47,039 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:46:47,039 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:47:42,322 |     INFO | Epoch=59 done.
+2022-04-28 15:47:43,810 |  WARNING | ./. already exists
+2022-04-28 15:47:43,810 |  WARNING | ././out already exists
+2022-04-28 15:47:43,811 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:47:43,811 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:47:43,811 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:47:47,638 |  WARNING | ./. already exists
+2022-04-28 15:47:47,654 |  WARNING | ././out already exists
+2022-04-28 15:47:47,654 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:47:47,654 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:47:47,654 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:48:42,900 |     INFO | Epoch=60 done.
+2022-04-28 15:48:44,383 |  WARNING | ./. already exists
+2022-04-28 15:48:44,383 |  WARNING | ././out already exists
+2022-04-28 15:48:44,383 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:48:44,383 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:48:44,383 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:48:48,161 |  WARNING | ./. already exists
+2022-04-28 15:48:48,161 |  WARNING | ././out already exists
+2022-04-28 15:48:48,161 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:48:48,161 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:48:48,161 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:49:43,364 |     INFO | Epoch=61 done.
+2022-04-28 15:49:44,888 |  WARNING | ./. already exists
+2022-04-28 15:49:44,889 |  WARNING | ././out already exists
+2022-04-28 15:49:44,889 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:49:44,889 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:49:44,889 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:49:48,672 |  WARNING | ./. already exists
+2022-04-28 15:49:48,673 |  WARNING | ././out already exists
+2022-04-28 15:49:48,673 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:49:48,673 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:49:48,673 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:50:43,822 |     INFO | Epoch=62 done.
+2022-04-28 15:50:45,309 |  WARNING | ./. already exists
+2022-04-28 15:50:45,310 |  WARNING | ././out already exists
+2022-04-28 15:50:45,310 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:50:45,310 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:50:45,310 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:50:48,832 |  WARNING | ./. already exists
+2022-04-28 15:50:48,832 |  WARNING | ././out already exists
+2022-04-28 15:50:48,833 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:50:48,833 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:50:48,833 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:51:44,015 |     INFO | Epoch=63 done.
+2022-04-28 15:51:45,798 |  WARNING | ./. already exists
+2022-04-28 15:51:45,799 |  WARNING | ././out already exists
+2022-04-28 15:51:45,799 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:51:45,799 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:51:45,799 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:51:49,345 |  WARNING | ./. already exists
+2022-04-28 15:51:49,346 |  WARNING | ././out already exists
+2022-04-28 15:51:49,346 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:51:49,346 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:51:49,346 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:52:44,655 |     INFO | Epoch=64 done.
+2022-04-28 15:52:46,094 |  WARNING | ./. already exists
+2022-04-28 15:52:46,094 |  WARNING | ././out already exists
+2022-04-28 15:52:46,095 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:52:46,095 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:52:46,095 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:52:49,896 |  WARNING | ./. already exists
+2022-04-28 15:52:49,896 |  WARNING | ././out already exists
+2022-04-28 15:52:49,896 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:52:49,896 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:52:49,896 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:53:45,231 |     INFO | Epoch=65 done.
+2022-04-28 15:53:46,707 |  WARNING | ./. already exists
+2022-04-28 15:53:46,707 |  WARNING | ././out already exists
+2022-04-28 15:53:46,707 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:53:46,707 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:53:46,707 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:53:50,529 |  WARNING | ./. already exists
+2022-04-28 15:53:50,529 |  WARNING | ././out already exists
+2022-04-28 15:53:50,529 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:53:50,529 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:53:50,529 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:54:45,758 |     INFO | Epoch=66 done.
+2022-04-28 15:54:47,196 |  WARNING | ./. already exists
+2022-04-28 15:54:47,196 |  WARNING | ././out already exists
+2022-04-28 15:54:47,196 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:54:47,196 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:54:47,196 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:54:50,730 |  WARNING | ./. already exists
+2022-04-28 15:54:50,730 |  WARNING | ././out already exists
+2022-04-28 15:54:50,730 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:54:50,730 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:54:50,730 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:55:45,970 |     INFO | Epoch=67 done.
+2022-04-28 15:55:47,658 |  WARNING | ./. already exists
+2022-04-28 15:55:47,658 |  WARNING | ././out already exists
+2022-04-28 15:55:47,658 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:55:47,658 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:55:47,658 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:55:51,173 |  WARNING | ./. already exists
+2022-04-28 15:55:51,173 |  WARNING | ././out already exists
+2022-04-28 15:55:51,173 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:55:51,174 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:55:51,174 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:56:46,215 |     INFO | Epoch=68 done.
+2022-04-28 15:56:47,671 |  WARNING | ./. already exists
+2022-04-28 15:56:47,672 |  WARNING | ././out already exists
+2022-04-28 15:56:47,672 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:56:47,672 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:56:47,672 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:56:51,501 |  WARNING | ./. already exists
+2022-04-28 15:56:51,501 |  WARNING | ././out already exists
+2022-04-28 15:56:51,501 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:56:51,502 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:56:51,502 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:57:46,678 |     INFO | Epoch=69 done.
+2022-04-28 15:57:48,145 |  WARNING | ./. already exists
+2022-04-28 15:57:48,146 |  WARNING | ././out already exists
+2022-04-28 15:57:48,146 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:57:48,146 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:57:48,146 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:57:51,929 |  WARNING | ./. already exists
+2022-04-28 15:57:51,930 |  WARNING | ././out already exists
+2022-04-28 15:57:51,930 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:57:51,930 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:57:51,930 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:58:47,031 |     INFO | Epoch=70 done.
+2022-04-28 15:58:48,458 |  WARNING | ./. already exists
+2022-04-28 15:58:48,458 |  WARNING | ././out already exists
+2022-04-28 15:58:48,458 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:58:48,458 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:58:48,458 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:58:51,986 |  WARNING | ./. already exists
+2022-04-28 15:58:51,986 |  WARNING | ././out already exists
+2022-04-28 15:58:51,986 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:58:51,986 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:58:51,987 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:59:47,124 |     INFO | Epoch=71 done.
+2022-04-28 15:59:48,818 |  WARNING | ./. already exists
+2022-04-28 15:59:48,818 |  WARNING | ././out already exists
+2022-04-28 15:59:48,818 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:59:48,819 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:59:48,819 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 15:59:52,382 |  WARNING | ./. already exists
+2022-04-28 15:59:52,382 |  WARNING | ././out already exists
+2022-04-28 15:59:52,382 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 15:59:52,382 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 15:59:52,382 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:00:47,431 |     INFO | Epoch=72 done.
+2022-04-28 16:00:48,793 |  WARNING | ./. already exists
+2022-04-28 16:00:48,794 |  WARNING | ././out already exists
+2022-04-28 16:00:48,794 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:00:48,794 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:00:48,794 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:00:52,620 |  WARNING | ./. already exists
+2022-04-28 16:00:52,620 |  WARNING | ././out already exists
+2022-04-28 16:00:52,621 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:00:52,621 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:00:52,621 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:01:47,352 |     INFO | Epoch=73 done.
+2022-04-28 16:01:48,777 |  WARNING | ./. already exists
+2022-04-28 16:01:48,777 |  WARNING | ././out already exists
+2022-04-28 16:01:48,777 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:01:48,777 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:01:48,777 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:01:52,567 |  WARNING | ./. already exists
+2022-04-28 16:01:52,567 |  WARNING | ././out already exists
+2022-04-28 16:01:52,567 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:01:52,567 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:01:52,567 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:02:47,236 |     INFO | Epoch=74 done.
+2022-04-28 16:02:48,757 |  WARNING | ./. already exists
+2022-04-28 16:02:48,757 |  WARNING | ././out already exists
+2022-04-28 16:02:48,757 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:02:48,757 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:02:48,757 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:02:52,235 |  WARNING | ./. already exists
+2022-04-28 16:02:52,235 |  WARNING | ././out already exists
+2022-04-28 16:02:52,235 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:02:52,235 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:02:52,235 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:03:47,050 |     INFO | Epoch=75 done.
+2022-04-28 16:03:48,853 |  WARNING | ./. already exists
+2022-04-28 16:03:48,853 |  WARNING | ././out already exists
+2022-04-28 16:03:48,853 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:03:48,854 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:03:48,854 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:03:52,362 |  WARNING | ./. already exists
+2022-04-28 16:03:52,362 |  WARNING | ././out already exists
+2022-04-28 16:03:52,362 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:03:52,362 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:03:52,362 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:04:47,151 |     INFO | Epoch=76 done.
+2022-04-28 16:04:48,597 |  WARNING | ./. already exists
+2022-04-28 16:04:48,597 |  WARNING | ././out already exists
+2022-04-28 16:04:48,597 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:04:48,597 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:04:48,597 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:04:52,364 |  WARNING | ./. already exists
+2022-04-28 16:04:52,364 |  WARNING | ././out already exists
+2022-04-28 16:04:52,364 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:04:52,364 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:04:52,364 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:05:47,141 |     INFO | Epoch=77 done.
+2022-04-28 16:05:48,988 |  WARNING | ./. already exists
+2022-04-28 16:05:48,988 |  WARNING | ././out already exists
+2022-04-28 16:05:48,989 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:05:48,989 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:05:48,989 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:05:52,483 |  WARNING | ./. already exists
+2022-04-28 16:05:52,484 |  WARNING | ././out already exists
+2022-04-28 16:05:52,484 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:05:52,484 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:05:52,484 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:06:47,592 |     INFO | Epoch=78 done.
+2022-04-28 16:06:49,083 |  WARNING | ./. already exists
+2022-04-28 16:06:49,083 |  WARNING | ././out already exists
+2022-04-28 16:06:49,083 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:06:49,083 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:06:49,083 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:06:52,591 |  WARNING | ./. already exists
+2022-04-28 16:06:52,591 |  WARNING | ././out already exists
+2022-04-28 16:06:52,591 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:06:52,591 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:06:52,591 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:07:47,604 |     INFO | Epoch=79 done.
+2022-04-28 16:07:49,105 |  WARNING | ./. already exists
+2022-04-28 16:07:49,105 |  WARNING | ././out already exists
+2022-04-28 16:07:49,105 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:07:49,106 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:07:49,106 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:07:52,908 |  WARNING | ./. already exists
+2022-04-28 16:07:52,908 |  WARNING | ././out already exists
+2022-04-28 16:07:52,908 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:07:52,908 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:07:52,908 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:08:47,911 |     INFO | Epoch=80 done.
+2022-04-28 16:08:49,425 |  WARNING | ./. already exists
+2022-04-28 16:08:49,426 |  WARNING | ././out already exists
+2022-04-28 16:08:49,426 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:08:49,426 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:08:49,426 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:08:53,177 |  WARNING | ./. already exists
+2022-04-28 16:08:53,177 |  WARNING | ././out already exists
+2022-04-28 16:08:53,177 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:08:53,177 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:08:53,177 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:09:48,153 |     INFO | Epoch=81 done.
+2022-04-28 16:09:49,513 |  WARNING | ./. already exists
+2022-04-28 16:09:49,513 |  WARNING | ././out already exists
+2022-04-28 16:09:49,514 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:09:49,514 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:09:49,514 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:09:53,003 |  WARNING | ./. already exists
+2022-04-28 16:09:53,004 |  WARNING | ././out already exists
+2022-04-28 16:09:53,004 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:09:53,004 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:09:53,004 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:10:48,114 |     INFO | Epoch=82 done.
+2022-04-28 16:10:49,919 |  WARNING | ./. already exists
+2022-04-28 16:10:49,919 |  WARNING | ././out already exists
+2022-04-28 16:10:49,919 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:10:49,919 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:10:49,919 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:10:53,411 |  WARNING | ./. already exists
+2022-04-28 16:10:53,411 |  WARNING | ././out already exists
+2022-04-28 16:10:53,411 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:10:53,411 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:10:53,411 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:11:48,512 |     INFO | Epoch=83 done.
+2022-04-28 16:11:50,024 |  WARNING | ./. already exists
+2022-04-28 16:11:50,025 |  WARNING | ././out already exists
+2022-04-28 16:11:50,025 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:11:50,025 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:11:50,025 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:11:53,826 |  WARNING | ./. already exists
+2022-04-28 16:11:53,826 |  WARNING | ././out already exists
+2022-04-28 16:11:53,826 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:11:53,826 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:11:53,826 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:12:48,914 |     INFO | Epoch=84 done.
+2022-04-28 16:12:50,417 |  WARNING | ./. already exists
+2022-04-28 16:12:50,418 |  WARNING | ././out already exists
+2022-04-28 16:12:50,418 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:12:50,418 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:12:50,418 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:12:53,901 |  WARNING | ./. already exists
+2022-04-28 16:12:53,901 |  WARNING | ././out already exists
+2022-04-28 16:12:53,901 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:12:53,901 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:12:53,901 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:13:49,332 |     INFO | Epoch=85 done.
+2022-04-28 16:13:50,767 |  WARNING | ./. already exists
+2022-04-28 16:13:50,767 |  WARNING | ././out already exists
+2022-04-28 16:13:50,767 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:13:50,768 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:13:50,768 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:13:54,281 |  WARNING | ./. already exists
+2022-04-28 16:13:54,282 |  WARNING | ././out already exists
+2022-04-28 16:13:54,282 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:13:54,282 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:13:54,282 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:14:49,298 |     INFO | Epoch=86 done.
+2022-04-28 16:14:50,684 |  WARNING | ./. already exists
+2022-04-28 16:14:50,684 |  WARNING | ././out already exists
+2022-04-28 16:14:50,684 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:14:50,684 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:14:50,684 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:14:54,500 |  WARNING | ./. already exists
+2022-04-28 16:14:54,501 |  WARNING | ././out already exists
+2022-04-28 16:14:54,501 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:14:54,501 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:14:54,501 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:15:49,577 |     INFO | Epoch=87 done.
+2022-04-28 16:15:51,068 |  WARNING | ./. already exists
+2022-04-28 16:15:51,068 |  WARNING | ././out already exists
+2022-04-28 16:15:51,068 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:15:51,069 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:15:51,069 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:15:54,896 |  WARNING | ./. already exists
+2022-04-28 16:15:54,896 |  WARNING | ././out already exists
+2022-04-28 16:15:54,896 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:15:54,897 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:15:54,897 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:16:49,933 |     INFO | Epoch=88 done.
+2022-04-28 16:16:51,446 |  WARNING | ./. already exists
+2022-04-28 16:16:51,447 |  WARNING | ././out already exists
+2022-04-28 16:16:51,447 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:16:51,447 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:16:51,447 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:16:54,947 |  WARNING | ./. already exists
+2022-04-28 16:16:54,947 |  WARNING | ././out already exists
+2022-04-28 16:16:54,947 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:16:54,947 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:16:54,947 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:17:49,798 |     INFO | Epoch=89 done.
+2022-04-28 16:17:51,590 |  WARNING | ./. already exists
+2022-04-28 16:17:51,590 |  WARNING | ././out already exists
+2022-04-28 16:17:51,591 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:17:51,591 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:17:51,591 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:17:55,080 |  WARNING | ./. already exists
+2022-04-28 16:17:55,080 |  WARNING | ././out already exists
+2022-04-28 16:17:55,080 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:17:55,080 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:17:55,080 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:18:49,885 |     INFO | Epoch=90 done.
+2022-04-28 16:18:51,256 |  WARNING | ./. already exists
+2022-04-28 16:18:51,256 |  WARNING | ././out already exists
+2022-04-28 16:18:51,256 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:18:51,256 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:18:51,256 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:18:55,021 |  WARNING | ./. already exists
+2022-04-28 16:18:55,021 |  WARNING | ././out already exists
+2022-04-28 16:18:55,021 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:18:55,021 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:18:55,021 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:19:49,829 |     INFO | Epoch=91 done.
+2022-04-28 16:19:51,324 |  WARNING | ./. already exists
+2022-04-28 16:19:51,325 |  WARNING | ././out already exists
+2022-04-28 16:19:51,325 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:19:51,326 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:19:51,326 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:19:54,823 |  WARNING | ./. already exists
+2022-04-28 16:19:54,823 |  WARNING | ././out already exists
+2022-04-28 16:19:54,824 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:19:54,824 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:19:54,824 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:20:49,773 |     INFO | Epoch=92 done.
+2022-04-28 16:20:51,471 |  WARNING | ./. already exists
+2022-04-28 16:20:51,472 |  WARNING | ././out already exists
+2022-04-28 16:20:51,472 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:20:51,472 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:20:51,472 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:20:54,981 |  WARNING | ./. already exists
+2022-04-28 16:20:54,981 |  WARNING | ././out already exists
+2022-04-28 16:20:54,981 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:20:54,981 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:20:54,981 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:21:49,941 |     INFO | Epoch=93 done.
+2022-04-28 16:21:51,315 |  WARNING | ./. already exists
+2022-04-28 16:21:51,316 |  WARNING | ././out already exists
+2022-04-28 16:21:51,316 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:21:51,316 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:21:51,316 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:21:55,104 |  WARNING | ./. already exists
+2022-04-28 16:21:55,104 |  WARNING | ././out already exists
+2022-04-28 16:21:55,104 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:21:55,104 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:21:55,104 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:22:49,970 |     INFO | Epoch=94 done.
+2022-04-28 16:22:51,475 |  WARNING | ./. already exists
+2022-04-28 16:22:51,475 |  WARNING | ././out already exists
+2022-04-28 16:22:51,475 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:22:51,475 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:22:51,475 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:22:54,988 |  WARNING | ./. already exists
+2022-04-28 16:22:54,988 |  WARNING | ././out already exists
+2022-04-28 16:22:54,988 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:22:54,988 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:22:54,988 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:23:49,870 |     INFO | Epoch=95 done.
+2022-04-28 16:23:51,661 |  WARNING | ./. already exists
+2022-04-28 16:23:51,662 |  WARNING | ././out already exists
+2022-04-28 16:23:51,662 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:23:51,662 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:23:51,663 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:23:55,187 |  WARNING | ./. already exists
+2022-04-28 16:23:55,187 |  WARNING | ././out already exists
+2022-04-28 16:23:55,187 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:23:55,188 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:23:55,188 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:24:50,216 |     INFO | Epoch=96 done.
+2022-04-28 16:24:51,615 |  WARNING | ./. already exists
+2022-04-28 16:24:51,616 |  WARNING | ././out already exists
+2022-04-28 16:24:51,616 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:24:51,616 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:24:51,616 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:24:55,431 |  WARNING | ./. already exists
+2022-04-28 16:24:55,431 |  WARNING | ././out already exists
+2022-04-28 16:24:55,431 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:24:55,431 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:24:55,431 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:25:50,380 |     INFO | Epoch=97 done.
+2022-04-28 16:25:51,882 |  WARNING | ./. already exists
+2022-04-28 16:25:51,883 |  WARNING | ././out already exists
+2022-04-28 16:25:51,883 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:25:51,883 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:25:51,883 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:25:55,418 |  WARNING | ./. already exists
+2022-04-28 16:25:55,418 |  WARNING | ././out already exists
+2022-04-28 16:25:55,418 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:25:55,418 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:25:55,418 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:26:50,437 |     INFO | Epoch=98 done.
+2022-04-28 16:26:52,161 |  WARNING | ./. already exists
+2022-04-28 16:26:52,161 |  WARNING | ././out already exists
+2022-04-28 16:26:52,161 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:26:52,161 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:26:52,161 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:26:55,666 |  WARNING | ./. already exists
+2022-04-28 16:26:55,667 |  WARNING | ././out already exists
+2022-04-28 16:26:55,667 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:26:55,667 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:26:55,667 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:27:50,665 |     INFO | Epoch=99 done.
+2022-04-28 16:27:52,139 |  WARNING | ./. already exists
+2022-04-28 16:27:52,140 |  WARNING | ././out already exists
+2022-04-28 16:27:52,140 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:27:52,140 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:27:52,140 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
+2022-04-28 16:27:55,958 |  WARNING | ./. already exists
+2022-04-28 16:27:55,958 |  WARNING | ././out already exists
+2022-04-28 16:27:55,958 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02 already exists
+2022-04-28 16:27:55,958 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE already exists
+2022-04-28 16:27:55,959 |  WARNING | ././out/cluster_100-28-04-2022-14-47-02/CovAE/gray-scale already exists
