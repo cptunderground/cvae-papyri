@@ -1,325 +1,234 @@
-import math
-
-import cv2
-import umap.umap_ as umap
-
-
-from pyro.infer import SVI, Trace_ELBO
-from pyro.optim import Adam
-
-from sklearn.datasets import fetch_openml
-from sklearn.utils import check_random_state
-from sklearn.model_selection import train_test_split
-import os
-
 import numpy as np
-import scipy
+import sklearn
 import torch
+from matplotlib import pyplot as plt
+import seaborn as sns
+from sklearn.manifold import TSNE
+from torch.utils.data import Subset
+from torchvision import datasets
+from torchvision.transforms import transforms
 
-import torch.nn as nn
+import umap.umap_
+import umap.plot
+import sklearn.cluster as cluster
 
-import pyro
-import pyro.distributions as dist
+from autoencoders.autoencoder import Network, get_label, ConvAutoEncoder
+from util.base_logger import logger
 
-import torch;
-from torchvision import datasets, transforms
-from tqdm import tqdm
-
-torch.manual_seed(0)
-
-import torch.nn.functional as F
-import torch.utils
-import torch.distributions
-import numpy as np
-import matplotlib.pyplot as plt;plt.rcParams['figure.dpi'] = 200
-
-from torch.utils.data import Dataset, DataLoader
+import util
 
 
-class Decoder_pyro(nn.Module):
-    def __init__(self, z_dim, hidden_dim):
-        super().__init__()
-        # setup the two linear transformations used
-        self.fc1 = nn.Linear(z_dim, hidden_dim)
-        self.fc21 = nn.Linear(hidden_dim, 784)
-        # setup the non-linearities
-        self.softplus = nn.Softplus()
-        # self.sigmoid = nn.Sigmoid()
+def draw_umap(data,labels, n_neighbors=15, min_dist=0.1, n_components=2, metric='euclidean', title=''):
+    fit = umap.umap_.UMAP(
+        n_neighbors=n_neighbors,
+        min_dist=min_dist,
+        n_components=n_components,
+        metric=metric
+    )
+    u = fit.fit_transform(data);
+    fig = plt.figure()
 
-    def forward(self, z):
-        # define the forward computation on the latent z
-        # first compute the hidden units
-        hidden = self.softplus(self.fc1(z))
-        # return the parameter for the output Bernoulli
-        # each is of size batch_size x 784
-        loc_img = self.fc21(hidden)
-        return loc_img
-
-
-class Encoder_pyro(nn.Module):
-    def __init__(self, z_dim, hidden_dim):
-        super().__init__()
-        # setup the three linear transformations used
-        self.fc1 = nn.Linear(784, hidden_dim)
-        self.fc21 = nn.Linear(hidden_dim, z_dim)
-        self.fc22 = nn.Linear(hidden_dim, z_dim)
-        # setup the non-linearities
-        self.softplus = nn.Softplus()
-
-    def forward(self, x):
-        # define the forward computation on the image x
-        # first shape the mini-batch to have pixels in the rightmost dimension
-        x = x.reshape(-1, 784)
-        # then compute the hidden units
-        hidden = self.softplus(self.fc1(x))
-        # then return a mean vector and a (positive) square root covariance
-        # each of size batch_size x z_dim
-        z_loc = self.fc21(hidden)
-        z_scale = torch.exp(self.fc22(hidden))
-        return z_loc, z_scale
-
-
-class VAE(nn.Module):
-    # by default our latent space is 50-dimensional
-    # and we use 500 hidden units
-    def __init__(self, z_dim=50, hidden_dim=500, use_cuda=False):
-        super().__init__()
-        # create the encoder and decoder networks
-        self.encoder = Encoder_pyro(z_dim, hidden_dim)
-        self.decoder = Decoder_pyro(z_dim, hidden_dim)
-
-        if use_cuda:
-            # calling cuda() here will put all the parameters of
-            # the encoder and decoder networks into gpu memory
-            self.cuda()
-        self.use_cuda = use_cuda
-        self.z_dim = z_dim
-
-    # define the model p(x|z)p(z)
-    def model(self, x):
-        # register PyTorch module `decoder` with Pyro
-        pyro.module("decoder", self.decoder)
-        with pyro.plate("data", x.shape[0]):
-            # setup hyperparameters for prior p(z)
-            z_loc = x.new_zeros(torch.Size((x.shape[0], self.z_dim)))
-            z_scale = x.new_ones(torch.Size((x.shape[0], self.z_dim)))
-            # sample from prior (value will be sampled by guide when computing the ELBO)
-            z = pyro.sample("latent", dist.Normal(z_loc, z_scale).to_event(1))
-            # decode the latent code z
-            loc_img = torch.sigmoid(self.decoder(z))
-
-            pyro.sample("obs", dist.ContinuousBernoulli(probs=loc_img).to_event(1), obs=x.reshape(-1, 784))
-
-    # define the guide (i.e. variational distribution) q(z|x)
-    def guide(self, x):
-        # register PyTorch module `encoder` with Pyro
-        pyro.module("encoder", self.encoder)
-        with pyro.plate("data", x.shape[0]):
-            # use the encoder to get the parameters used to define q(z|x)
-            z_loc, z_scale = self.encoder(x)
-            # sample the latent code z
-            pyro.sample("latent", dist.Normal(z_loc, z_scale).to_event(1))
-
-    # define a helper function for reconstructing images
-    def reconstruct_img(self, x):
-        # encode image x
-        z_loc, z_scale = self.encoder(x)
-        # sample in latent space
-        z = dist.Normal(z_loc, z_scale).sample()
-        # decode the image (note we don't sample in image space)
-        loc_img = torch.sigmoid(self.decoder(z))
-        out = loc_img / (2 * loc_img - 1) + 1. / (2 * torch.atanh(1 - 2 * loc_img))
-        out[out == float('inf')] = 0.5
-        return out.to(device)
-        # return loc_img
-
-
-def train(svi, train_loader, use_cuda=False):
-    # initialize loss accumulator
-    epoch_loss = 0.
-    # do a training epoch over each mini-batch x returned
-    # by the data loader
-    loop = tqdm(train_loader, total=len(train_loader))
-    for d in loop:
-        # if on GPU put mini-batch into CUDA memory
-        x = d['re_image']
-        if use_cuda:
-            x = x.cuda()
-        # do ELBO gradient and accumulate loss
-        epoch_loss += svi.step(x)
-
-    # return epoch loss
-    normalizer_train = len(train_loader.dataset)
-    total_epoch_loss_train = epoch_loss / normalizer_train
-    return total_epoch_loss_train
-
-
-class ImgFolderWithLabel(datasets.ImageFolder):
-    def __getitem__(self, item):
-        img, target = super(ImgFolderWithLabel, self).__getitem__(item)
-        return img, target
-
-
-def loss_plot_pyro(loss):
-    fig = plt.figure(figsize=(5, 5))
-    plt.plot(np.arange(len(loss)), loss)
-    plt.xlabel('Epochs')
-    plt.ylabel('ELBO')
-    plt.savefig("loss.png")
+    if n_components == 3:
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels, s=100)
+    plt.title(title, fontsize=18)
+    plt.show()
+    plt.savefig
     plt.close()
 
+def evaluate(letters: list, root: str, eval_name: str, letter_name):
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-
-class Papyri_dataset(Dataset):
-    def __init__(self, images, targets):
-        self.images = images
-        self.targets = targets
-
-    def __len__(self):
-        return len(self.images)
-
-    def __getitem__(self, item):
-        image = self.images[item]
-        re_image = image / 255
-        target = int(self.targets[item])
-        return {'re_image': torch.tensor(re_image.reshape(28, 28)[np.newaxis, :, :], dtype=torch.float32),
-                'target': torch.tensor(target, dtype=torch.long)
-                }
-
-
-def plot_latent_var_pyro(epoch, autoencoder, data, nei, num_batches=100):
-    print("in umap plot")
-    stack = []
-    stacky = []
-    autoencoder = autoencoder.eval()
-    with torch.no_grad():
-        for i, d in enumerate(data):
-
-            x = d['re_image']
-            y = d['target'].to('cpu').detach().numpy().tolist()
-            z, sigma = autoencoder.encoder(x.to(device))
-            z = z.to('cpu').detach().numpy().tolist()
-            stack.extend(z)
-            stacky.extend(y)
-            if i > num_batches:
-
-                umaper = umap.UMAP(n_components=2, n_neighbors=nei)
-                x_umap = umaper.fit_transform(stack)
-                plt.scatter(x_umap[:, 0], x_umap[:, 1], s=2, c=stacky, cmap='tab10')
-                plt.colorbar()
-                plt.xlabel('UMAP 1')
-                plt.ylabel('UMAP 2')
-
-
-                break
-
-    plt.savefig(f"./umap/umap{epoch}.png")
-    plt.close()
-
-
-
-class Mnist_dataset(Dataset):
-    def __init__(self, images, targets):
-        self.images = images
-        self.targets = targets
-
-    def __len__(self):
-        return len(self.images)
-
-    def __getitem__(self, item):
-        image = self.images[item]
-        re_image = image / 255
-        target = int(self.targets[item])
-        return {'re_image': torch.tensor(re_image.reshape(28, 28)[np.newaxis, :, :], dtype=torch.float32),
-                'target': torch.tensor(target, dtype=torch.long)
-                }
-
-
-if __name__ == '__main__':
-    # assert pyro.__version__.startswith('1.7.0')
-    print(f"start programm")
-
-    dataset = datasets.ImageFolder(
+    util.utils.create_folder(root)
+    test_set = datasets.ImageFolder(
         './data/raw-cleaned-standardised',
+        # './data/test-data-standardised',
+        # './data/test-data-manual',
+        # './data/test-data-manual-otsu',
+
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
 
-    dataloader = DataLoader(dataset)
-    images = dataset.imgs
-    targets = dataset.targets
-    samples = len(images)
-    test_samples = math.floor(samples / 10)
-    train_samples = samples - test_samples
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=11082)
+    idx = [i for i in range(len(test_set)) if
+           test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in letters]]
+    # build the appropriate subset
+    subset = Subset(test_set, idx)
+
+    train_loader = torch.utils.data.DataLoader(subset)
+    test_loader = torch.utils.data.DataLoader(subset, batch_size=len(test_set))
+    logger.debug(test_loader.batch_size)
+    model = Network()
+    model = ConvAutoEncoder(model)
+    model.load_state_dict(torch.load("./_models/models-autoencoder-cluster_50.pth"))
+    model.eval()
+    model.to(device)
+
+    # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
+
+    logger.info(model)
+
+    images, labels = next(iter(test_loader))
+
+    images = images.to(device)
+
+    # get sample outputs
+    encoded_imgs, decoded_imgs = model(images)
+
+    # prep images for display
+    images = images.cpu().numpy()
+
+    # use detach when it's an output that requires_grad
+    encoded_imgs = encoded_imgs.detach().cpu().numpy()
+    decoded_imgs = decoded_imgs.detach().cpu().numpy()
+
+    # plot the first ten input images and then reconstructed images
+    fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(12, 4))
+
+    # input images on top row, reconstructions on bottom
+    for images, row in zip([images, decoded_imgs], axes):
+        for img, ax in zip(images, row):
+            ax.imshow(np.squeeze(img), cmap='gray')
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+
+    fig.savefig(f'./{root}/original_decoded.png', bbox_inches='tight')
+    plt.close()
+
+    encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
+
+    fig = plt.figure(figsize=(4, 4))
+    for fm in range(encoded_img.shape[0]):
+        ax = fig.add_subplot(2, 2, fm + 1, xticks=[], yticks=[])
+        ax.set_title(f'feature map: {fm}')
+        ax.imshow(encoded_img[fm], cmap='gray')
+
+    fig.savefig(f'./{root}/encoded_img_alpha')
+    plt.close()
+
+    encoded_img = encoded_imgs[3]  # get 1st image from the batch (here '7')
+
+    fig = plt.figure(figsize=(4, 4))
+    for fm in range(encoded_img.shape[0]):
+        ax = fig.add_subplot(2, 2, fm + 1, xticks=[], yticks=[])
+        ax.set_title(f'feature map: {fm}')
+        ax.imshow(encoded_img[fm], cmap='gray')
+
+    fig.savefig(f'./{root}/encoded_img_epsilon')
+    plt.close()
+
+    # X, y = load_digits(return_X_y=True)
+
+    data = []
+    folder = './data/training-data-standardised'
+
+    # print(encoded_imgs)
+    # print(labels)
+    # print(len(encoded_imgs))
+    # print(len(labels))
+
+    for i in range(len(encoded_imgs)):
+        data.append([encoded_imgs[i], labels[i]])
+
+    # print(data)
+
+    features, images = zip(*data)
+    y = images
+    X = np.array(features)
+
+    X.reshape(-1)
+
+    X.ravel()
+
+    X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
+
+    y_list = list(y)
+    y_list_old = y_list
+    y_old = y
+    for item in range(len(y_list)):
+        y_list[item] = get_label(str(y_list[item]))
+
+    y = tuple(y_list)
+
+    y_set = set(y)
+    y_len = len(y_set)
+
+    palette = sns.color_palette("bright", y_len)
+    MACHINE_EPSILON = np.finfo(np.double).eps
+    n_components = 2
+    perplexity = 30
+
+    # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
+
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    # plt.show()
+
+    X_embedded = TSNE().fit_transform(X)
+    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
+
+    plt.title(f"tsne_{eval_name}_final_eval_mode_{letter_name}")
+
+    plt.savefig(f'./{root}/tsne_{eval_name}_final_eval_mode_{letter_name}.png')
+
+    plt.close()
+    print(encoded_imgs.shape)
+    print(labels)
+    print(labels.shape)
+
+    encoded_imgs = encoded_imgs.reshape((encoded_imgs.shape[0], 196))
+
+    X_embedded = umap.umap_.UMAP().fit_transform(encoded_imgs)
+
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    # plt.title(f"umap_{eval_name}_final_eval_{letter_name}")
+    # plt.savefig(f'./{root}/umap_{eval_name}_final_eval_mode_{letter_name}.png')
+    # plt.close()
+
+    mapper = umap.umap_.UMAP(n_components=2).fit(encoded_imgs)
+
+    umap.plot.points(mapper, labels=labels, theme="fire")
+
+    plt.title(f"umap_{eval_name}_final_eval_{letter_name}")
+    plt.savefig(f'./{root}/umap_{eval_name}_scatter_{letter_name}.png')
+    plt.show()
+    plt.close()
+
+    standard_embedding = umap.umap_.UMAP(random_state=42).fit_transform(encoded_imgs)
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels, s=0.1, cmap='Spectral');
+    plt.title(f"umap_{eval_name}_ncluster_{letter_name}")
+    plt.savefig(f'./{root}/umap_{eval_name}_ncluster_{letter_name}.png')
+    plt.show()
+    plt.close()
+
+    kmeans_labels = cluster.KMeans(n_clusters=len(letters)).fit_predict(encoded_imgs)
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=0.1, cmap='Spectral');
+    plt.title(f"umap_{eval_name}_kmeans_{letter_name}")
+    plt.savefig(f'./{root}/umap_{eval_name}_kmeans_{letter_name}.png')
+    plt.show()
+    plt.close()
 
 
-    print(f"test_samples={test_samples}")
-    print(f"trains_samples={train_samples}")
 
-    X = []
-
-    for i in images:
-        img = cv2.imread(str(i[0]).replace("\\\\", "/"), 0)
-        if img is not None:
-            X.append(img)
-
-    X = np.array(X)
-    X = np.reshape(X,(X.shape[0], X.shape[1]**2))
-    y = np.array(targets)
+    fit = umap.umap_.UMAP(n_components=3)
+    u = fit.fit_transform(encoded_imgs);
+    fig = plt.figure()
 
 
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels, s=10)
+    plt.title(f'n_components = 3 - {letter_name}')
+    plt.savefig(f'./{root}/umap_{eval_name}_ncomp3_{letter_name}.png')
+    plt.show()
+    plt.close()
 
-    #_X, _y = fetch_openml('mnist_784', version=1, return_X_y=True, as_frame=False)
-    #_train_samples = 60000
-    #_test_samples =10000
-    #print(_X,_y)
 
-    print(X,y)
+if __name__ == '__main__':
+    eval_name = "eval50"
+    root = "./_out/eval/50"
 
-    random_state = check_random_state(0)
-    permutation = random_state.permutation(X.shape[0])
-    X = X[permutation]
-    y = y[permutation]
-    X = X.reshape((X.shape[0], -1))
+    letters = ["alpha",
+    "delta"
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, train_size=test_samples, test_size=test_samples)
-
-    pyro.distributions.enable_validation(False)
-    pyro.set_rng_seed(0)
-
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    USE_CUDA = True if torch.cuda.is_available() else False
-
-    LEARNING_RATE = 3.0e-4
-
-    NUM_EPOCHS = 30
-
-    i_dataset = Mnist_dataset(images=X_train, targets=y_train)
-
-    i_data_loader = torch.utils.data.DataLoader(i_dataset, num_workers=8)
-
-    pyro.clear_param_store()
-
-    # setup the VAE
-    vae = VAE(use_cuda=USE_CUDA)
-
-    # setup the optimizer
-    adam_args = {"lr": LEARNING_RATE}
-    optimizer = Adam(adam_args)
-
-    # setup the inference algorithm
-    svi = SVI(vae.model, vae.guide, optimizer, loss=Trace_ELBO())
-
-    train_elbo = []
-    test_elbo = []
-    # training loop
-    for epoch in range(NUM_EPOCHS):
-        total_epoch_loss_train = train(svi, i_data_loader, use_cuda=USE_CUDA)
-        train_elbo.append(-total_epoch_loss_train)
-        print("[epoch %03d]  average training loss: %.4f" % (epoch, total_epoch_loss_train))
-        plot_latent_var_pyro(epoch, vae, i_data_loader, 100)
-        print("epoch end")
-
-    torch.save(vae.state_dict(), f'./models/models-vae.pth')
-    loss_plot_pyro(train_elbo)
-    plot_latent_var_pyro(epoch, vae, i_data_loader, 100)
+    ]
+    evaluate(letters, root, eval_name, "all")

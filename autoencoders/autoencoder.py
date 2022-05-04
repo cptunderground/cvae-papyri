@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
 from sklearn.manifold import TSNE
-from torch.utils.data import dataset
+from torch.utils.data import dataset, Subset
 from torchsummary import summary
 from torchvision import datasets
 from torchvision.transforms import transforms
@@ -15,10 +15,10 @@ from umap.umap_ import UMAP
 
 import umap
 
-
 import util.report
 import util.utils
 from util.base_logger import logger
+from util.run import Run
 
 
 class Network(nn.Module):
@@ -134,29 +134,33 @@ def get_label(label):
 
     return switcher.get(label)
 
-def plot_latent_var_pyro(autoencoder, device, data,nei, num_batches=100):
-    stack=[]
-    stacky=[]
+
+def plot_latent_var_pyro(autoencoder, device, data, nei, num_batches=100):
+    stack = []
+    stacky = []
     autoencoder = autoencoder.eval()
     with torch.no_grad():
         for i, d in enumerate(data):
-            x=d['re_image']
-            y=d['target'].to('cpu').detach().numpy().tolist()
-            z,sigma = autoencoder.encoder(x.to(device))
+            x = d['re_image']
+            y = d['target'].to('cpu').detach().numpy().tolist()
+            z, sigma = autoencoder.encoder(x.to(device))
             z = z.to('cpu').detach().numpy().tolist()
             stack.extend(z)
             stacky.extend(y)
             if i > num_batches:
-                umaper = umap.UMAP(n_components=2,n_neighbors=nei)
+                umaper = umap.UMAP(n_components=2, n_neighbors=nei)
                 x_umap = umaper.fit_transform(stack)
-                plt.scatter(x_umap[:, 0], x_umap[:, 1],s=2, c=stacky, cmap='tab10')
+                plt.scatter(x_umap[:, 0], x_umap[:, 1], s=2, c=stacky, cmap='tab10')
                 plt.colorbar()
                 plt.xlabel('UMAP 1')
                 plt.ylabel('UMAP 2')
                 break
 
-def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
+
+def train(run: Run):
     util.report.header1("Auto-Encoder")
+
+    print(torch.cuda.is_available())
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
@@ -175,11 +179,16 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
 
+    idx = [i for i in range(len(test_set)) if
+           test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
+    # build the appropriate subset
+    subset = Subset(test_set, idx)
 
-    train_loader = torch.utils.data.DataLoader(train_set)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=11082)
+    train_loader = torch.utils.data.DataLoader(subset)
+    test_loader = torch.utils.data.DataLoader(subset, batch_size=128)
     logger.debug(test_loader.batch_size)
 
+    
     # take 5 random letters from testset
 
     pretrained_model = Network()
@@ -195,9 +204,9 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
 
     input_names = ['Image']
     output_names = ['Label']
-    torch.onnx.export(model, b, 'AE.onnx', input_names=input_names, output_names=output_names)
+    
 
-    logger.info(summary(model, (1, 28, 28), 2592))
+    
     """
     TODO FIX
     """
@@ -219,13 +228,13 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
     ], lr=0.01)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
-    num_epochs = epochs
+    num_epochs = run.epochs
     for epoch in range(num_epochs):
         train_loss = 0
         ###################
         # train the models #
         ###################
-        if tqdm_mode:
+        if run.tqdm:
             loop = tqdm(train_loader, total=len(train_loader))
         else:
             loop = train_loader
@@ -239,15 +248,15 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             optimizer.step()
 
             train_loss += loss.item() * images.size(0)
-            if tqdm_mode:
+            if run.tqdm:
                 loop.set_description(f'Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop.set_postfix(loss=train_loss)
         logger.info(f'Epoch={epoch} done.')
 
         scheduler.step(train_loss)
 
-        torch.save(model.state_dict(), f'./models/models-autoencoder{mode}.pth')
-        torch.save(model.state_dict(), f'./{util.utils.get_root()}/models-autoencoder{mode}.pth')
+        torch.save(model.state_dict(), f'./models/models-autoencoder-{run.name}.pth')
+        torch.save(model.state_dict(), f'./{run.root}/models-autoencoder-{run.name}.pth')
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
@@ -262,9 +271,6 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         encoded_imgs = encoded_imgs.detach().cpu().numpy()
         decoded_imgs = decoded_imgs.detach().cpu().numpy()
 
-
-
-
         # plot the first ten input images and then reconstructed images
         fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(12, 4))
 
@@ -275,7 +281,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
                 ax.get_xaxis().set_visible(False)
                 ax.get_yaxis().set_visible(False)
 
-        fig.savefig(f'./{util.utils.get_root()}/original_decoded.png', bbox_inches='tight')
+        fig.savefig(f'./{run.root}/original_decoded.png', bbox_inches='tight')
         plt.close()
 
         encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
@@ -286,7 +292,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax.set_title(f'feature map: {fm}')
             ax.imshow(encoded_img[fm], cmap='gray')
 
-        fig.savefig(f'./{util.utils.get_root()}/encoded_img_alpha')
+        fig.savefig(f'./{run.root}/encoded_img_alpha')
         plt.close()
 
         encoded_img = encoded_imgs[3]  # get 1st image from the batch (here '7')
@@ -297,7 +303,7 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
             ax.set_title(f'feature map: {fm}')
             ax.imshow(encoded_img[fm], cmap='gray')
 
-        fig.savefig(f'./{util.utils.get_root()}/encoded_img_epsilon')
+        fig.savefig(f'./{run.root}/encoded_img_epsilon')
         plt.close()
 
         # X, y = load_digits(return_X_y=True)
@@ -319,13 +325,13 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         y = images
         X = np.array(features)
 
-        logger.debug(X.shape)
+        
         X.reshape(-1)
-        logger.debug(X.shape)
+        
         X.ravel()
-        logger.debug(X.shape)
+        
         X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
-        logger.debug(X.shape)
+        
 
         y_list = list(y)
         y_list_old = y_list
@@ -335,17 +341,11 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
 
         y = tuple(y_list)
 
-        logger.debug(y)
+        
         y_set = set(y)
         y_len = len(y_set)
 
-
-        logger.info(f"y_old={y_old}")
-        logger.info(f"y_list_old={y_list_old}")
-        logger.info(y_list)
-        logger.info(y)
-        logger.info(f"y_set {y_set}")
-        logger.info(f"y_len{y_len}")
+        
 
         palette = sns.color_palette("bright", y_len)
         MACHINE_EPSILON = np.finfo(np.double).eps
@@ -365,28 +365,188 @@ def run_cae(epochs=30, mode="not_selected", tqdm_mode=True):
         sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
         # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-        plt.title(f"tsne_{name}_epoch_{epoch}_mode_{mode}")
-        util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
-        plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png')
-        util.report.image_to_report(f"{name}/{mode}/tsne_{name}_epoch_{epoch}_mode_{mode}.png", f"TSNE Epoch {epoch}")
+        plt.title(f"tsne_{name}_epoch_{epoch}_mode_{run.processing}")
+        util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
+        plt.savefig(f'./{run.root}/{name}/{run.processing}/tsne_{name}_epoch_{epoch}_mode_{run.processing}.png')
+        util.report.image_to_report(f"{name}/{run.processing}/tsne_{name}_epoch_{epoch}_mode_{run.processing}.png",
+                                    f"TSNE Epoch {epoch}")
         plt.close()
 
         umap = UMAP()
         X_embedded = umap.fit_transform(X)
 
-
-
         sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
         # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-        plt.title(f"umap_{name}_epoch_{epoch}_mode_{mode}")
-        util.utils.create_folder(f"./{util.utils.get_root()}/{name}/{mode}")
-        plt.savefig(f'./{util.utils.get_root()}/{name}/{mode}/umap_{name}_epoch_{epoch}_mode_{mode}.png')
-        util.report.image_to_report(f"{name}/{mode}/umap_{name}_epoch_{epoch}_mode_{mode}.png", f"UMAP Epoch {epoch}")
+        plt.title(f"umap_{name}_epoch_{epoch}_mode_{run.processing}")
+        util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
+        plt.savefig(f'./{run.root}/{name}/{run.processing}/umap_{name}_epoch_{epoch}_mode_{run.processing}.png')
+        util.report.image_to_report(f"{name}/{run.processing}/umap_{name}_epoch_{epoch}_mode_{run.processing}.png",
+                                    f"UMAP Epoch {epoch}")
         plt.close()
-    summary(model, (1, 28, 28))
+    
 
     return features, images
+
+
+def evaluate(run):
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    name = "CovAE"
+
+    test_set = datasets.ImageFolder(
+        './data/raw-cleaned-standardised',
+        # './data/test-data-standardised',
+        # './data/test-data-manual',
+        # './data/test-data-manual-otsu',
+
+        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+    )
+
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=11082)
+    idx = [i for i in range(len(test_set)) if
+           test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
+    # build the appropriate subset
+    subset = Subset(test_set, idx)
+
+    train_loader = torch.utils.data.DataLoader(subset)
+    test_loader = torch.utils.data.DataLoader(subset, batch_size=11082)
+    logger.debug(test_loader.batch_size)
+    model = Network()
+    model = ConvAutoEncoder(model)
+    model.load_state_dict(torch.load(run.model))
+    model.eval()
+
+    # util.report.write_to_report(pretrained_model)
+
+    # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
+
+    logger.info(model)
+
+    images, labels = next(iter(test_loader))
+    # images, labels = next(iter(train_loader))
+    images = images.to(device)
+
+    # get sample outputs
+    encoded_imgs, decoded_imgs = model(images)
+    # prep images for display
+    images = images.cpu().numpy()
+
+    # use detach when it's an output that requires_grad
+    encoded_imgs = encoded_imgs.detach().cpu().numpy()
+    decoded_imgs = decoded_imgs.detach().cpu().numpy()
+
+    # plot the first ten input images and then reconstructed images
+    fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(12, 4))
+
+    # input images on top row, reconstructions on bottom
+    for images, row in zip([images, decoded_imgs], axes):
+        for img, ax in zip(images, row):
+            ax.imshow(np.squeeze(img), cmap='gray')
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+
+    fig.savefig(f'./{run.root}/original_decoded.png', bbox_inches='tight')
+    plt.close()
+
+    encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
+
+    fig = plt.figure(figsize=(4, 4))
+    for fm in range(encoded_img.shape[0]):
+        ax = fig.add_subplot(2, 2, fm + 1, xticks=[], yticks=[])
+        ax.set_title(f'feature map: {fm}')
+        ax.imshow(encoded_img[fm], cmap='gray')
+
+    fig.savefig(f'./{run.root}/encoded_img_alpha')
+    plt.close()
+
+    encoded_img = encoded_imgs[3]  # get 1st image from the batch (here '7')
+
+    fig = plt.figure(figsize=(4, 4))
+    for fm in range(encoded_img.shape[0]):
+        ax = fig.add_subplot(2, 2, fm + 1, xticks=[], yticks=[])
+        ax.set_title(f'feature map: {fm}')
+        ax.imshow(encoded_img[fm], cmap='gray')
+
+    fig.savefig(f'./{run.root}/encoded_img_epsilon')
+    plt.close()
+
+    # X, y = load_digits(return_X_y=True)
+
+    data = []
+    folder = './data/training-data-standardised'
+
+    # print(encoded_imgs)
+    # print(labels)
+    # print(len(encoded_imgs))
+    # print(len(labels))
+
+    for i in range(len(encoded_imgs)):
+        data.append([encoded_imgs[i], labels[i]])
+
+    # print(data)
+
+    features, images = zip(*data)
+    y = images
+    X = np.array(features)
+
+    
+    X.reshape(-1)
+    
+    X.ravel()
+    
+    X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
+    
+
+    y_list = list(y)
+    y_list_old = y_list
+    y_old = y
+    for item in range(len(y_list)):
+        y_list[item] = get_label(str(y_list[item]))
+
+    y = tuple(y_list)
+
+    y_set = set(y)
+    y_len = len(y_set)
+
+    
+
+    palette = sns.color_palette("bright", y_len)
+    MACHINE_EPSILON = np.finfo(np.double).eps
+    n_components = 2
+    perplexity = 30
+
+    # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
+
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    # plt.show()
+
+    tsne = TSNE()
+    X_embedded = tsne.fit_transform(X)
+
+    umap = UMAP()
+
+    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
+
+    plt.title(f"tsne_{name}_final_eval_mode_{run.processing}")
+    util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
+    plt.savefig(f'./{run.root}/{name}/{run.processing}/tsne_{name}_final_eval_mode_{run.processing}.png')
+    util.report.image_to_report(f"{name}/{run.processing}/tsne_{name}_final_eval_mode_{run.processing}.png",
+                                f"TSNE final_eval")
+    plt.close()
+
+    umap = UMAP()
+    X_embedded = umap.fit_transform(X)
+
+    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
+
+    plt.title(f"umap_{name}_final_eval_mode_{run.processing}")
+    util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
+    plt.savefig(f'./{run.root}/{name}/{run.processing}/umap_{name}_final_eval_mode_{run.processing}.png')
+    util.report.image_to_report(f"{name}/{run.processing}/umap_{name}_final_eval_mode_{run.processing}.png",
+                                f"UMAP final_eval")
+    plt.close()
 
 
 """
