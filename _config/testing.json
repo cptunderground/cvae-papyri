@@ -1,5 +1,5 @@
 {
-  "name": "standard_config",
+  "name": "testing",
   "train": true,
   "model": "../models/models-autoencodergray-scale.pth",
   "letters": [
