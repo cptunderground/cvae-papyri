@@ -16,7 +16,7 @@ import seaborn as sns
 
 def custom_tsne(X, y):
     data = []
-    folder = './data/test-data-standardised'
+    folder = './data/__test-data-standardised'
 
     for f in os.listdir(folder):
         print(f)

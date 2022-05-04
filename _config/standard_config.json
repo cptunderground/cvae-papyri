@@ -4,11 +4,12 @@
   "model": "../models/models-autoencodergray-scale.pth",
   "letters": [
     "alpha",
-    "delta"
+    "delta",
+    "beta"
   ],
   "logging": 40,
   "mode": "default",
-  "epochs": 3,
+  "epochs": 100,
   "dimensions": 28,
   "tqdm": true,
   "processing": "gray-scale",

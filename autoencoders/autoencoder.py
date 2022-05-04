@@ -21,6 +21,38 @@ from util.base_logger import logger
 from util.run import Run
 
 
+def get_label(label):
+    switcher = {
+        "tensor(0)": "alpha",
+        "tensor(1)": "beta",
+        "tensor(2)": "chi",
+        "tensor(3)": "delta",
+        "tensor(4)": "epsilon",
+        "tensor(5)": "eta",
+        "tensor(6)": "gamma",
+        "tensor(7)": "iota",
+        "tensor(8)": "kappa",
+        "tensor(9)": "lambda",
+        "tensor(10)": "mu",
+        "tensor(11)": "nu",
+        "tensor(12)": "omega",
+        "tensor(13)": "omicron",
+        "tensor(14)": "phi",
+        "tensor(15)": "pi",
+        "tensor(16)": "psi",
+        "tensor(17)": "rho",
+        "tensor(18)": "sigma",
+        "tensor(19)": "tau",
+        "tensor(20)": "theta",
+        "tensor(21)": "xi",
+        "tensor(22)": "ypsilon",
+        "tensor(23)": "zeta",
+
+    }
+
+    return switcher.get(label)
+
+
 class Network(nn.Module):
     def __init__(self):
         super().__init__()
@@ -103,60 +135,6 @@ class ConvAutoEncoder(nn.Module):
         return enc, dec
 
 
-def get_label(label):
-    switcher = {
-        "tensor(0)": "alpha",
-        "tensor(1)": "beta",
-        "tensor(2)": "chi",
-        "tensor(3)": "delta",
-        "tensor(4)": "epsilon",
-        "tensor(5)": "eta",
-        "tensor(6)": "gamma",
-        "tensor(7)": "iota",
-        "tensor(8)": "kappa",
-        "tensor(9)": "lambda",
-        "tensor(10)": "mu",
-        "tensor(11)": "nu",
-        "tensor(12)": "omega",
-        "tensor(13)": "omicron",
-        "tensor(14)": "phi",
-        "tensor(15)": "pi",
-        "tensor(16)": "psi",
-        "tensor(17)": "rho",
-        "tensor(18)": "sigma",
-        "tensor(19)": "tau",
-        "tensor(20)": "theta",
-        "tensor(21)": "xi",
-        "tensor(22)": "ypsilon",
-        "tensor(23)": "zeta",
-
-    }
-
-    return switcher.get(label)
-
-
-def plot_latent_var_pyro(autoencoder, device, data, nei, num_batches=100):
-    stack = []
-    stacky = []
-    autoencoder = autoencoder.eval()
-    with torch.no_grad():
-        for i, d in enumerate(data):
-            x = d['re_image']
-            y = d['target'].to('cpu').detach().numpy().tolist()
-            z, sigma = autoencoder.encoder(x.to(device))
-            z = z.to('cpu').detach().numpy().tolist()
-            stack.extend(z)
-            stacky.extend(y)
-            if i > num_batches:
-                umaper = umap.UMAP(n_components=2, n_neighbors=nei)
-                x_umap = umaper.fit_transform(stack)
-                plt.scatter(x_umap[:, 0], x_umap[:, 1], s=2, c=stacky, cmap='tab10')
-                plt.colorbar()
-                plt.xlabel('UMAP 1')
-                plt.ylabel('UMAP 2')
-                break
-
-
 def train(run: Run):
     util.report.header1("Auto-Encoder")
 
@@ -165,30 +143,34 @@ def train(run: Run):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
     train_set = datasets.ImageFolder(
-        # './data/training-data-standardised',
-        './data/raw-cleaned-standardised',
+        './data/__training-data-standardised',
+        # './data/raw-cleaned-standardised',
 
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
     test_set = datasets.ImageFolder(
-        './data/raw-cleaned-standardised',
-        # './data/test-data-standardised',
+        # './data/raw-cleaned-standardised',
+        './data/__test-data-standardised',
         # './data/test-data-manual',
         # './data/test-data-manual-otsu',
 
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
 
-    idx = [i for i in range(len(test_set)) if
+    test_idx = [i for i in range(len(test_set)) if
            test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
     # build the appropriate subset
-    subset = Subset(test_set, idx)
+    subset_test = Subset(test_set, test_idx)
 
-    train_loader = torch.utils.data.DataLoader(subset)
-    test_loader = torch.utils.data.DataLoader(subset, batch_size=128)
-    logger.debug(test_loader.batch_size)
+    train_idx = [i for i in range(len(train_set)) if
+           train_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
+    # build the appropriate subset
+    subset_train = Subset(train_set, train_idx)
 
-    
+    train_loader = torch.utils.data.DataLoader(subset_train)
+    test_loader = torch.utils.data.DataLoader(subset_test)
+    logger.debug(f"testloader batchsize={test_loader.batch_size}")
+
     # take 5 random letters from testset
 
     pretrained_model = Network()
@@ -204,12 +186,8 @@ def train(run: Run):
 
     input_names = ['Image']
     output_names = ['Label']
-    
 
-    
-    """
-    TODO FIX
-    """
+    # TODO fix
     # util.report.write_to_report(summary(model, (1, 28, 28), 2592))
     # to check if our weight transfer was successful or not
     # list(list(pretrained_model.layer2.children())[0].parameters()) == list(
@@ -221,12 +199,23 @@ def train(run: Run):
                 param.requires_grad = False
 
     model.to(device)
+
+    ###TODO understand losses
     criterion = nn.MSELoss()
+    ###TODO understand optimizer
+
+    """Old optimizer
     optimizer = optim.Adam([  # parameters which need optimization
         {'params': model.encoder[8:].parameters()},
         {'params': model.decoder.parameters()}
-    ], lr=0.01)
+    ], lr=0.01)"""
+
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    ###TODO
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
+
+    losses = []
 
     num_epochs = run.epochs
     for epoch in range(num_epochs):
@@ -251,12 +240,14 @@ def train(run: Run):
             if run.tqdm:
                 loop.set_description(f'Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop.set_postfix(loss=train_loss)
+
+        losses.append(loss)
         logger.info(f'Epoch={epoch} done.')
 
         scheduler.step(train_loss)
 
-        torch.save(model.state_dict(), f'./models/models-autoencoder-{run.name}.pth')
-        torch.save(model.state_dict(), f'./{run.root}/models-autoencoder-{run.name}.pth')
+        torch.save(model.state_dict(), f'./models/models-autoencoder-{run.name_time}.pth')
+        torch.save(model.state_dict(), f'./{run.root}/models-autoencoder-{run.name_time}.pth')
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
@@ -295,98 +286,15 @@ def train(run: Run):
         fig.savefig(f'./{run.root}/encoded_img_alpha')
         plt.close()
 
-        encoded_img = encoded_imgs[3]  # get 1st image from the batch (here '7')
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses[-100:])
+    util.utils.create_folder(f"./{run.root}/net_eval")
+    plt.savefig(f"./{run.root}/net_eval/loss.png")
+    util.report.image_to_report("net_eval/loss.png", "Network Training Loss")
+    plt.show()
+    plt.close()
 
-        fig = plt.figure(figsize=(4, 4))
-        for fm in range(encoded_img.shape[0]):
-            ax = fig.add_subplot(2, 2, fm + 1, xticks=[], yticks=[])
-            ax.set_title(f'feature map: {fm}')
-            ax.imshow(encoded_img[fm], cmap='gray')
-
-        fig.savefig(f'./{run.root}/encoded_img_epsilon')
-        plt.close()
-
-        # X, y = load_digits(return_X_y=True)
-
-        data = []
-        folder = './data/training-data-standardised'
-
-        # print(encoded_imgs)
-        # print(labels)
-        # print(len(encoded_imgs))
-        # print(len(labels))
-
-        for i in range(len(encoded_imgs)):
-            data.append([encoded_imgs[i], labels[i]])
-
-        # print(data)
-
-        features, images = zip(*data)
-        y = images
-        X = np.array(features)
-
-        
-        X.reshape(-1)
-        
-        X.ravel()
-        
-        X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
-        
-
-        y_list = list(y)
-        y_list_old = y_list
-        y_old = y
-        for item in range(len(y_list)):
-            y_list[item] = get_label(str(y_list[item]))
-
-        y = tuple(y_list)
-
-        
-        y_set = set(y)
-        y_len = len(y_set)
-
-        
-
-        palette = sns.color_palette("bright", y_len)
-        MACHINE_EPSILON = np.finfo(np.double).eps
-        n_components = 2
-        perplexity = 30
-
-        # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
-
-        # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
-        # plt.show()
-
-        tsne = TSNE()
-        X_embedded = tsne.fit_transform(X)
-
-        umap = UMAP()
-
-        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
-        # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
-
-        plt.title(f"tsne_{name}_epoch_{epoch}_mode_{run.processing}")
-        util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
-        plt.savefig(f'./{run.root}/{name}/{run.processing}/tsne_{name}_epoch_{epoch}_mode_{run.processing}.png')
-        util.report.image_to_report(f"{name}/{run.processing}/tsne_{name}_epoch_{epoch}_mode_{run.processing}.png",
-                                    f"TSNE Epoch {epoch}")
-        plt.close()
-
-        umap = UMAP()
-        X_embedded = umap.fit_transform(X)
-
-        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
-        # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
-
-        plt.title(f"umap_{name}_epoch_{epoch}_mode_{run.processing}")
-        util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
-        plt.savefig(f'./{run.root}/{name}/{run.processing}/umap_{name}_epoch_{epoch}_mode_{run.processing}.png')
-        util.report.image_to_report(f"{name}/{run.processing}/umap_{name}_epoch_{epoch}_mode_{run.processing}.png",
-                                    f"UMAP Epoch {epoch}")
-        plt.close()
-    
-
-    return features, images
 
 
 def evaluate(run):
@@ -395,7 +303,7 @@ def evaluate(run):
 
     test_set = datasets.ImageFolder(
         './data/raw-cleaned-standardised',
-        # './data/test-data-standardised',
+        # './data/__test-data-standardised',
         # './data/test-data-manual',
         # './data/test-data-manual-otsu',
 
@@ -473,7 +381,7 @@ def evaluate(run):
     # X, y = load_digits(return_X_y=True)
 
     data = []
-    folder = './data/training-data-standardised'
+    folder = './data/__training-data-standardised'
 
     # print(encoded_imgs)
     # print(labels)
@@ -489,13 +397,11 @@ def evaluate(run):
     y = images
     X = np.array(features)
 
-    
     X.reshape(-1)
-    
+
     X.ravel()
-    
+
     X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
-    
 
     y_list = list(y)
     y_list_old = y_list
@@ -507,8 +413,6 @@ def evaluate(run):
 
     y_set = set(y)
     y_len = len(y_set)
-
-    
 
     palette = sns.color_palette("bright", y_len)
     MACHINE_EPSILON = np.finfo(np.double).eps
@@ -606,12 +510,12 @@ def run_ae():
     # Load data
 
     train_data = datasets.ImageFolder(
-        './data/training-data-standardised',
+        './data/__training-data-standardised',
 
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )
     test_data = test_set = datasets.ImageFolder(
-        './data/test-data-standardised',
+        './data/__test-data-standardised',
 
         transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
     )

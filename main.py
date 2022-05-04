@@ -93,7 +93,7 @@ if __name__ == '__main__':
     #dim_reduction.tsne.tsne(mode=run.mode, folder='./data/raw-cleaned-standardised')
 
     if run.train:
-        X, y = autoencoder.train(run)
+        autoencoder.train(run)
     else:
         autoencoder.evaluate(run)
     print("Evaluating results and summarizing them in report")
