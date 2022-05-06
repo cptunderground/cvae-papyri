@@ -1,6 +1,7 @@
 import numpy as np
 import sklearn
 import torch
+from PIL import Image
 from matplotlib import pyplot as plt
 import seaborn as sns
 from sklearn.manifold import TSNE
@@ -14,9 +15,34 @@ import sklearn.cluster as cluster
 
 from autoencoders.autoencoder import Network, get_label, ConvAutoEncoder
 from util.base_logger import logger
-
+from util.transform import _Pad
 import util
+import cv2
 
+def plot(imgs, with_orig=True, row_title=None, **imshow_kwargs):
+    if not isinstance(imgs[0], list):
+        # Make a 2d grid even if there's just 1 row
+        imgs = [imgs]
+
+    num_rows = len(imgs)
+    num_cols = len(imgs[0]) + with_orig
+    fig, axs = plt.subplots(nrows=num_rows, ncols=num_cols, squeeze=False)
+    for row_idx, row in enumerate(imgs):
+        row = [orig_img] + row if with_orig else row
+        for col_idx, img in enumerate(row):
+            ax = axs[row_idx, col_idx]
+            ax.imshow(np.asarray(img), **imshow_kwargs)
+            ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+
+    if with_orig:
+        axs[0, 0].set(title='Original image')
+        axs[0, 0].title.set_size(8)
+    if row_title is not None:
+        for row_idx in range(num_rows):
+            axs[row_idx, 0].set(ylabel=row_title[row_idx])
+
+    plt.tight_layout()
+    plt.show()
 
 def draw_umap(data,labels, n_neighbors=15, min_dist=0.1, n_components=2, metric='euclidean', title=''):
     fit = umap.umap_.UMAP(
@@ -224,6 +250,15 @@ def evaluate(letters: list, root: str, eval_name: str, letter_name):
 
 
 if __name__ == '__main__':
+    orig_img = Image.open("./data/raw-cleaned/beta/beta_60215_[1]_bt1_Iliad_9_206_21.png")
+    padded_imgs = [_Pad(padding=padding)(orig_img) for padding in (0, 3, 10, 30, 50)]
+    plot(padded_imgs)
+
+    orig_img = Image.open("./data/raw-cleaned/pi/pi_59170_Oxy_[3]_bt1_106_29.png")
+    padded_imgs = [_Pad(padding=padding)(orig_img) for padding in (0, 3, 10, 30, 50)]
+    plot(padded_imgs)
+
+    """
     eval_name = "eval50"
     root = "./_out/eval/50"
 
@@ -231,4 +266,4 @@ if __name__ == '__main__':
     "delta"
 
     ]
-    evaluate(letters, root, eval_name, "all")
+    evaluate(letters, root, eval_name, "all")"""
