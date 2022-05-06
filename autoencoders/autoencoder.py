@@ -6,14 +6,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
 from sklearn.manifold import TSNE
+from sklearn.model_selection import train_test_split
 from torch.utils.data import dataset, Subset
-from torchsummary import summary
 from torchvision import datasets
 from torchvision.transforms import transforms
 from tqdm import tqdm
 from umap.umap_ import UMAP
 
-import umap
 import util._transforms as _transforms
 import util.report
 import util.utils
@@ -169,7 +168,20 @@ def train(run: Run):
 
         transform=transforms.Compose([t, transforms.ToTensor()])
     )
+    _dataset = datasets.ImageFolder(
+        # './data/raw-cleaned-standardised',
+        './data/raw',
+        # './data/test-data-manual',
+        # './data/test-data-manual-otsu',
 
+        transform=transforms.Compose([t, transforms.ToTensor()])
+    )
+
+    _trainset, _testset = train_test_split(_dataset,test_size=0.2, random_state=42)
+    print(len(_trainset))
+    _trainset, _validationset = train_test_split(_trainset, test_size=0.25, random_state=42)
+
+    """
     test_idx = [i for i in range(len(test_set)) if
                 test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
     # build the appropriate subset
@@ -179,9 +191,11 @@ def train(run: Run):
                  train_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
     # build the appropriate subset
     subset_train = Subset(train_set, train_idx)
+    """
 
-    train_loader = torch.utils.data.DataLoader(train_set)
-    test_loader = torch.utils.data.DataLoader(test_set)
+    train_loader = torch.utils.data.DataLoader(_trainset)
+    test_loader = torch.utils.data.DataLoader(_testset)
+    validation_loader = torch.utils.data.DataLoader(_validationset)
     logger.debug(f"testloader batchsize={test_loader.batch_size}")
 
     # take 5 random letters from testset
