@@ -143,7 +143,7 @@ def train(run: Run):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
     t = transforms.Compose([
-        _transforms._Pad(padding=[0,0,0,0]),
+        _transforms._Pad(padding=[0,0,0,0],fill=(255,255,255)),
         transforms.Resize([28,28]),
         transforms.Grayscale()]
     )
@@ -286,6 +286,7 @@ def train(run: Run):
                 ax.get_yaxis().set_visible(False)
 
         fig.savefig(f'./{run.root}/original_decoded.png', bbox_inches='tight')
+        plt.show()
         plt.close()
 
         encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
@@ -297,6 +298,7 @@ def train(run: Run):
             ax.imshow(encoded_img[fm], cmap='gray')
 
         fig.savefig(f'./{run.root}/encoded_img_alpha')
+        plt.show()
         plt.close()
 
     plt.xlabel('Iterations')
