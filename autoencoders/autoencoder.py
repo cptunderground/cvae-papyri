@@ -219,7 +219,7 @@ def train(run: Run):
         {'params': model.decoder.parameters()}
     ], lr=0.01)"""
 
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
     ###TODO
     #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
