@@ -23,7 +23,7 @@ from util.run import Run
 
 
 def png_to_ipx3():
-    Names = [['./data/training-data-standardised/alpha', 'train'], ['./data/test-data-standardised/alpha', 't10k']]
+    Names = [['./data/__training-data-standardised/alpha', 'train'], ['./data/__test-data-standardised/alpha', 't10k']]
 
     for name in Names:
 
@@ -252,8 +252,8 @@ def standardise(run:Run):
     path_test = "./data/test-data"
     path_raw_cleaned = "./data/raw-cleaned"
 
-    path_train_std = "./data/training-data-standardised"
-    path_test_std = "./data/test-data-standardised"
+    path_train_std = "./data/__training-data-standardised"
+    path_test_std = "./data/__test-data-standardised"
     path_raw_cleaned_std = "./data/raw-cleaned-standardised"
 
 
@@ -447,8 +447,8 @@ def setup():
     path_train = "./data/training-data"
     path_test = "./data/test-data"
     path_raw_cleaned_std = "./data/raw-cleaned-standardised"
-    path_train_std = "./data/training-data-standardised"
-    path_test_std = "./data/test-data-standardised"
+    path_train_std = "./data/__training-data-standardised"
+    path_test_std = "./data/__test-data-standardised"
 
     path_out = "./out"
     path_out_tsne = f'./out/tsne'
@@ -490,8 +490,8 @@ def generate_training_sets():
     path_train = "./data/training-data"
     path_test = "./data/test-data"
     path_raw_cleaned_std = "./data/raw-cleaned-standardised"
-    path_train_std = "./data/training-data-standardised"
-    path_test_std = "./data/test-data-standardised"
+    path_train_std = "./data/__training-data-standardised"
+    path_test_std = "./data/__test-data-standardised"
 
     path_out = "./out"
     path_out_tsne = f'./out/tsne'

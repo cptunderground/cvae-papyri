@@ -42,7 +42,7 @@ def evaluate(letters: list, root: str, eval_name: str, letter_name):
     util.utils.create_folder(root)
     test_set = datasets.ImageFolder(
         './data/raw-cleaned-standardised',
-        # './data/test-data-standardised',
+        # './data/__test-data-standardised',
         # './data/test-data-manual',
         # './data/test-data-manual-otsu',
 
@@ -120,7 +120,7 @@ def evaluate(letters: list, root: str, eval_name: str, letter_name):
     # X, y = load_digits(return_X_y=True)
 
     data = []
-    folder = './data/training-data-standardised'
+    folder = './data/__training-data-standardised'
 
     # print(encoded_imgs)
     # print(labels)
