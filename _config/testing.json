@@ -10,7 +10,7 @@
   ],
   "logging": 40,
   "mode": "default",
-  "epochs": 1,
+  "epochs": 3,
   "dimensions": 28,
   "tqdm": true,
   "processing": "gray-scale",

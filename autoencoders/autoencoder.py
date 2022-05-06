@@ -137,37 +137,16 @@ class ConvAutoEncoder(nn.Module):
 def train(run: Run):
     util.report.header1("Auto-Encoder")
 
-    print(torch.cuda.is_available())
+    logger.info(f"torch.cuda.is_available()={torch.cuda.is_available()}")
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
     t = transforms.Compose([
-        _transforms._Pad(padding=[0,0,0,0],fill=(255,255,255)),
-        transforms.Resize([28,28]),
+        _transforms._Pad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
+        transforms.Resize([28, 28]),
         transforms.Grayscale()]
     )
-    """
-    tr = torch.nn.Sequential(
-        _transforms._Pad(padding=[0, 0, 0, 0]),
-        transforms.Resize([28, 28]),
-        transforms.Grayscale()
-    )
-    t = torch.jit.script(tr)
-    """
-    train_set = datasets.ImageFolder(
-        './data/training-data',
-        # './data/raw-cleaned-standardised',
 
-        transform=transforms.Compose([t, transforms.ToTensor()])
-    )
-    test_set = datasets.ImageFolder(
-        # './data/raw-cleaned-standardised',
-        './data/test-data',
-        # './data/test-data-manual',
-        # './data/test-data-manual-otsu',
-
-        transform=transforms.Compose([t, transforms.ToTensor()])
-    )
     _dataset = datasets.ImageFolder(
         # './data/raw-cleaned-standardised',
         './data/raw',
@@ -177,9 +156,12 @@ def train(run: Run):
         transform=transforms.Compose([t, transforms.ToTensor()])
     )
 
-    _trainset, _testset = train_test_split(_dataset,test_size=0.2, random_state=42)
-    print(len(_trainset))
-    _trainset, _validationset = train_test_split(_trainset, test_size=0.25, random_state=42)
+    _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=42)
+    _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=42)
+
+    logger.info(f"len(_trainset)={len(_trainset)}")
+    logger.info(f"len(_validset)={len(_validset)}")
+    logger.info(f"len(_testset)={len(_testset)}")
 
     """
     test_idx = [i for i in range(len(test_set)) if
@@ -195,19 +177,19 @@ def train(run: Run):
 
     train_loader = torch.utils.data.DataLoader(_trainset)
     test_loader = torch.utils.data.DataLoader(_testset)
-    validation_loader = torch.utils.data.DataLoader(_validationset)
+    valid_loader = torch.utils.data.DataLoader(_validset)
     logger.debug(f"testloader batchsize={test_loader.batch_size}")
 
     # take 5 random letters from testset
 
     pretrained_model = Network()
-    logger.info(pretrained_model)
+    #logger.info(pretrained_model)
     # util.report.write_to_report(pretrained_model)
 
     # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
     model = ConvAutoEncoder(pretrained_model)
-    logger.info(model)
+    #logger.info(model)
 
     b = torch.randn(16, 1, 5, 5)
 
@@ -240,48 +222,68 @@ def train(run: Run):
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     ###TODO
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
+    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
-    losses = []
+    losses_train = []
+    losses_valid = []
+    optimal_model = None
+    current_valid_loss = 10000
 
     num_epochs = run.epochs
     for epoch in range(num_epochs):
         train_loss = 0
+        valid_loss = 0
         ###################
         # train the models #
         ###################
         if run.tqdm:
-            loop = tqdm(train_loader, total=len(train_loader))
+            loop_train = tqdm(train_loader, total=len(train_loader))
         else:
-            loop = train_loader
+            loop_train = train_loader
 
-        for batch in loop:
+        for batch in loop_train:
             images = batch[0].to(device)
-            _, outputs = model(images)
-            loss = criterion(outputs, images)
+            _, outputs = model.train()(images)
+            loss_train = criterion(outputs, images)
             optimizer.zero_grad()
-            loss.backward()
+            loss_train.backward()
             optimizer.step()
 
-            train_loss += loss.item() * images.size(0)
+            train_loss += loss_train.item() * images.size(0)
             if run.tqdm:
-                loop.set_description(f'Epoch [{epoch + 1:2d}/{num_epochs}]')
-                loop.set_postfix(loss=train_loss)
+                loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_postfix(loss=train_loss)
 
-        losses.append(loss)
+        if run.tqdm:
+            loop_valid = tqdm(valid_loader, total=len(valid_loader))
+        else:
+            loop_valid = valid_loader
+
+        for batch in loop_valid:
+            images = batch[0].to(device)
+            _, outputs = model.eval()(images)
+            loss_valid = criterion(outputs, images)
+
+            valid_loss += loss_valid.item() * images.size(0)
+            if run.tqdm:
+                loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_postfix(loss=valid_loss)
+
+        if current_valid_loss > valid_loss:
+            optimal_model = (model, epoch)
+
+        losses_train.append(loss_train)
+        losses_valid.append(loss_valid)
         logger.info(f'Epoch={epoch} done.')
 
-        scheduler.step(train_loss)
-
-        torch.save(model.state_dict(), f'./models/models-autoencoder-{run.name_time}.pth')
-        torch.save(model.state_dict(), f'./{run.root}/models-autoencoder-{run.name_time}.pth')
+        #scheduler.step(train_loss)
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
         images = images.to(device)
 
         # get sample outputs
-        encoded_imgs, decoded_imgs = model(images)
+        encoded_imgs, decoded_imgs = model.eval()(images)
         # prep images for display
         images = images.cpu().numpy()
 
@@ -315,12 +317,27 @@ def train(run: Run):
         plt.show()
         plt.close()
 
+    torch.save(optimal_model[0].state_dict(), f'./models/optimal-model-{optimal_model[1]}-ae-{run.name_time}.pth')
+    torch.save(optimal_model[0], f'./{run.root}/optimal-model-{optimal_model[1]}-ae-{run.name_time}.pth')
+
     plt.xlabel('Iterations')
     plt.ylabel('Loss')
-    plt.plot(losses[-100:])
+    plt.plot(losses_train[-num_epochs:])
     util.utils.create_folder(f"./{run.root}/net_eval")
-    plt.savefig(f"./{run.root}/net_eval/loss.png")
-    util.report.image_to_report("net_eval/loss.png", "Network Training Loss")
+    plt.title("Train Loss")
+    plt.savefig(f"./{run.root}/net_eval/loss_train.png")
+    util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
+
+    plt.show()
+    plt.close()
+
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses_valid[-num_epochs:])
+    util.utils.create_folder(f"./{run.root}/net_eval")
+    plt.title("Validation Loss")
+    plt.savefig(f"./{run.root}/net_eval/loss_valid.png")
+    util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
     plt.show()
     plt.close()
 
