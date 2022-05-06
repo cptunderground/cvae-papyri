@@ -14,7 +14,7 @@ from tqdm import tqdm
 from umap.umap_ import UMAP
 
 import umap
-
+import util._transforms as _transforms
 import util.report
 import util.utils
 from util.base_logger import logger
@@ -142,33 +142,46 @@ def train(run: Run):
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
+    t = transforms.Compose([
+        _transforms._Pad(padding=[0,0,0,0]),
+        transforms.Resize([28,28]),
+        transforms.Grayscale()]
+    )
+    """
+    tr = torch.nn.Sequential(
+        _transforms._Pad(padding=[0, 0, 0, 0]),
+        transforms.Resize([28, 28]),
+        transforms.Grayscale()
+    )
+    t = torch.jit.script(tr)
+    """
     train_set = datasets.ImageFolder(
-        './data/__training-data-standardised',
+        './data/training-data',
         # './data/raw-cleaned-standardised',
 
-        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+        transform=transforms.Compose([t, transforms.ToTensor()])
     )
     test_set = datasets.ImageFolder(
         # './data/raw-cleaned-standardised',
-        './data/__test-data-standardised',
+        './data/test-data',
         # './data/test-data-manual',
         # './data/test-data-manual-otsu',
 
-        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+        transform=transforms.Compose([t, transforms.ToTensor()])
     )
 
     test_idx = [i for i in range(len(test_set)) if
-           test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
+                test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
     # build the appropriate subset
     subset_test = Subset(test_set, test_idx)
 
     train_idx = [i for i in range(len(train_set)) if
-           train_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
+                 train_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
     # build the appropriate subset
     subset_train = Subset(train_set, train_idx)
 
-    train_loader = torch.utils.data.DataLoader(subset_train)
-    test_loader = torch.utils.data.DataLoader(subset_test)
+    train_loader = torch.utils.data.DataLoader(train_set)
+    test_loader = torch.utils.data.DataLoader(test_set)
     logger.debug(f"testloader batchsize={test_loader.batch_size}")
 
     # take 5 random letters from testset
@@ -294,7 +307,6 @@ def train(run: Run):
     util.report.image_to_report("net_eval/loss.png", "Network Training Loss")
     plt.show()
     plt.close()
-
 
 
 def evaluate(run):

@@ -15,7 +15,7 @@ import sklearn.cluster as cluster
 
 from autoencoders.autoencoder import Network, get_label, ConvAutoEncoder
 from util.base_logger import logger
-from util.transform import _Pad
+from util._transforms import _Pad
 import util
 import cv2
 
