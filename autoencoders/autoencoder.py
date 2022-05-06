@@ -226,13 +226,15 @@ def train(run: Run):
 
     losses_train = []
     losses_valid = []
+    losses_test = []
     optimal_model = None
     current_valid_loss = 10000
 
     num_epochs = run.epochs
     for epoch in range(num_epochs):
-        train_loss = 0
-        valid_loss = 0
+        cum_train_loss = 0
+        cum_valid_loss = 0
+        cum_test_loss = 0
         ###################
         # train the models #
         ###################
@@ -249,10 +251,10 @@ def train(run: Run):
             loss_train.backward()
             optimizer.step()
 
-            train_loss += loss_train.item() * images.size(0)
+            cum_train_loss += loss_train.item() * images.size(0)
             if run.tqdm:
                 loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
-                loop_train.set_postfix(loss=train_loss)
+                loop_train.set_postfix(loss=cum_train_loss)
 
         if run.tqdm:
             loop_valid = tqdm(valid_loader, total=len(valid_loader))
@@ -264,19 +266,38 @@ def train(run: Run):
             _, outputs = model.eval()(images)
             loss_valid = criterion(outputs, images)
 
-            valid_loss += loss_valid.item() * images.size(0)
+            cum_valid_loss += loss_valid.item() * images.size(0)
             if run.tqdm:
                 loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
-                loop_train.set_postfix(loss=valid_loss)
+                loop_train.set_postfix(loss=cum_valid_loss)
 
-        if current_valid_loss > valid_loss:
+        if current_valid_loss > cum_valid_loss:
             optimal_model = (model, epoch)
+            current_valid_loss = cum_valid_loss
 
-        losses_train.append(loss_train)
-        losses_valid.append(loss_valid)
+        if run.tqdm:
+            loop_test = tqdm(test_loader, total=len(test_loader))
+        else:
+            loop_test = test_loader
+
+        for batch in loop_test:
+            images = batch[0].to(device)
+            _, outputs = model.eval()(images)
+            loss_test = criterion(outputs, images)
+
+            cum_test_loss += loss_test.item() * images.size(0)
+            if run.tqdm:
+                loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_postfix(loss=cum_test_loss)
+
+
+
+        losses_train.append(cum_train_loss)
+        losses_valid.append(cum_valid_loss)
+        losses_test.append(cum_test_loss)
         logger.info(f'Epoch={epoch} done.')
 
-        #scheduler.step(train_loss)
+        #scheduler.step(cum_train_loss)
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
@@ -302,7 +323,7 @@ def train(run: Run):
                 ax.get_yaxis().set_visible(False)
 
         fig.savefig(f'./{run.root}/original_decoded.png', bbox_inches='tight')
-        plt.show()
+
         plt.close()
 
         encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
@@ -314,7 +335,6 @@ def train(run: Run):
             ax.imshow(encoded_img[fm], cmap='gray')
 
         fig.savefig(f'./{run.root}/encoded_img_alpha')
-        plt.show()
         plt.close()
 
     torch.save(optimal_model[0].state_dict(), f'./models/optimal-model-{optimal_model[1]}-ae-{run.name_time}.pth')
@@ -327,8 +347,6 @@ def train(run: Run):
     plt.title("Train Loss")
     plt.savefig(f"./{run.root}/net_eval/loss_train.png")
     util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
-
-    plt.show()
     plt.close()
 
     plt.xlabel('Iterations')
@@ -338,7 +356,15 @@ def train(run: Run):
     plt.title("Validation Loss")
     plt.savefig(f"./{run.root}/net_eval/loss_valid.png")
     util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
-    plt.show()
+    plt.close()
+
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses_test[-num_epochs:])
+    util.utils.create_folder(f"./{run.root}/net_eval")
+    plt.title("Test Loss")
+    plt.savefig(f"./{run.root}/net_eval/loss_test.png")
+    util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
     plt.close()
 
 
@@ -498,100 +524,3 @@ def evaluate(run):
     plt.close()
 
 
-"""
-
-IMAGE_SIZE = 784
-IMAGE_WIDTH = IMAGE_HEIGHT = 28
-
-
-class AutoEncoder(nn.Module):
-
-    def __init__(self, code_size):
-        super().__init__()
-        self.code_size = code_size
-
-        # Encoder specification
-        self.enc_cnn_1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.enc_cnn_2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.enc_linear_1 = nn.Linear(4 * 4 * 20, 50)
-        self.enc_linear_2 = nn.Linear(50, self.code_size)
-
-        # Decoder specification
-        self.dec_linear_1 = nn.Linear(self.code_size, 160)
-        self.dec_linear_2 = nn.Linear(160, IMAGE_SIZE)
-
-    def forward(self, images):
-        code = self.encode(images)
-        out = self.decode(code)
-        return out, code
-
-    def encode(self, images):
-        code = self.enc_cnn_1(images)
-        code = F.selu(F.max_pool2d(code, 2))
-
-        code = self.enc_cnn_2(code)
-        code = F.selu(F.max_pool2d(code, 2))
-
-        code = code.view([images.size(0), -1])
-        code = F.selu(self.enc_linear_1(code))
-        code = self.enc_linear_2(code)
-        return code
-
-    def decode(self, code):
-        out = F.selu(self.dec_linear_1(code))
-        out = F.sigmoid(self.dec_linear_2(out))
-        out = out.view([code.size(0), 1, IMAGE_WIDTH, IMAGE_HEIGHT])
-        return out
-
-
-def run_ae():
-    # Hyperparameters
-    code_size = 20
-    num_epochs = 5
-    batch_size = 128
-    lr = 0.002
-    optimizer_cls = optim.Adam
-
-    # Load data
-
-    train_data = datasets.ImageFolder(
-        './data/__training-data-standardised',
-
-        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
-    )
-    test_data = test_set = datasets.ImageFolder(
-        './data/__test-data-standardised',
-
-        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
-    )
-    train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size, num_workers=4,
-                                               drop_last=True)
-
-    # Instantiate models
-    autoencoder = AutoEncoder(code_size)
-    loss_fn = nn.BCELoss()
-    optimizer = optimizer_cls(autoencoder.parameters(), lr=lr)
-
-
-    # Training loop
-    for epoch in range(num_epochs):
-        print("Epoch %d" % epoch)
-
-        for i, (images, _) in enumerate(train_loader):  # Ignore image labels
-            out, code = autoencoder(Variable(images))
-
-            optimizer.zero_grad()
-            loss = loss_fn(out, images)
-            loss.backward()
-            optimizer.step()
-
-        print("Loss = %.3f" % loss.data)
-
-    # Try reconstructing on test data
-    test_image = random.choice(test_data)
-
-    test_reconst, _ = autoencoder(test_image)
-
-    torchvision.utils.save_image(test_image.data, 'orig.png')
-    torchvision.utils.save_image(test_reconst.data, 'reconst.png')
-"""
