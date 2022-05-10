@@ -1,3 +1,2 @@
-./_config/cluster_config_100.json
-True
+./_config/cluster_config_250_gpu.json
 Evaluating results and summarizing them in report
