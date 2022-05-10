@@ -1,3 +1,5 @@
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -8,6 +10,7 @@ import torchvision.transforms as transforms
 from sklearn.manifold import TSNE
 from sklearn.model_selection import train_test_split
 from torch.utils.data import dataset, Subset
+from torchsummary import summary
 from torchvision import datasets
 from torchvision.transforms import transforms
 from tqdm import tqdm
@@ -52,42 +55,11 @@ def get_label(label):
     return switcher.get(label)
 
 
-class Network(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=16,
-                      kernel_size=5, stride=1, padding=2),
-            nn.BatchNorm2d(num_features=16),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-        )
-        self.layer2 = nn.Sequential(
-            nn.Conv2d(in_channels=16, out_channels=32,
-                      kernel_size=5, stride=1, padding=2),
-            nn.BatchNorm2d(num_features=32),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-        )
-        self.fc = nn.Sequential(
-            nn.Linear(in_features=7 * 7 * 32, out_features=256),
-            nn.Dropout(p=0.2),
-            nn.ReLU()
-        )
-        self.out = nn.Linear(in_features=256, out_features=5)
 
-    def forward(self, t):
-        t = self.layer1(t)
-        t = self.layer2(t)
-        t = t.reshape(t.size(0), -1)
-        t = self.fc(t)
-        t = self.out(t)
-
-        return t
 
 
 class ConvAutoEncoder(nn.Module):
-    def __init__(self, pretrained_model):
+    def __init__(self, dim):
         super().__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=16,
@@ -135,6 +107,9 @@ class ConvAutoEncoder(nn.Module):
 
 
 def train(run: Run):
+    dim = 62
+    dim = math.floor(dim/4)*4
+    logger.info(f"Adjusted dim to %4=0 {dim}")
     util.report.header1("Auto-Encoder")
 
     logger.info(f"torch.cuda.is_available()={torch.cuda.is_available()}")
@@ -143,7 +118,7 @@ def train(run: Run):
     name = "CovAE"
     t = transforms.Compose([
         _transforms._Pad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
-        transforms.Resize([28, 28]),
+        transforms.Resize([dim, dim]),
         transforms.Grayscale()]
     )
 
@@ -182,19 +157,20 @@ def train(run: Run):
 
     # take 5 random letters from testset
 
-    pretrained_model = Network()
-    #logger.info(pretrained_model)
+
     # util.report.write_to_report(pretrained_model)
 
     # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
-    model = ConvAutoEncoder(pretrained_model)
+    model = ConvAutoEncoder(dim)
+    logger.info(model)
     #logger.info(model)
 
     b = torch.randn(16, 1, 5, 5)
 
     input_names = ['Image']
     output_names = ['Label']
+
 
     # TODO fix
     # util.report.write_to_report(summary(model, (1, 28, 28), 2592))
@@ -208,7 +184,7 @@ def train(run: Run):
                 param.requires_grad = False
 
     model.to(device)
-
+    logger.info(summary(model, (1, 28, 28), 10))
     ###TODO understand losses
     criterion = nn.MSELoss()
     ###TODO understand optimizer
@@ -256,6 +232,8 @@ def train(run: Run):
                 loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_train_loss)
 
+        tqdm._instances.clear()
+
         if run.tqdm:
             loop_valid = tqdm(valid_loader, total=len(valid_loader))
         else:
@@ -274,6 +252,8 @@ def train(run: Run):
         if current_valid_loss > cum_valid_loss:
             optimal_model = (model, epoch)
             current_valid_loss = cum_valid_loss
+
+        tqdm._instances.clear()
 
         if run.tqdm:
             loop_test = tqdm(test_loader, total=len(test_loader))
