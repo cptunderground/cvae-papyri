@@ -295,6 +295,9 @@ def standardise(run:Run):
                     img_max_res = max(img_height, img_width)
                     img_min_res = min(img_height, img_width)
 
+                    if (img_width < 20 or img_height < 20):
+                        logger.info(f"{filename} - width={img_width} - height={img_height}")
+
                     if (img_max_res > max_resolution):
                         max_resolution = img_max_res
                         max_resolution_name = filename
