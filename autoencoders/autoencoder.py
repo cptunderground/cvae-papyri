@@ -127,10 +127,7 @@ def train(run: Run):
     ])
 
     _dataset = datasets.ImageFolder(
-        # './data/raw-cleaned-standardised',
         './data/raw',
-        # './data/test-data-manual',
-        # './data/test-data-manual-otsu',
 
         transform=transforms.Compose([t, t_prime])
     )
@@ -142,9 +139,9 @@ def train(run: Run):
     logger.info(f"len(_validset)={len(_validset)}")
     logger.info(f"len(_testset)={len(_testset)}")
 
-    batch = 1
+    batch = 100
     train_loader = torch.utils.data.DataLoader(_trainset, batch_size=batch)
-    test_loader = torch.utils.data.DataLoader(_testset, batch_size=batch)
+    test_loader = torch.utils.data.DataLoader(_testset, batch_size=100)
     valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
     logger.debug(f"testloader batchsize={test_loader.batch_size}")
 
@@ -286,7 +283,7 @@ def train(run: Run):
         print(decoded_imgs.shape)
         print(images.shape)
         # plot the first ten input images and then reconstructed images
-        fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(12, 4))
+        fig, axes = plt.subplots(nrows=2, ncols=10, sharex=True, sharey=True, figsize=(12, 4))
 
         # input images on top row, reconstructions on bottom
         for images, row in zip([images, decoded_imgs], axes):
