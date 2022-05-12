@@ -20,7 +20,7 @@ import util.report
 import util.utils
 from util.base_logger import logger
 from util.run import Run
-
+import statistics
 
 def png_to_ipx3():
     Names = [['./data/__training-data-standardised/alpha', 'train'], ['./data/__test-data-standardised/alpha', 't10k']]
@@ -295,6 +295,9 @@ def standardise(run:Run):
                     img_max_res = max(img_height, img_width)
                     img_min_res = min(img_height, img_width)
 
+                    if (img_width < 20 or img_height < 20):
+                        logger.info(f"{filename} - width={img_width} - height={img_height}")
+
                     if (img_max_res > max_resolution):
                         max_resolution = img_max_res
                         max_resolution_name = filename
@@ -315,7 +318,7 @@ def standardise(run:Run):
     sleep(10)
 
     data = np.zeros((max_resolution, max_resolution))
-
+    all_res = []
     for tup in paths:
         src_directory = tup[0]
         dst_directory = tup[1]
@@ -338,12 +341,22 @@ def standardise(run:Run):
 
                     img_height = img.shape[0]
                     img_width = img.shape[1]
-
+                    all_res.append(img_width)
+                    all_res.append(img_height)
                     data[img_width - 1][img_height - 1] += 1
 
                     continue
                 else:
                     continue
+
+    median_res = statistics.median(all_res)
+    mean_res = statistics.mean(all_res)
+
+    logger.info(f"median of all resolutions is [{median_res}], rounded to {math.floor(median_res)}")
+    logger.info(f"mean of all resolutions is [{mean_res}], rounded to {math.floor(mean_res)}")
+
+    _mean_res = math.floor(mean_res)
+    _median_res = math.floor(median_res)
 
     logger.debug(data)
 
@@ -367,8 +380,11 @@ def standardise(run:Run):
     most_frequent_res = (0,0)
     count = 0
 
+
+
     for i in x:
         for j in y:
+
             if max(data[i][j], count) > count:
                 most_frequent_res = i,j
                 count = data[i][j]

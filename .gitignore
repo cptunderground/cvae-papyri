@@ -3,3 +3,4 @@
 /out
 /models
 /umap
+*.pyc

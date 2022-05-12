@@ -1,3 +1,5 @@
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -6,6 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
 from sklearn.manifold import TSNE
+from sklearn.model_selection import train_test_split
 from torch.utils.data import dataset, Subset
 from torchsummary import summary
 from torchvision import datasets
@@ -13,8 +16,7 @@ from torchvision.transforms import transforms
 from tqdm import tqdm
 from umap.umap_ import UMAP
 
-import umap
-
+import util._transforms as _transforms
 import util.report
 import util.utils
 from util.base_logger import logger
@@ -53,42 +55,11 @@ def get_label(label):
     return switcher.get(label)
 
 
-class Network(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=16,
-                      kernel_size=5, stride=1, padding=2),
-            nn.BatchNorm2d(num_features=16),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-        )
-        self.layer2 = nn.Sequential(
-            nn.Conv2d(in_channels=16, out_channels=32,
-                      kernel_size=5, stride=1, padding=2),
-            nn.BatchNorm2d(num_features=32),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-        )
-        self.fc = nn.Sequential(
-            nn.Linear(in_features=7 * 7 * 32, out_features=256),
-            nn.Dropout(p=0.2),
-            nn.ReLU()
-        )
-        self.out = nn.Linear(in_features=256, out_features=5)
 
-    def forward(self, t):
-        t = self.layer1(t)
-        t = self.layer2(t)
-        t = t.reshape(t.size(0), -1)
-        t = self.fc(t)
-        t = self.out(t)
-
-        return t
 
 
 class ConvAutoEncoder(nn.Module):
-    def __init__(self, pretrained_model):
+    def __init__(self, dim):
         super().__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=16,
@@ -136,56 +107,70 @@ class ConvAutoEncoder(nn.Module):
 
 
 def train(run: Run):
+    dim = 62
+    dim = math.floor(dim/4)*4
+    logger.info(f"Adjusted dim to %4=0 {dim}")
     util.report.header1("Auto-Encoder")
 
-    print(torch.cuda.is_available())
+    logger.info(f"torch.cuda.is_available()={torch.cuda.is_available()}")
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
-    train_set = datasets.ImageFolder(
-        './data/__training-data-standardised',
-        # './data/raw-cleaned-standardised',
-
-        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+    t = transforms.Compose([
+        _transforms._Pad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
+        transforms.Resize([dim, dim]),
+        transforms.Grayscale()]
     )
-    test_set = datasets.ImageFolder(
+
+    _dataset = datasets.ImageFolder(
         # './data/raw-cleaned-standardised',
-        './data/__test-data-standardised',
+        './data/raw',
         # './data/test-data-manual',
         # './data/test-data-manual-otsu',
 
-        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+        transform=transforms.Compose([t, transforms.ToTensor()])
     )
 
+    _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=42)
+    _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=42)
+
+    logger.info(f"len(_trainset)={len(_trainset)}")
+    logger.info(f"len(_validset)={len(_validset)}")
+    logger.info(f"len(_testset)={len(_testset)}")
+
+    """
     test_idx = [i for i in range(len(test_set)) if
-           test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
+                test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
     # build the appropriate subset
     subset_test = Subset(test_set, test_idx)
 
     train_idx = [i for i in range(len(train_set)) if
-           train_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
+                 train_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
     # build the appropriate subset
     subset_train = Subset(train_set, train_idx)
+    """
 
-    train_loader = torch.utils.data.DataLoader(subset_train)
-    test_loader = torch.utils.data.DataLoader(subset_test)
+    train_loader = torch.utils.data.DataLoader(_trainset)
+    test_loader = torch.utils.data.DataLoader(_testset)
+    valid_loader = torch.utils.data.DataLoader(_validset)
     logger.debug(f"testloader batchsize={test_loader.batch_size}")
 
     # take 5 random letters from testset
 
-    pretrained_model = Network()
-    logger.info(pretrained_model)
+
     # util.report.write_to_report(pretrained_model)
 
     # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
-    model = ConvAutoEncoder(pretrained_model)
+    model = ConvAutoEncoder(dim)
     logger.info(model)
+    #logger.info(model)
 
     b = torch.randn(16, 1, 5, 5)
 
     input_names = ['Image']
     output_names = ['Label']
+
 
     # TODO fix
     # util.report.write_to_report(summary(model, (1, 28, 28), 2592))
@@ -199,7 +184,7 @@ def train(run: Run):
                 param.requires_grad = False
 
     model.to(device)
-
+    logger.info(summary(model, (1, 28, 28), 10))
     ###TODO understand losses
     criterion = nn.MSELoss()
     ###TODO understand optimizer
@@ -210,51 +195,96 @@ def train(run: Run):
         {'params': model.decoder.parameters()}
     ], lr=0.01)"""
 
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
     ###TODO
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
+    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
-    losses = []
+    losses_train = []
+    losses_valid = []
+    losses_test = []
+    optimal_model = None
+    current_valid_loss = 10000
 
     num_epochs = run.epochs
     for epoch in range(num_epochs):
-        train_loss = 0
+        cum_train_loss = 0
+        cum_valid_loss = 0
+        cum_test_loss = 0
         ###################
         # train the models #
         ###################
         if run.tqdm:
-            loop = tqdm(train_loader, total=len(train_loader))
+            loop_train = tqdm(train_loader, total=len(train_loader))
         else:
-            loop = train_loader
+            loop_train = train_loader
 
-        for batch in loop:
+        for batch in loop_train:
             images = batch[0].to(device)
-            _, outputs = model(images)
-            loss = criterion(outputs, images)
+            _, outputs = model.train()(images)
+            loss_train = criterion(outputs, images)
             optimizer.zero_grad()
-            loss.backward()
+            loss_train.backward()
             optimizer.step()
 
-            train_loss += loss.item() * images.size(0)
+            cum_train_loss += loss_train.item() * images.size(0)
             if run.tqdm:
-                loop.set_description(f'Epoch [{epoch + 1:2d}/{num_epochs}]')
-                loop.set_postfix(loss=train_loss)
+                loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_postfix(loss=cum_train_loss)
 
-        losses.append(loss)
+        tqdm._instances.clear()
+
+        if run.tqdm:
+            loop_valid = tqdm(valid_loader, total=len(valid_loader))
+        else:
+            loop_valid = valid_loader
+
+        for batch in loop_valid:
+            images = batch[0].to(device)
+            _, outputs = model.eval()(images)
+            loss_valid = criterion(outputs, images)
+
+            cum_valid_loss += loss_valid.item() * images.size(0)
+            if run.tqdm:
+                loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_postfix(loss=cum_valid_loss)
+
+        if current_valid_loss > cum_valid_loss:
+            optimal_model = (model, epoch)
+            current_valid_loss = cum_valid_loss
+
+        tqdm._instances.clear()
+
+        if run.tqdm:
+            loop_test = tqdm(test_loader, total=len(test_loader))
+        else:
+            loop_test = test_loader
+
+        for batch in loop_test:
+            images = batch[0].to(device)
+            _, outputs = model.eval()(images)
+            loss_test = criterion(outputs, images)
+
+            cum_test_loss += loss_test.item() * images.size(0)
+            if run.tqdm:
+                loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_postfix(loss=cum_test_loss)
+
+
+
+        losses_train.append(cum_train_loss)
+        losses_valid.append(cum_valid_loss)
+        losses_test.append(cum_test_loss)
         logger.info(f'Epoch={epoch} done.')
 
-        scheduler.step(train_loss)
-
-        torch.save(model.state_dict(), f'./models/models-autoencoder-{run.name_time}.pth')
-        torch.save(model.state_dict(), f'./{run.root}/models-autoencoder-{run.name_time}.pth')
+        #scheduler.step(cum_train_loss)
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
         images = images.to(device)
 
         # get sample outputs
-        encoded_imgs, decoded_imgs = model(images)
+        encoded_imgs, decoded_imgs = model.eval()(images)
         # prep images for display
         images = images.cpu().numpy()
 
@@ -273,6 +303,7 @@ def train(run: Run):
                 ax.get_yaxis().set_visible(False)
 
         fig.savefig(f'./{run.root}/original_decoded.png', bbox_inches='tight')
+
         plt.close()
 
         encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
@@ -286,15 +317,35 @@ def train(run: Run):
         fig.savefig(f'./{run.root}/encoded_img_alpha')
         plt.close()
 
+    torch.save(optimal_model[0].state_dict(), f'./models/optimal-model-{optimal_model[1]}-ae-{run.name_time}.pth')
+    torch.save(optimal_model[0], f'./{run.root}/optimal-model-{optimal_model[1]}-ae-{run.name_time}.pth')
+
     plt.xlabel('Iterations')
     plt.ylabel('Loss')
-    plt.plot(losses[-100:])
+    plt.plot(losses_train[-num_epochs:])
     util.utils.create_folder(f"./{run.root}/net_eval")
-    plt.savefig(f"./{run.root}/net_eval/loss.png")
-    util.report.image_to_report("net_eval/loss.png", "Network Training Loss")
-    plt.show()
+    plt.title("Train Loss")
+    plt.savefig(f"./{run.root}/net_eval/loss_train.png")
+    util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
     plt.close()
 
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses_valid[-num_epochs:])
+    util.utils.create_folder(f"./{run.root}/net_eval")
+    plt.title("Validation Loss")
+    plt.savefig(f"./{run.root}/net_eval/loss_valid.png")
+    util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
+    plt.close()
+
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses_test[-num_epochs:])
+    util.utils.create_folder(f"./{run.root}/net_eval")
+    plt.title("Test Loss")
+    plt.savefig(f"./{run.root}/net_eval/loss_test.png")
+    util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
+    plt.close()
 
 
 def evaluate(run):
@@ -453,100 +504,3 @@ def evaluate(run):
     plt.close()
 
 
-"""
-
-IMAGE_SIZE = 784
-IMAGE_WIDTH = IMAGE_HEIGHT = 28
-
-
-class AutoEncoder(nn.Module):
-
-    def __init__(self, code_size):
-        super().__init__()
-        self.code_size = code_size
-
-        # Encoder specification
-        self.enc_cnn_1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.enc_cnn_2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.enc_linear_1 = nn.Linear(4 * 4 * 20, 50)
-        self.enc_linear_2 = nn.Linear(50, self.code_size)
-
-        # Decoder specification
-        self.dec_linear_1 = nn.Linear(self.code_size, 160)
-        self.dec_linear_2 = nn.Linear(160, IMAGE_SIZE)
-
-    def forward(self, images):
-        code = self.encode(images)
-        out = self.decode(code)
-        return out, code
-
-    def encode(self, images):
-        code = self.enc_cnn_1(images)
-        code = F.selu(F.max_pool2d(code, 2))
-
-        code = self.enc_cnn_2(code)
-        code = F.selu(F.max_pool2d(code, 2))
-
-        code = code.view([images.size(0), -1])
-        code = F.selu(self.enc_linear_1(code))
-        code = self.enc_linear_2(code)
-        return code
-
-    def decode(self, code):
-        out = F.selu(self.dec_linear_1(code))
-        out = F.sigmoid(self.dec_linear_2(out))
-        out = out.view([code.size(0), 1, IMAGE_WIDTH, IMAGE_HEIGHT])
-        return out
-
-
-def run_ae():
-    # Hyperparameters
-    code_size = 20
-    num_epochs = 5
-    batch_size = 128
-    lr = 0.002
-    optimizer_cls = optim.Adam
-
-    # Load data
-
-    train_data = datasets.ImageFolder(
-        './data/__training-data-standardised',
-
-        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
-    )
-    test_data = test_set = datasets.ImageFolder(
-        './data/__test-data-standardised',
-
-        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
-    )
-    train_loader = torch.utils.data.DataLoader(train_data, shuffle=True, batch_size=batch_size, num_workers=4,
-                                               drop_last=True)
-
-    # Instantiate models
-    autoencoder = AutoEncoder(code_size)
-    loss_fn = nn.BCELoss()
-    optimizer = optimizer_cls(autoencoder.parameters(), lr=lr)
-
-
-    # Training loop
-    for epoch in range(num_epochs):
-        print("Epoch %d" % epoch)
-
-        for i, (images, _) in enumerate(train_loader):  # Ignore image labels
-            out, code = autoencoder(Variable(images))
-
-            optimizer.zero_grad()
-            loss = loss_fn(out, images)
-            loss.backward()
-            optimizer.step()
-
-        print("Loss = %.3f" % loss.data)
-
-    # Try reconstructing on test data
-    test_image = random.choice(test_data)
-
-    test_reconst, _ = autoencoder(test_image)
-
-    torchvision.utils.save_image(test_image.data, 'orig.png')
-    torchvision.utils.save_image(test_reconst.data, 'reconst.png')
-"""
