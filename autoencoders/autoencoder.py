@@ -21,6 +21,8 @@ import util.report
 import util.utils
 from util.base_logger import logger
 from util.run import Run
+import autoencoders.auto_resnet18
+import autoencoders.vae
 
 
 def get_label(label):
@@ -53,9 +55,6 @@ def get_label(label):
     }
 
     return switcher.get(label)
-
-
-
 
 
 class ConvAutoEncoder(nn.Module):
@@ -107,20 +106,25 @@ class ConvAutoEncoder(nn.Module):
 
 
 def train(run: Run):
-    dim = 62
-    dim = math.floor(dim/4)*4
+    dim = 224
+    dim = math.floor(dim / 4) * 4
     logger.info(f"Adjusted dim to %4=0 {dim}")
     util.report.header1("Auto-Encoder")
 
     logger.info(f"torch.cuda.is_available()={torch.cuda.is_available()}")
 
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
     t = transforms.Compose([
         _transforms._Pad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
-        transforms.Resize([dim, dim]),
-        transforms.Grayscale()]
-    )
+        transforms.Resize([64, 64]),
+        transforms.Grayscale()
+    ])
+
+    t_prime = transforms.Compose([
+        transforms.ToTensor(),
+        #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
 
     _dataset = datasets.ImageFolder(
         # './data/raw-cleaned-standardised',
@@ -128,7 +132,7 @@ def train(run: Run):
         # './data/test-data-manual',
         # './data/test-data-manual-otsu',
 
-        transform=transforms.Compose([t, transforms.ToTensor()])
+        transform=transforms.Compose([t, t_prime])
     )
 
     _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=42)
@@ -138,67 +142,39 @@ def train(run: Run):
     logger.info(f"len(_validset)={len(_validset)}")
     logger.info(f"len(_testset)={len(_testset)}")
 
-    """
-    test_idx = [i for i in range(len(test_set)) if
-                test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
-    # build the appropriate subset
-    subset_test = Subset(test_set, test_idx)
-
-    train_idx = [i for i in range(len(train_set)) if
-                 train_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters]]
-    # build the appropriate subset
-    subset_train = Subset(train_set, train_idx)
-    """
-
-    train_loader = torch.utils.data.DataLoader(_trainset)
-    test_loader = torch.utils.data.DataLoader(_testset)
-    valid_loader = torch.utils.data.DataLoader(_validset)
+    batch = 1
+    train_loader = torch.utils.data.DataLoader(_trainset, batch_size=batch)
+    test_loader = torch.utils.data.DataLoader(_testset, batch_size=batch)
+    valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
     logger.debug(f"testloader batchsize={test_loader.batch_size}")
 
     # take 5 random letters from testset
-
 
     # util.report.write_to_report(pretrained_model)
 
     # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
     model = ConvAutoEncoder(dim)
+    # resnet18 = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
+    # resnet18_dec = autoencoders.auto_resnet18.ResNet18Dec()
+
+    vae = autoencoders.vae.VAE(z_dim=24, nc=1)
+
     logger.info(model)
-    #logger.info(model)
 
-    b = torch.randn(16, 1, 5, 5)
-
-    input_names = ['Image']
-    output_names = ['Label']
-
-
-    # TODO fix
-    # util.report.write_to_report(summary(model, (1, 28, 28), 2592))
-    # to check if our weight transfer was successful or not
-    # list(list(pretrained_model.layer2.children())[0].parameters()) == list(
-    #    list(model.encoder.children())[4].parameters())
-    #
-    for layer_num, child in enumerate(model.encoder.children()):
-        if layer_num < 8:
-            for param in child.parameters():
-                param.requires_grad = False
 
     model.to(device)
-    logger.info(summary(model, (1, 28, 28), 10))
-    ###TODO understand losses
+    # resnet18.to(device)
+    # resnet18_dec.to(device)
+
+    vae.to(device)
+
     criterion = nn.MSELoss()
-    ###TODO understand optimizer
 
-    """Old optimizer
-    optimizer = optim.Adam([  # parameters which need optimization
-        {'params': model.encoder[8:].parameters()},
-        {'params': model.decoder.parameters()}
-    ], lr=0.01)"""
-
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = optim.Adam(vae.parameters(), lr=0.0001)
 
     ###TODO
-    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
+    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
     losses_train = []
     losses_valid = []
@@ -221,8 +197,10 @@ def train(run: Run):
 
         for batch in loop_train:
             images = batch[0].to(device)
-            _, outputs = model.train()(images)
-            loss_train = criterion(outputs, images)
+            # _, outputs = model.train()(images)
+            _enc = vae.encoder.train()(images)
+            _dec = vae.decoder(_enc)
+            loss_train = criterion(_dec, images)
             optimizer.zero_grad()
             loss_train.backward()
             optimizer.step()
@@ -234,6 +212,9 @@ def train(run: Run):
 
         tqdm._instances.clear()
 
+        ######################
+        # validate the model #
+        ######################
         if run.tqdm:
             loop_valid = tqdm(valid_loader, total=len(valid_loader))
         else:
@@ -241,8 +222,10 @@ def train(run: Run):
 
         for batch in loop_valid:
             images = batch[0].to(device)
-            _, outputs = model.eval()(images)
-            loss_valid = criterion(outputs, images)
+            # _, outputs = model.eval()(images)
+            _enc = vae.encoder.eval()(images)
+            _dec = vae.decoder(_enc)
+            loss_valid = criterion(_dec, images)
 
             cum_valid_loss += loss_valid.item() * images.size(0)
             if run.tqdm:
@@ -255,6 +238,9 @@ def train(run: Run):
 
         tqdm._instances.clear()
 
+        ##################
+        # test the model #
+        ##################
         if run.tqdm:
             loop_test = tqdm(test_loader, total=len(test_loader))
         else:
@@ -262,29 +248,29 @@ def train(run: Run):
 
         for batch in loop_test:
             images = batch[0].to(device)
-            _, outputs = model.eval()(images)
-            loss_test = criterion(outputs, images)
+            _enc = vae.encoder.eval()(images)
+            _dec = vae.decoder(_enc)
+            loss_test = criterion(_dec, images)
 
             cum_test_loss += loss_test.item() * images.size(0)
             if run.tqdm:
                 loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_test_loss)
 
-
-
         losses_train.append(cum_train_loss)
         losses_valid.append(cum_valid_loss)
         losses_test.append(cum_test_loss)
         logger.info(f'Epoch={epoch} done.')
 
-        #scheduler.step(cum_train_loss)
+        # scheduler.step(cum_train_loss)
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
         images = images.to(device)
 
         # get sample outputs
-        encoded_imgs, decoded_imgs = model.eval()(images)
+        encoded_imgs = vae.encoder.eval()(images)
+        decoded_imgs = vae.decoder.eval()(encoded_imgs)
         # prep images for display
         images = images.cpu().numpy()
 
@@ -292,29 +278,25 @@ def train(run: Run):
         encoded_imgs = encoded_imgs.detach().cpu().numpy()
         decoded_imgs = decoded_imgs.detach().cpu().numpy()
 
+        print(encoded_imgs.shape)
+        print(decoded_imgs.shape)
+
+        decoded_imgs = np.reshape(decoded_imgs, (decoded_imgs.shape[0], decoded_imgs.shape[2], decoded_imgs.shape[3], decoded_imgs.shape[1]))
+        images = np.reshape(images, (images.shape[0], images.shape[2], images.shape[3], images.shape[1]))
+        print(decoded_imgs.shape)
+        print(images.shape)
         # plot the first ten input images and then reconstructed images
         fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(12, 4))
 
         # input images on top row, reconstructions on bottom
         for images, row in zip([images, decoded_imgs], axes):
             for img, ax in zip(images, row):
-                ax.imshow(np.squeeze(img), cmap='gray')
+                ax.imshow(np.squeeze(img), cmap="gray")
                 ax.get_xaxis().set_visible(False)
                 ax.get_yaxis().set_visible(False)
 
         fig.savefig(f'./{run.root}/original_decoded.png', bbox_inches='tight')
 
-        plt.close()
-
-        encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
-
-        fig = plt.figure(figsize=(4, 4))
-        for fm in range(encoded_img.shape[0]):
-            ax = fig.add_subplot(2, 2, fm + 1, xticks=[], yticks=[])
-            ax.set_title(f'feature map: {fm}')
-            ax.imshow(encoded_img[fm], cmap='gray')
-
-        fig.savefig(f'./{run.root}/encoded_img_alpha')
         plt.close()
 
     torch.save(optimal_model[0].state_dict(), f'./models/optimal-model-{optimal_model[1]}-ae-{run.name_time}.pth')
@@ -502,5 +484,3 @@ def evaluate(run):
     util.report.image_to_report(f"{name}/{run.processing}/umap_{name}_final_eval_mode_{run.processing}.png",
                                 f"UMAP final_eval")
     plt.close()
-
-
