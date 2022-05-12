@@ -139,7 +139,7 @@ def train(run: Run):
     logger.info(f"len(_validset)={len(_validset)}")
     logger.info(f"len(_testset)={len(_testset)}")
 
-    batch = 100
+    batch = 1
     train_loader = torch.utils.data.DataLoader(_trainset, batch_size=batch)
     test_loader = torch.utils.data.DataLoader(_testset, batch_size=100)
     valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
