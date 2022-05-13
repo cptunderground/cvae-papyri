@@ -1,0 +1,99 @@
+2022-05-12 16:41:47,074 |     INFO | Program starting in cluster-mode
+2022-05-12 16:41:47,074 |     INFO | STARTING PROGRAM
+2022-05-12 16:41:47,074 |     INFO | Selected parameters:
+2022-05-12 16:41:47,074 |     INFO | {'name': 'cluster_50', 'name_time': 'cluster_50-12-05-2022-16-41-47', 'train': True, 'model': './models/models-autoencodergray-scale.pth', 'letters': ['alpha', 'beta', 'chi', 'delta', 'epsilon', 'eta', 'gamma', 'iota', 'kappa', 'lambda', 'mu', 'nu', 'omega', 'omicron', 'phi', 'pi', 'psi', 'rho', 'sigma', 'tau', 'theta', 'xi', 'ypsilon', 'zeta'], 'logging': 40, 'mode': 'cluster', 'epochs': 50, 'dimensions': 28, 'tqdm': False, 'processing': 'gray-scale', 'root': 'out/cluster_50-12-05-2022-16-41-47'}
+2022-05-12 16:41:47,075 |     INFO | Adjusted dim to %4=0 224
+2022-05-12 16:41:47,124 |     INFO | torch.cuda.is_available()=True
+2022-05-12 16:44:32,442 |     INFO | len(_trainset)=7113
+2022-05-12 16:44:32,444 |     INFO | len(_validset)=2371
+2022-05-12 16:44:32,444 |     INFO | len(_testset)=2371
+2022-05-12 16:44:32,668 |     INFO | ConvAutoEncoder(
+  (encoder): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (8): Conv2d(32, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(4, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): ReLU()
+  )
+  (decoder): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Upsample(scale_factor=2.0, mode=nearest)
+    (4): Conv2d(32, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (5): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): ReLU()
+    (7): Upsample(scale_factor=2.0, mode=nearest)
+    (8): Conv2d(16, 1, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (9): BatchNorm2d(1, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (10): Sigmoid()
+  )
+)
+2022-05-12 16:48:43,269 |     INFO | Epoch=0 done.
+2022-05-12 16:52:34,034 |     INFO | Epoch=1 done.
+2022-05-12 16:56:27,480 |     INFO | Epoch=2 done.
+2022-05-12 17:00:19,760 |     INFO | Epoch=3 done.
+2022-05-12 17:04:13,268 |     INFO | Epoch=4 done.
+2022-05-12 17:08:06,807 |     INFO | Epoch=5 done.
+2022-05-12 17:11:58,208 |     INFO | Epoch=6 done.
+2022-05-12 17:15:50,619 |     INFO | Epoch=7 done.
+2022-05-12 17:19:41,486 |     INFO | Epoch=8 done.
+2022-05-12 17:23:36,389 |     INFO | Epoch=9 done.
+2022-05-12 17:27:29,568 |     INFO | Epoch=10 done.
+2022-05-12 17:31:20,574 |     INFO | Epoch=11 done.
+2022-05-12 17:35:15,447 |     INFO | Epoch=12 done.
+2022-05-12 17:39:09,255 |     INFO | Epoch=13 done.
+2022-05-12 17:42:58,893 |     INFO | Epoch=14 done.
+2022-05-12 17:46:52,268 |     INFO | Epoch=15 done.
+2022-05-12 17:50:45,014 |     INFO | Epoch=16 done.
+2022-05-12 17:54:37,138 |     INFO | Epoch=17 done.
+2022-05-12 17:58:31,073 |     INFO | Epoch=18 done.
+2022-05-12 18:02:24,245 |     INFO | Epoch=19 done.
+2022-05-12 18:06:15,650 |     INFO | Epoch=20 done.
+2022-05-12 18:10:07,873 |     INFO | Epoch=21 done.
+2022-05-12 18:14:01,322 |     INFO | Epoch=22 done.
+2022-05-12 18:17:55,017 |     INFO | Epoch=23 done.
+2022-05-12 18:21:49,037 |     INFO | Epoch=24 done.
+2022-05-12 18:25:44,497 |     INFO | Epoch=25 done.
+2022-05-12 18:29:37,327 |     INFO | Epoch=26 done.
+2022-05-12 18:33:31,405 |     INFO | Epoch=27 done.
+2022-05-12 18:37:27,776 |     INFO | Epoch=28 done.
+2022-05-12 18:41:20,491 |     INFO | Epoch=29 done.
+2022-05-12 18:45:15,612 |     INFO | Epoch=30 done.
+2022-05-12 18:49:12,217 |     INFO | Epoch=31 done.
+2022-05-12 18:53:06,589 |     INFO | Epoch=32 done.
+2022-05-12 18:57:02,589 |     INFO | Epoch=33 done.
+2022-05-12 19:00:57,971 |     INFO | Epoch=34 done.
+2022-05-12 19:04:50,948 |     INFO | Epoch=35 done.
+2022-05-12 19:08:47,714 |     INFO | Epoch=36 done.
+2022-05-12 19:12:44,057 |     INFO | Epoch=37 done.
+2022-05-12 19:16:39,797 |     INFO | Epoch=38 done.
+2022-05-12 19:20:37,951 |     INFO | Epoch=39 done.
+2022-05-12 19:24:32,141 |     INFO | Epoch=40 done.
+2022-05-12 19:28:27,636 |     INFO | Epoch=41 done.
+2022-05-12 19:32:25,376 |     INFO | Epoch=42 done.
+2022-05-12 19:36:18,010 |     INFO | Epoch=43 done.
+2022-05-12 19:40:16,920 |     INFO | Epoch=44 done.
+2022-05-12 19:44:15,834 |     INFO | Epoch=45 done.
+2022-05-12 19:48:09,291 |     INFO | Epoch=46 done.
+2022-05-12 19:52:06,462 |     INFO | Epoch=47 done.
+2022-05-12 19:56:04,034 |     INFO | Epoch=48 done.
+2022-05-12 19:59:56,871 |     INFO | Epoch=49 done.
+2022-05-12 19:59:57,865 |  WARNING | ./. already exists
+2022-05-12 19:59:57,865 |  WARNING | ././out already exists
+2022-05-12 19:59:57,865 |  WARNING | ././out/cluster_50-12-05-2022-16-41-47 already exists
+2022-05-12 19:59:57,866 |     INFO | Created folder ././out/cluster_50-12-05-2022-16-41-47/net_eval
+2022-05-12 19:59:58,122 |  WARNING | ./. already exists
+2022-05-12 19:59:58,122 |  WARNING | ././out already exists
+2022-05-12 19:59:58,122 |  WARNING | ././out/cluster_50-12-05-2022-16-41-47 already exists
+2022-05-12 19:59:58,122 |  WARNING | ././out/cluster_50-12-05-2022-16-41-47/net_eval already exists
+2022-05-12 19:59:58,284 |  WARNING | ./. already exists
+2022-05-12 19:59:58,284 |  WARNING | ././out already exists
+2022-05-12 19:59:58,284 |  WARNING | ././out/cluster_50-12-05-2022-16-41-47 already exists
+2022-05-12 19:59:58,284 |  WARNING | ././out/cluster_50-12-05-2022-16-41-47/net_eval already exists
