@@ -107,10 +107,11 @@ class ResNet18Enc(nn.Module):
         x = F.adaptive_avg_pool2d(x, 1)
         x = x.view(x.size(0), -1)
         x = self.linear(x)
-        mu = x[:, :self.z_dim]
-        logvar = x[:, self.z_dim:]
-        return x
+        #mu = x[:, :self.z_dim]
+        #logvar = x[:, self.z_dim:]
         #return mu, logvar
+
+        return x
 
 
 class ResNet18Dec(nn.Module):
@@ -144,7 +145,7 @@ class ResNet18Dec(nn.Module):
         x = self.layer2(x)
         x = self.layer1(x)
         x = torch.sigmoid(self.conv1(x))
-        x = x.view(x.size(0), self.nc, 64, 64)
+        #x = x.view(x.size(0), self.nc, 64, 64)
         return x
 
 
@@ -156,7 +157,7 @@ class resnet_AE(nn.Module):
         self.decoder = ResNet18Dec(z_dim=z_dim, nc=nc)
 
     def forward(self, x):
-        mean, logvar = self.encoder(x)
+        #mean, logvar = self.encoder(x)
         #z = self.reparameterize(mean, logvar)
         enc = self.encoder(x)
         dec = self.decoder(enc)

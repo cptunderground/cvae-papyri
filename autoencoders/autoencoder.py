@@ -139,9 +139,9 @@ def train(run: Run):
     logger.info(f"len(_validset)={len(_validset)}")
     logger.info(f"len(_testset)={len(_testset)}")
 
-    batch = 1
+    batch = 128
     train_loader = torch.utils.data.DataLoader(_trainset, batch_size=batch)
-    test_loader = torch.utils.data.DataLoader(_testset, batch_size=100)
+    test_loader = torch.utils.data.DataLoader(_testset, batch_size=batch)
     valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
     logger.debug(f"testloader batchsize={test_loader.batch_size}")
 
@@ -155,20 +155,20 @@ def train(run: Run):
     # resnet18 = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
     # resnet18_dec = autoencoders.auto_resnet18.ResNet18Dec()
 
-    vae = autoencoders.vae.resnet_AE(z_dim=24, nc=1)
+    ae_resnet18 = autoencoders.resnet_ae.resnet_AE(z_dim=24, nc=1)
 
     logger.info(model)
 
 
-    model.to(device)
+    #model.to(device)
     # resnet18.to(device)
     # resnet18_dec.to(device)
 
-    vae.to(device)
+    ae_resnet18.to(device)
 
     criterion = nn.MSELoss()
 
-    optimizer = optim.Adam(vae.parameters(), lr=0.0001)
+    optimizer = optim.Adam(ae_resnet18.parameters(), lr=0.0001)
 
     ###TODO
     # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
@@ -193,16 +193,19 @@ def train(run: Run):
             loop_train = train_loader
 
         for batch in loop_train:
+
             images = batch[0].to(device)
             # _, outputs = model.train()(images)
-            _enc = vae.encoder.train()(images)
-            _dec = vae.decoder(_enc)
+            ae_resnet18.train()
+
+            _enc, _dec = ae_resnet18(images)
+
             loss_train = criterion(_dec, images)
             optimizer.zero_grad()
             loss_train.backward()
             optimizer.step()
 
-            cum_train_loss += loss_train.item() * images.size(0)
+            cum_train_loss += loss_train.item() / len(train_loader.dataset)
             if run.tqdm:
                 loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_train_loss)
@@ -220,11 +223,12 @@ def train(run: Run):
         for batch in loop_valid:
             images = batch[0].to(device)
             # _, outputs = model.eval()(images)
-            _enc = vae.encoder.eval()(images)
-            _dec = vae.decoder(_enc)
+            ae_resnet18.eval()
+            with torch.no_grad():
+                _enc, _dec = ae_resnet18(images)
             loss_valid = criterion(_dec, images)
 
-            cum_valid_loss += loss_valid.item() * images.size(0)
+            cum_valid_loss += loss_valid.item() / len(valid_loader.dataset)
             if run.tqdm:
                 loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_valid_loss)
@@ -245,11 +249,14 @@ def train(run: Run):
 
         for batch in loop_test:
             images = batch[0].to(device)
-            _enc = vae.encoder.eval()(images)
-            _dec = vae.decoder(_enc)
+
+            ae_resnet18.eval()
+            with torch.no_grad():
+                _enc, _dec = ae_resnet18(images)
+
             loss_test = criterion(_dec, images)
 
-            cum_test_loss += loss_test.item() * images.size(0)
+            cum_test_loss += loss_test.item() / len(test_loader.dataset)
             if run.tqdm:
                 loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_test_loss)
@@ -266,8 +273,8 @@ def train(run: Run):
         images = images.to(device)
 
         # get sample outputs
-        encoded_imgs = vae.encoder.eval()(images)
-        decoded_imgs = vae.decoder.eval()(encoded_imgs)
+        encoded_imgs = ae_resnet18.encoder.eval()(images)
+        decoded_imgs = ae_resnet18.decoder.eval()(encoded_imgs)
         # prep images for display
         images = images.cpu().numpy()
 
