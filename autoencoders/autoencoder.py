@@ -55,9 +55,6 @@ def get_label(label):
     return switcher.get(label)
 
 
-
-
-
 class ConvAutoEncoder(nn.Module):
     def __init__(self, dim):
         super().__init__()
@@ -108,7 +105,7 @@ class ConvAutoEncoder(nn.Module):
 
 def train(run: Run):
     dim = 62
-    dim = math.floor(dim/4)*4
+    dim = math.floor(dim / 4) * 4
     logger.info(f"Adjusted dim to %4=0 {dim}")
     util.report.header1("Auto-Encoder")
 
@@ -150,13 +147,16 @@ def train(run: Run):
     subset_train = Subset(train_set, train_idx)
     """
 
-    train_loader = torch.utils.data.DataLoader(_trainset)
-    test_loader = torch.utils.data.DataLoader(_testset)
-    valid_loader = torch.utils.data.DataLoader(_validset)
+    ##set batchsize to 512 and see if it crashes
+    ##--> powers of 2
+
+    batch = 512
+    train_loader = torch.utils.data.DataLoader(_trainset, batch_size=batch)
+    test_loader = torch.utils.data.DataLoader(_testset, batch_size=batch)
+    valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
     logger.debug(f"testloader batchsize={test_loader.batch_size}")
 
     # take 5 random letters from testset
-
 
     # util.report.write_to_report(pretrained_model)
 
@@ -164,13 +164,12 @@ def train(run: Run):
 
     model = ConvAutoEncoder(dim)
     logger.info(model)
-    #logger.info(model)
+    # logger.info(model)
 
     b = torch.randn(16, 1, 5, 5)
 
     input_names = ['Image']
     output_names = ['Label']
-
 
     # TODO fix
     # util.report.write_to_report(summary(model, (1, 28, 28), 2592))
@@ -198,7 +197,7 @@ def train(run: Run):
     optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
     ###TODO
-    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
+    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
 
     losses_train = []
     losses_valid = []
@@ -220,14 +219,15 @@ def train(run: Run):
             loop_train = train_loader
 
         for batch in loop_train:
-            images = batch[0].to(device)
+
+            images = batch.to(device)
             _, outputs = model.train()(images)
             loss_train = criterion(outputs, images)
             optimizer.zero_grad()
             loss_train.backward()
             optimizer.step()
 
-            cum_train_loss += loss_train.item() * images.size(0)
+            cum_train_loss += loss_train.item() / len(loop_train.dataset)
             if run.tqdm:
                 loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_train_loss)
@@ -240,11 +240,15 @@ def train(run: Run):
             loop_valid = valid_loader
 
         for batch in loop_valid:
-            images = batch[0].to(device)
-            _, outputs = model.eval()(images)
+            images = batch.to(device)
+
+            model.eval()
+            with torch.no_grad():
+                _, outputs = model(images)
+
             loss_valid = criterion(outputs, images)
 
-            cum_valid_loss += loss_valid.item() * images.size(0)
+            cum_valid_loss += loss_valid.item() / len(loop_valid.dataset)
             if run.tqdm:
                 loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_valid_loss)
@@ -261,23 +265,24 @@ def train(run: Run):
             loop_test = test_loader
 
         for batch in loop_test:
-            images = batch[0].to(device)
-            _, outputs = model.eval()(images)
+            images = batch.to(device)
+
+            model.eval()
+            with torch.no_grad():
+                _, outputs = model.eval()(images)
             loss_test = criterion(outputs, images)
 
-            cum_test_loss += loss_test.item() * images.size(0)
+            cum_test_loss += loss_test.item() / len(loop_test.dataset)
             if run.tqdm:
                 loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_test_loss)
-
-
 
         losses_train.append(cum_train_loss)
         losses_valid.append(cum_valid_loss)
         losses_test.append(cum_test_loss)
         logger.info(f'Epoch={epoch} done.')
 
-        #scheduler.step(cum_train_loss)
+        # scheduler.step(cum_train_loss)
 
         images, labels = next(iter(test_loader))
         # images, labels = next(iter(train_loader))
@@ -502,5 +507,3 @@ def evaluate(run):
     util.report.image_to_report(f"{name}/{run.processing}/umap_{name}_final_eval_mode_{run.processing}.png",
                                 f"UMAP final_eval")
     plt.close()
-
-
