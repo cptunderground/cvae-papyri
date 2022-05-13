@@ -354,8 +354,8 @@ def evaluate(run):
     train_loader = torch.utils.data.DataLoader(subset)
     test_loader = torch.utils.data.DataLoader(subset, batch_size=11082)
     logger.debug(test_loader.batch_size)
-    model = Network()
-    model = ConvAutoEncoder(model)
+
+    model = ConvAutoEncoder()
     model.load_state_dict(torch.load(run.model))
     model.eval()
 
