@@ -22,7 +22,7 @@ import util.utils
 from util.base_logger import logger
 from util.run import Run
 import autoencoders.auto_resnet18
-import autoencoders.vae
+import autoencoders.resnet_ae
 
 
 def get_label(label):
@@ -155,7 +155,7 @@ def train(run: Run):
     # resnet18 = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
     # resnet18_dec = autoencoders.auto_resnet18.ResNet18Dec()
 
-    vae = autoencoders.vae.VAE(z_dim=24, nc=1)
+    vae = autoencoders.vae.resnet_AE(z_dim=24, nc=1)
 
     logger.info(model)
 

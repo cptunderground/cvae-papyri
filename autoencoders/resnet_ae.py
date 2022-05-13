@@ -148,7 +148,7 @@ class ResNet18Dec(nn.Module):
         return x
 
 
-class VAE(nn.Module):
+class resnet_AE(nn.Module):
 
     def __init__(self, z_dim, nc=3):
         super().__init__()
