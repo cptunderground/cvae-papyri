@@ -139,7 +139,7 @@ def train(run: Run):
     logger.info(f"len(_validset)={len(_validset)}")
     logger.info(f"len(_testset)={len(_testset)}")
 
-    batch = 128
+    batch = run.batch_size
     train_loader = torch.utils.data.DataLoader(_trainset, batch_size=batch)
     test_loader = torch.utils.data.DataLoader(_testset, batch_size=batch)
     valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
@@ -282,13 +282,11 @@ def train(run: Run):
         encoded_imgs = encoded_imgs.detach().cpu().numpy()
         decoded_imgs = decoded_imgs.detach().cpu().numpy()
 
-        print(encoded_imgs.shape)
-        print(decoded_imgs.shape)
+
 
         decoded_imgs = np.reshape(decoded_imgs, (decoded_imgs.shape[0], decoded_imgs.shape[2], decoded_imgs.shape[3], decoded_imgs.shape[1]))
         images = np.reshape(images, (images.shape[0], images.shape[2], images.shape[3], images.shape[1]))
-        print(decoded_imgs.shape)
-        print(images.shape)
+
         # plot the first ten input images and then reconstructed images
         fig, axes = plt.subplots(nrows=2, ncols=10, sharex=True, sharey=True, figsize=(12, 4))
 

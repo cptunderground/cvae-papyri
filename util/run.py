@@ -13,7 +13,7 @@ processing_modes = ['gray-scale', 'otsu']
 class Run:
     def __init__(self, name: str = "unnamed", letters: list = None,
                  train: bool = False, model: str = f'./models/models-autoencodergray-scale.pth',
-                 mode: str = "default", epochs: int = 30, dimensions: int = 28,
+                 mode: str = "default", batch_size = 128, epochs: int = 30, dimensions: int = 28,
                  tqdm: bool = False, processing: str = "gray-scale"):
         checkArgs(mode, processing)
 
@@ -27,6 +27,7 @@ class Run:
         self.letters = letters
         self.logging = logging.ERROR
         self.mode = mode
+        self.batch_size = batch_size
         self.epochs = epochs
         self.dimensions = dimensions
         self.tqdm = tqdm
@@ -39,7 +40,7 @@ class Run:
             data = json.load(file)
             run = Run(name=data["name"], train=data["train"], letters=data["letters"],
                       mode=data["mode"], epochs=data["epochs"], dimensions=data["dimensions"],
-                      tqdm=data["tqdm"],
+                      tqdm=data["tqdm"], batch_size=data["batch_size"],
                       processing=data["processing"])
             return run
 
@@ -76,7 +77,7 @@ def checkArgs(mode, proc):
         exit(1)
 
 if __name__ == '__main__':
-    standard_conf = Run(name="standard_config", letters=['alpha'], train=True, mode="default", epochs=3, dimensions=28,
+    standard_conf = Run(name="standard_config", letters=['alpha'], train=True, mode="default", epochs=30, dimensions=28,
                         tqdm=False, processing="gray-scale")
 
     standard_conf.saveJSON()
