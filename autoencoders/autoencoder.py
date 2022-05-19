@@ -220,14 +220,14 @@ def train(run: Run):
 
         for batch in loop_train:
 
-            images = batch.to(device)
+            images = batch[0].to(device)
             _, outputs = model.train()(images)
             loss_train = criterion(outputs, images)
             optimizer.zero_grad()
             loss_train.backward()
             optimizer.step()
 
-            cum_train_loss += loss_train.item() / len(loop_train.dataset)
+            cum_train_loss += loss_train.item() / len(train_loader.dataset)
             if run.tqdm:
                 loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_train_loss)
@@ -240,7 +240,7 @@ def train(run: Run):
             loop_valid = valid_loader
 
         for batch in loop_valid:
-            images = batch.to(device)
+            images = batch[0].to(device)
 
             model.eval()
             with torch.no_grad():
@@ -248,7 +248,7 @@ def train(run: Run):
 
             loss_valid = criterion(outputs, images)
 
-            cum_valid_loss += loss_valid.item() / len(loop_valid.dataset)
+            cum_valid_loss += loss_valid.item() / len(valid_loader.dataset)
             if run.tqdm:
                 loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_valid_loss)
@@ -265,14 +265,14 @@ def train(run: Run):
             loop_test = test_loader
 
         for batch in loop_test:
-            images = batch.to(device)
+            images = batch[0].to(device)
 
             model.eval()
             with torch.no_grad():
                 _, outputs = model.eval()(images)
             loss_test = criterion(outputs, images)
 
-            cum_test_loss += loss_test.item() / len(loop_test.dataset)
+            cum_test_loss += loss_test.item() / len(test_loader.dataset)
             if run.tqdm:
                 loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_test_loss)
