@@ -105,8 +105,10 @@ class ConvAutoEncoder(nn.Module):
         return enc, dec
 
 
+
 def train(config: Config):
     dim = 224
+
     dim = math.floor(dim / 4) * 4
     logger.info(f"Adjusted dim to %4=0 {dim}")
     util.report.header1("Auto-Encoder")
@@ -139,7 +141,9 @@ def train(config: Config):
     logger.info(f"len(_validset)={len(_validset)}")
     logger.info(f"len(_testset)={len(_testset)}")
 
+
     batch = config.batch_size
+
     train_loader = torch.utils.data.DataLoader(_trainset, batch_size=batch)
     test_loader = torch.utils.data.DataLoader(_testset, batch_size=batch)
     valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
@@ -152,17 +156,21 @@ def train(config: Config):
     # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
 
     model = ConvAutoEncoder(dim)
+
     # resnet18 = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
     # resnet18_dec = autoencoders.auto_resnet18.ResNet18Dec()
+
 
     ae_resnet18 = autoencoders.resnet_ae.resnet_AE(z_dim=24, nc=1)
 
     logger.info(model)
 
 
+
     #model.to(device)
     # resnet18.to(device)
     # resnet18_dec.to(device)
+
 
     ae_resnet18.to(device)
 
@@ -206,7 +214,9 @@ def train(config: Config):
             optimizer.step()
 
             cum_train_loss += loss_train.item() / len(train_loader.dataset)
+
             if config.tqdm:
+
                 loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_train_loss)
 
@@ -222,6 +232,7 @@ def train(config: Config):
 
         for batch in loop_valid:
             images = batch[0].to(device)
+
             # _, outputs = model.eval()(images)
             ae_resnet18.eval()
             with torch.no_grad():
@@ -230,6 +241,7 @@ def train(config: Config):
 
             cum_valid_loss += loss_valid.item() / len(valid_loader.dataset)
             if config.tqdm:
+
                 loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_valid_loss)
 
@@ -260,6 +272,7 @@ def train(config: Config):
             if config.tqdm:
                 loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_test_loss)
+
 
         losses_train.append(cum_train_loss)
         losses_valid.append(cum_valid_loss)
