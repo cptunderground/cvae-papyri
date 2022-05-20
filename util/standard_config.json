@@ -1,1 +1,0 @@
-{"name": "standard_config", "train": true, "model": "../models/models-autoencodergray-scale.pth", "letters": ["alpha"], "logging": 40, "mode": "default", "epochs": 3, "dimensions": 28, "tqdm": false, "processing": "gray-scale", "root": null}

@@ -1,0 +1,18 @@
+{
+  "name": "__debug",
+  "train": true,
+  "evaluate": false,
+  "model_class": "resnet_AE",
+  "model_path": "../_out/testing-2022-05-20-14-11-22/optimal-model-0-ae-testing-2022-05-20-14-11-22.pth",
+  "letters_to_eval": [
+    "alpha",
+    "beta",
+    "chi",
+    "delta"
+  ],
+  "logging_val": 40,
+  "batch_size": 128,
+  "epochs": 1,
+  "tqdm": true,
+  "root": null
+}
