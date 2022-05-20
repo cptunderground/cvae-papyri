@@ -10,7 +10,7 @@ modes = ['default', 'testing', 'cluster', 'full', 'init']
 processing_modes = ['gray-scale', 'otsu']
 
 
-class Run:
+class Config:
     def __init__(self, name: str = "unnamed", letters: list = None,
                  train: bool = False, model: str = f'./models/models-autoencodergray-scale.pth',
                  mode: str = "default", batch_size = 128, epochs: int = 30, dimensions: int = 28,
@@ -38,10 +38,10 @@ class Run:
     def fromfile(self, path_to_file):
         with open(path_to_file, encoding="UTF-8") as file:
             data = json.load(file)
-            run = Run(name=data["name"], train=data["train"], letters=data["letters"],
-                      mode=data["mode"], epochs=data["epochs"], dimensions=data["dimensions"],
-                      tqdm=data["tqdm"], batch_size=data["batch_size"],
-                      processing=data["processing"])
+            run = Config(name=data["name"], train=data["train"], letters=data["letters"],
+                         mode=data["mode"], epochs=data["epochs"], dimensions=data["dimensions"],
+                         tqdm=data["tqdm"], batch_size=data["batch_size"],
+                         processing=data["processing"])
             return run
 
     def __repr__(self):
@@ -77,9 +77,9 @@ def checkArgs(mode, proc):
         exit(1)
 
 if __name__ == '__main__':
-    standard_conf = Run(name="standard_config", letters=['alpha'], train=True, mode="default", epochs=30, dimensions=28,
-                        tqdm=False, processing="gray-scale")
+    standard_conf = Config(name="standard_config", letters=['alpha'], train=True, mode="default", epochs=30, dimensions=28,
+                           tqdm=False, processing="gray-scale")
 
     standard_conf.saveJSON()
-    testi = Run.fromfile("./standard_config.json")
+    testi = Config.fromfile("./standard_config.json")
     print(testi)

@@ -20,7 +20,7 @@ import util._transforms as _transforms
 import util.report
 import util.utils
 from util.base_logger import logger
-from util.run import Run
+from util.config import Config
 import autoencoders.auto_resnet18
 import autoencoders.resnet_ae
 
@@ -105,7 +105,7 @@ class ConvAutoEncoder(nn.Module):
         return enc, dec
 
 
-def train(run: Run):
+def train(config: Config):
     dim = 224
     dim = math.floor(dim / 4) * 4
     logger.info(f"Adjusted dim to %4=0 {dim}")
@@ -139,7 +139,7 @@ def train(run: Run):
     logger.info(f"len(_validset)={len(_validset)}")
     logger.info(f"len(_testset)={len(_testset)}")
 
-    batch = run.batch_size
+    batch = config.batch_size
     train_loader = torch.utils.data.DataLoader(_trainset, batch_size=batch)
     test_loader = torch.utils.data.DataLoader(_testset, batch_size=batch)
     valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
@@ -179,7 +179,7 @@ def train(run: Run):
     optimal_model = None
     current_valid_loss = 10000
 
-    num_epochs = run.epochs
+    num_epochs = config.epochs
     for epoch in range(num_epochs):
         cum_train_loss = 0
         cum_valid_loss = 0
@@ -187,7 +187,7 @@ def train(run: Run):
         ###################
         # train the models #
         ###################
-        if run.tqdm:
+        if config.tqdm:
             loop_train = tqdm(train_loader, total=len(train_loader))
         else:
             loop_train = train_loader
@@ -206,7 +206,7 @@ def train(run: Run):
             optimizer.step()
 
             cum_train_loss += loss_train.item() / len(train_loader.dataset)
-            if run.tqdm:
+            if config.tqdm:
                 loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_train_loss)
 
@@ -215,7 +215,7 @@ def train(run: Run):
         ######################
         # validate the model #
         ######################
-        if run.tqdm:
+        if config.tqdm:
             loop_valid = tqdm(valid_loader, total=len(valid_loader))
         else:
             loop_valid = valid_loader
@@ -229,7 +229,7 @@ def train(run: Run):
             loss_valid = criterion(_dec, images)
 
             cum_valid_loss += loss_valid.item() / len(valid_loader.dataset)
-            if run.tqdm:
+            if config.tqdm:
                 loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_valid_loss)
 
@@ -242,7 +242,7 @@ def train(run: Run):
         ##################
         # test the model #
         ##################
-        if run.tqdm:
+        if config.tqdm:
             loop_test = tqdm(test_loader, total=len(test_loader))
         else:
             loop_test = test_loader
@@ -257,7 +257,7 @@ def train(run: Run):
             loss_test = criterion(_dec, images)
 
             cum_test_loss += loss_test.item() / len(test_loader.dataset)
-            if run.tqdm:
+            if config.tqdm:
                 loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_test_loss)
 
@@ -297,37 +297,37 @@ def train(run: Run):
                 ax.get_xaxis().set_visible(False)
                 ax.get_yaxis().set_visible(False)
 
-        fig.savefig(f'./{run.root}/original_decoded.png', bbox_inches='tight')
+        fig.savefig(f'./{config.root}/original_decoded.png', bbox_inches='tight')
 
         plt.close()
 
-    torch.save(optimal_model[0].state_dict(), f'./models/optimal-model-{optimal_model[1]}-ae-{run.name_time}.pth')
-    torch.save(optimal_model[0], f'./{run.root}/optimal-model-{optimal_model[1]}-ae-{run.name_time}.pth')
+    torch.save(optimal_model[0].state_dict(), f'./models/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth')
+    torch.save(optimal_model[0], f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth')
 
     plt.xlabel('Iterations')
     plt.ylabel('Loss')
     plt.plot(losses_train[-num_epochs:])
-    util.utils.create_folder(f"./{run.root}/net_eval")
+    util.utils.create_folder(f"./{config.root}/net_eval")
     plt.title("Train Loss")
-    plt.savefig(f"./{run.root}/net_eval/loss_train.png")
+    plt.savefig(f"./{config.root}/net_eval/loss_train.png")
     util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
     plt.close()
 
     plt.xlabel('Iterations')
     plt.ylabel('Loss')
     plt.plot(losses_valid[-num_epochs:])
-    util.utils.create_folder(f"./{run.root}/net_eval")
+    util.utils.create_folder(f"./{config.root}/net_eval")
     plt.title("Validation Loss")
-    plt.savefig(f"./{run.root}/net_eval/loss_valid.png")
+    plt.savefig(f"./{config.root}/net_eval/loss_valid.png")
     util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
     plt.close()
 
     plt.xlabel('Iterations')
     plt.ylabel('Loss')
     plt.plot(losses_test[-num_epochs:])
-    util.utils.create_folder(f"./{run.root}/net_eval")
+    util.utils.create_folder(f"./{config.root}/net_eval")
     plt.title("Test Loss")
-    plt.savefig(f"./{run.root}/net_eval/loss_test.png")
+    plt.savefig(f"./{config.root}/net_eval/loss_test.png")
     util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
     plt.close()
 
