@@ -21,8 +21,7 @@ import util.report
 import util.utils
 from util.base_logger import logger
 from util.config import Config
-
-
+from autoencoders.convautoencoder import ConvAutoEncoder as CAE
 def get_label(label):
     switcher = {
         "tensor(0)": "alpha",
@@ -55,52 +54,7 @@ def get_label(label):
     return switcher.get(label)
 
 
-class ConvAutoEncoder(nn.Module):
-    def __init__(self, dim):
-        super().__init__()
-        self.encoder = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=16,
-                      kernel_size=5, stride=1, padding=2),
-            nn.BatchNorm2d(num_features=16),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(in_channels=16, out_channels=32,
-                      kernel_size=5, stride=1, padding=2),
-            nn.BatchNorm2d(num_features=32),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(in_channels=32, out_channels=4,
-                      kernel_size=3, padding=1),
-            nn.BatchNorm2d(num_features=4),
-            nn.ReLU()
-        )
 
-        self.decoder = nn.Sequential(
-            nn.Conv2d(in_channels=4, out_channels=32,
-                      kernel_size=3, padding=1),
-            nn.BatchNorm2d(num_features=32),
-            nn.ReLU(),
-
-            nn.Upsample(scale_factor=2, mode='nearest'),
-
-            nn.Conv2d(in_channels=32, out_channels=16,
-                      kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=16),
-            nn.ReLU(),
-
-            nn.Upsample(scale_factor=2, mode='nearest'),
-
-            nn.Conv2d(in_channels=16, out_channels=1,
-                      kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=1),
-            nn.Sigmoid()
-        )
-
-    def forward(self, t):
-        enc = self.encoder(t)
-        dec = self.decoder(enc)
-
-        return enc, dec
 
 
 
@@ -353,7 +307,7 @@ def evaluate(run):
     test_loader = torch.utils.data.DataLoader(subset, batch_size=11082)
     logger.debug(test_loader.batch_size)
 
-    model = ConvAutoEncoder()
+    model = CAE()
     model.load_state_dict(torch.load(run.model))
     model.eval()
 
