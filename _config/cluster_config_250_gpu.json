@@ -30,6 +30,7 @@
   ],
   "logging": 40,
   "mode": "cluster",
+  "batch_size": 512,
   "epochs": 250,
   "dimensions": 28,
   "tqdm": false,

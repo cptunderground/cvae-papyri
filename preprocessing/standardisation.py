@@ -19,7 +19,7 @@ import logging
 import util.report
 import util.utils
 from util.base_logger import logger
-from util.run import Run
+from util.config import Config
 import statistics
 
 def png_to_ipx3():
@@ -241,7 +241,7 @@ def otsu(img):
     return otsu_img[1]
 
 
-def standardise(run:Run):
+def standardise(run:Config):
     print(f"cv2.version={cv2.__version__}")
     util.report.header1("Preprocessing")
 

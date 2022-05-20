@@ -10,6 +10,7 @@
   ],
   "logging": 40,
   "mode": "default",
+  "batch_size": 128,
   "epochs": 1,
   "dimensions": 28,
   "tqdm": true,
