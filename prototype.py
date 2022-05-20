@@ -1,23 +1,11 @@
 import numpy as np
-import sklearn
-import torch
+import umap.plot
+import umap.umap_
 from PIL import Image
 from matplotlib import pyplot as plt
-import seaborn as sns
-from sklearn.manifold import TSNE
-from torch.utils.data import Subset
-from torchvision import datasets
 from torchvision.transforms import transforms
 
-import umap.umap_
-import umap.plot
-import sklearn.cluster as cluster
-from torchvision.transforms import Pad
-from autoencoders.autoencoder import get_label, ConvAutoEncoder
-from util.base_logger import logger
 from util._transforms import _Pad
-import util
-import cv2
 
 
 def plot(imgs, with_orig=True, row_title=None, **imshow_kwargs):

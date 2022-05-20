@@ -1,6 +1,6 @@
 import torch
-from torch import nn, optim
 import torch.nn.functional as F
+from torch import nn
 
 
 class ResizeConv2d(nn.Module):
@@ -107,9 +107,9 @@ class ResNet18Enc(nn.Module):
         x = F.adaptive_avg_pool2d(x, 1)
         x = x.view(x.size(0), -1)
         x = self.linear(x)
-        #mu = x[:, :self.z_dim]
-        #logvar = x[:, self.z_dim:]
-        #return mu, logvar
+        # mu = x[:, :self.z_dim]
+        # logvar = x[:, self.z_dim:]
+        # return mu, logvar
 
         return x
 
@@ -120,7 +120,7 @@ class ResNet18Dec(nn.Module):
         super().__init__()
         self.in_planes = 512
         self.nc = nc
-        self.linear = nn.Linear(2*z_dim, 512)
+        self.linear = nn.Linear(2 * z_dim, 512)
 
         self.layer4 = self._make_layer(BasicBlockDec, 256, num_Blocks[3], stride=2)
         self.layer3 = self._make_layer(BasicBlockDec, 128, num_Blocks[2], stride=2)
@@ -145,7 +145,7 @@ class ResNet18Dec(nn.Module):
         x = self.layer2(x)
         x = self.layer1(x)
         x = torch.sigmoid(self.conv1(x))
-        #x = x.view(x.size(0), self.nc, 64, 64)
+        # x = x.view(x.size(0), self.nc, 64, 64)
         return x
 
 
@@ -157,8 +157,8 @@ class resnet_AE(nn.Module):
         self.decoder = ResNet18Dec(z_dim=z_dim, nc=nc)
 
     def forward(self, x):
-        #mean, logvar = self.encoder(x)
-        #z = self.reparameterize(mean, logvar)
+        # mean, logvar = self.encoder(x)
+        # z = self.reparameterize(mean, logvar)
         enc = self.encoder(x)
         dec = self.decoder(enc)
         return enc, dec

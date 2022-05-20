@@ -1,24 +1,13 @@
 import argparse
-import logging
 from datetime import datetime
 
-from util.config import Config
-import dim_reduction.tsne
 import util.base_logger
 import util.report
 import util.utils
 from autoencoders import autoencoder
 from preprocessing import standardisation
 from util.base_logger import logger
-
-
-def get_root():
-    return globals().get("run_root")
-
-
-def set_root(root):
-    globals().update(run_root=root)
-
+from util.config import Config
 
 if __name__ == '__main__':
 
@@ -72,21 +61,9 @@ if __name__ == '__main__':
         standardisation.generate_training_sets()
         standardisation.standardise(config)
 
-    # dim_reduction.tsne.tsne(mode="raw-cleaned", folder='./data/raw-cleaned')
-
-    # dim_reduction.tsne.tsne(mode=run.mode, folder='./data/raw-cleaned-standardised')
-
     if config.train:
         autoencoder.train(config)
     else:
         autoencoder.evaluate(config)
     print("Evaluating results and summarizing them in report")
     util.report.save_report()
-    # unused
-    # standardisation.png_to_ipx3()     
-    # mnist_reader.mnist_read()
-
-    # autoencoder.run_ae()
-    # X, y = autoencoder.run_cae()
-
-    # dim_reduction.custom_tsne.custom_tsne(X, y)

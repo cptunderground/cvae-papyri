@@ -33,13 +33,10 @@ def set_FileHandler(path, name):
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# Define format for logs
 fmt = '%(asctime)s | %(levelname)8s | %(message)s'
 
-# Create stdout handler for logging to the console (logs all five levels)
 stdout_handler = logging.StreamHandler()
 stdout_handler.setLevel(logging.INFO)
 stdout_handler.setFormatter(CustomFormatter(fmt))
 
-# Add both handlers to the logger
 logger.addHandler(stdout_handler)

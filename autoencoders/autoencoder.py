@@ -10,19 +10,17 @@ import torchvision.transforms as transforms
 from sklearn.manifold import TSNE
 from sklearn.model_selection import train_test_split
 from torch.utils.data import dataset, Subset
-from torchsummary import summary
 from torchvision import datasets
 from torchvision.transforms import transforms
 from tqdm import tqdm
 from umap.umap_ import UMAP
 
+import autoencoders.resnet_ae
 import util._transforms as _transforms
 import util.report
 import util.utils
 from util.base_logger import logger
 from util.config import Config
-import autoencoders.auto_resnet18
-import autoencoders.resnet_ae
 
 
 def get_label(label):
@@ -116,7 +114,7 @@ def train(config: Config):
     logger.info(f"torch.cuda.is_available()={torch.cuda.is_available()}")
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    name = "CovAE"
+
     t = transforms.Compose([
         _transforms._Pad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
         transforms.Resize([64, 64]),
@@ -149,27 +147,12 @@ def train(config: Config):
     valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
     logger.debug(f"testloader batchsize={test_loader.batch_size}")
 
-    # take 5 random letters from testset
 
-    # util.report.write_to_report(pretrained_model)
-
-    # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
-
-    model = ConvAutoEncoder(dim)
-
-    # resnet18 = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
-    # resnet18_dec = autoencoders.auto_resnet18.ResNet18Dec()
 
 
     ae_resnet18 = autoencoders.resnet_ae.resnet_AE(z_dim=24, nc=1)
 
-    logger.info(model)
-
-
-
-    #model.to(device)
-    # resnet18.to(device)
-    # resnet18_dec.to(device)
+    logger.info(ae_resnet18)
 
 
     ae_resnet18.to(device)
@@ -192,6 +175,8 @@ def train(config: Config):
         cum_train_loss = 0
         cum_valid_loss = 0
         cum_test_loss = 0
+
+
         ###################
         # train the models #
         ###################
@@ -203,9 +188,8 @@ def train(config: Config):
         for batch in loop_train:
 
             images = batch[0].to(device)
-            # _, outputs = model.train()(images)
-            ae_resnet18.train()
 
+            ae_resnet18.train()
             _enc, _dec = ae_resnet18(images)
 
             loss_train = criterion(_dec, images)
@@ -222,6 +206,7 @@ def train(config: Config):
 
         tqdm._instances.clear()
 
+
         ######################
         # validate the model #
         ######################
@@ -233,7 +218,7 @@ def train(config: Config):
         for batch in loop_valid:
             images = batch[0].to(device)
 
-            # _, outputs = model.eval()(images)
+
             ae_resnet18.eval()
             with torch.no_grad():
                 _enc, _dec = ae_resnet18(images)
@@ -246,7 +231,7 @@ def train(config: Config):
                 loop_train.set_postfix(loss=cum_valid_loss)
 
         if current_valid_loss > cum_valid_loss:
-            optimal_model = (model, epoch)
+            optimal_model = (ae_resnet18, epoch)
             current_valid_loss = cum_valid_loss
 
         tqdm._instances.clear()

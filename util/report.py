@@ -1,22 +1,19 @@
 import os
 import shutil
 
-import cv2
-import numpy as np
-
-import main
-import util.utils
 from mdutils.mdutils import MdUtils
-from mdutils import Html
-from util.base_logger import logger
+
+import util.utils
 
 mdFile = None
 mdFilename = None
 mdPath = None
 
+
 def set_mdPath(root_path):
     global mdPath
     mdPath = root_path
+
 
 def get_mdPath():
     global mdPath
@@ -38,13 +35,16 @@ def write_to_report(string):
     mdFile.new_line(string)
     pass
 
+
 def header2(headertext: str):
     global mdFile
     mdFile.new_header(level=2, title=headertext)
 
+
 def header1(headertext: str):
     global mdFile
     mdFile.new_header(level=1, title=headertext)
+
 
 def image_to_report(path, title, text=""):
     global mdFile
@@ -52,6 +52,7 @@ def image_to_report(path, title, text=""):
     mdFile.new_line(f"![Alt text]({path}?raw=true \"Title\")")
     mdFile.new_paragraph(text)
     pass
+
 
 def save_report():
     global mdFile
@@ -63,7 +64,6 @@ def save_report():
     os.remove(f"./{mdFilename}.md")
 
 
-
 if __name__ == '__main__':
     print("testing to report file")
 
@@ -73,5 +73,5 @@ if __name__ == '__main__':
 
     create_report("test_report_markdown")
     write_to_report("test")
-    image_to_report("tsne_otsu.png","some image", text="this is some example text for the paragraph")
+    image_to_report("tsne_otsu.png", "some image", text="this is some example text for the paragraph")
     save_report()

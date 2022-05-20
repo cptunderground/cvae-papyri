@@ -1,9 +1,6 @@
 import json
 import logging
 
-import torch
-
-
 from util.base_logger import logger
 
 modes = ['default', 'testing', 'cluster', 'full', 'init']
@@ -13,7 +10,7 @@ processing_modes = ['gray-scale', 'otsu']
 class Config:
     def __init__(self, name: str = "unnamed", letters: list = None,
                  train: bool = False, model: str = f'./models/models-autoencodergray-scale.pth',
-                 mode: str = "default", batch_size = 128, epochs: int = 30, dimensions: int = 28,
+                 mode: str = "default", batch_size=128, epochs: int = 30, dimensions: int = 28,
                  tqdm: bool = False, processing: str = "gray-scale"):
         checkArgs(mode, processing)
 
@@ -22,8 +19,8 @@ class Config:
 
         self.train = train
         self.model = model
-        #model_cls = autoencoders.autoencoder.Network()
-        #self.model = autoencoders.autoencoder.ConvAutoEncoder(model_cls.load_state_dict(torch.load(model)))
+        # model_cls = autoencoders.autoencoder.Network()
+        # self.model = autoencoders.autoencoder.ConvAutoEncoder(model_cls.load_state_dict(torch.load(model)))
         self.letters = letters
         self.logging = logging.ERROR
         self.mode = mode
@@ -76,8 +73,10 @@ def checkArgs(mode, proc):
     if ex:
         exit(1)
 
+
 if __name__ == '__main__':
-    standard_conf = Config(name="standard_config", letters=['alpha'], train=True, mode="default", epochs=30, dimensions=28,
+    standard_conf = Config(name="standard_config", letters=['alpha'], train=True, mode="default", epochs=30,
+                           dimensions=28,
                            tqdm=False, processing="gray-scale")
 
     standard_conf.saveJSON()
