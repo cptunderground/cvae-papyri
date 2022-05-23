@@ -5,6 +5,7 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from torchvision.transforms import transforms
 
+import util.decorators
 from util._transforms import _Pad
 
 
@@ -54,6 +55,17 @@ def draw_umap(data, labels, n_neighbors=15, min_dist=0.1, n_components=2, metric
 
 
 if __name__ == '__main__':
+
+    @util.decorators.timed
+    def loopi():
+        for i in range(100000):
+            pass
+
+    loopi()
+
+
+
+
     orig_img = Image.open("./data/raw-cleaned/alpha/alpha_60583_[-0_5-0_5]_bt1_Iliad_14_228_25.png")
     plt.imshow(orig_img)
     plt.show()

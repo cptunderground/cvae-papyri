@@ -46,14 +46,18 @@ class Config:
             return run
 
     def __repr__(self):
-        return str(self.__dict__)
+        return str(self._toJSON())
 
-    def toJSON(self) -> str:
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+    def _toJSON(self) -> str:
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=False, indent=4)
 
     def saveJSON(self) -> None:
-        with open(f'../_config/{self.name}.json', 'w') as outfile:
-            json.dump(self.__dict__, outfile)
+        if self.root != None:
+            with open(f'./{self.root}/{self.name}.json', 'w') as outfile:
+                json.dump(self.__dict__, outfile)
+        else:
+            with open(f'../_config/{self.name}.json', 'w') as outfile:
+                json.dump(self.__dict__, outfile)
 
     def setRoot(self, root_path: str):
         self.root = root_path

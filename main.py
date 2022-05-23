@@ -36,6 +36,7 @@ if __name__ == '__main__':
     config.root = run_path
 
     util.utils.create_folder(config.root)
+    config.saveJSON()
 
     util.base_logger.set_FileHandler(config.root, config.name)
 

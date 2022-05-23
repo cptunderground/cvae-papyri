@@ -16,8 +16,10 @@ import autoencoders.resnet_ae
 import util._transforms as _transforms
 import util.report
 import util.utils
+import util.decorators
 from util.base_logger import logger
 from util.config import Config
+from util.result import Result
 
 
 def get_label(label):
@@ -52,6 +54,7 @@ def get_label(label):
     return switcher.get(label)
 
 
+@util.decorators.timed
 def train(config: Config):
     dim = 224
 
@@ -92,17 +95,37 @@ def train(config: Config):
     train_loader = torch.utils.data.DataLoader(_trainset, batch_size=batch)
     test_loader = torch.utils.data.DataLoader(_testset, batch_size=batch)
     valid_loader = torch.utils.data.DataLoader(_validset, batch_size=batch)
-    logger.debug(f"testloader batchsize={test_loader.batch_size}")
+    logger.info(f"testloader batchsize={test_loader.batch_size}")
 
     ae_resnet18 = autoencoders.resnet_ae.resnet_AE(z_dim=24, nc=1)
 
-    logger.info(ae_resnet18)
+    #logger.info(ae_resnet18)
 
     ae_resnet18.to(device)
 
     criterion = nn.MSELoss()
 
     optimizer = optim.Adam(ae_resnet18.parameters(), lr=0.0001)
+
+    logger.info(f"optimizer:{optimizer.__module__}")
+    logger.info(f"optimizer defaults:{optimizer.defaults}")
+    logger.info(f"loss:{criterion}")
+    logger.info(f"loss defaults:{criterion.parameters()}")
+
+
+    result = Result(root=config.root, name=config.name)
+
+    result.model = ae_resnet18.__module__
+    result.epochs = config.epochs
+    result.batch_size = config.batch_size
+
+    result.optimizer = optimizer.__module__
+    result.optimizer_args = optimizer.defaults
+    result.loss = str(criterion)
+    #result.loss = criterion.__dict__
+
+    logger.info(f"result obj : {result}")
+
 
     ###TODO
     # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
@@ -199,6 +222,7 @@ def train(config: Config):
         losses_train.append(cum_train_loss)
         losses_valid.append(cum_valid_loss)
         losses_test.append(cum_test_loss)
+
         logger.info(f'Epoch={epoch} done.')
 
         # scheduler.step(cum_train_loss)
@@ -218,7 +242,7 @@ def train(config: Config):
         decoded_imgs = decoded_imgs.detach().cpu().numpy()
 
         decoded_imgs = np.reshape(decoded_imgs, (
-        decoded_imgs.shape[0], decoded_imgs.shape[2], decoded_imgs.shape[3], decoded_imgs.shape[1]))
+            decoded_imgs.shape[0], decoded_imgs.shape[2], decoded_imgs.shape[3], decoded_imgs.shape[1]))
         images = np.reshape(images, (images.shape[0], images.shape[2], images.shape[3], images.shape[1]))
 
         # plot the first ten input images and then reconstructed images
@@ -264,3 +288,24 @@ def train(config: Config):
     plt.savefig(f"./{config.root}/net_eval/loss_test.png")
     util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
     plt.close()
+
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses_train[-num_epochs:], label = "train_loss")
+    plt.plot(losses_valid[-num_epochs:], label = "valid_loss")
+    plt.plot(losses_test[-num_epochs:], label = "test_loss")
+    util.utils.create_folder(f"./{config.root}/net_eval")
+    plt.title("All Losses - Log Scale")
+    plt.legend()
+    plt.yscale("log")
+    plt.savefig(f"./{config.root}/net_eval/loss_all.png")
+    util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
+    plt.close()
+
+
+
+    result.train_loss = losses_train
+    result.valid_loss = losses_valid
+    result.test_loss = losses_test
+    logger.info(result)
+    result.saveJSON()
