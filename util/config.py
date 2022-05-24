@@ -73,9 +73,9 @@ class Config:
 
 
 if __name__ == '__main__':
-    __debug = Config().fromfile("../_config/__debug.json")
+    #__debug = Config().fromfile("../_config/__debug.json")
 
-    standard_conf = Config(name="standard_config",
+    standard_conf = Config(name="standard",
                            train=True,
                            evaluate=True,
                            model_class="resnet_AE",
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                            epochs=30,
                            tqdm=True)
 
-    cluster_30_gpu = Config(name="cluster_config_30_gpu",
+    cluster_30_gpu = Config(name="cluster_30_gpu",
                             train=True,
                             evaluate=True,
                             model_class="resnet_AE",
@@ -97,7 +97,7 @@ if __name__ == '__main__':
                             epochs=30,
                             tqdm=False)
 
-    cluster_100_gpu = Config(name="cluster_config_100_gpu",
+    cluster_100_gpu = Config(name="cluster_100_gpu",
                              train=True,
                              evaluate=True,
                              model_class="resnet_AE",
@@ -108,7 +108,7 @@ if __name__ == '__main__':
                              epochs=100,
                              tqdm=False)
 
-    cluster_1000_gpu = Config(name="cluster_config_1000_gpu",
+    cluster_1000_gpu = Config(name="cluster_1000_gpu",
                               train=True,
                               evaluate=True,
                               model_class="resnet_AE",

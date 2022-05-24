@@ -1,1 +1,0 @@
-{"name": "cluster_config_30_gpu", "name_time": null, "train": true, "evaluate": true, "model_class": "resnet_AE", "model_path": null, "letters_to_eval": ["alpha", "beta"], "logging_val": 40, "batch_size": 512, "epochs": 30, "tqdm": false, "root": null}
