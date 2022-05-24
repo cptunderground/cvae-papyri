@@ -1,0 +1,1 @@
+{"name": "cluster_config_1000_gpu", "name_time": "cluster_config_1000_gpu-2022-05-24-14-07-45", "train": true, "evaluate": true, "model_class": "resnet_AE", "model_path": null, "letters_to_eval": ["alpha", "beta"], "logging_val": 40, "batch_size": 512, "epochs": 1000, "tqdm": false, "root": "out/cluster_config_1000_gpu-2022-05-24-14-07-45"}
