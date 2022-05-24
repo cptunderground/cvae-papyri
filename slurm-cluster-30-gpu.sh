@@ -14,4 +14,4 @@
 ml Python/3.6.6-foss-2018b
 ml CUDA
 source $HOME/venv_MA/bin/activate               
-python main.py --config="./_config/cluster_config_30.json"
+python main.py --config="./_config/cluster-config_30.json"

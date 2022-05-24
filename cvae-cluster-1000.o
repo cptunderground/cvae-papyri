@@ -1,2 +1,1 @@
-./_config/cluster_config_1000_gpu.json
-Evaluating results and summarizing them in report
+./_config/config-cluster_1000_gpu.json
