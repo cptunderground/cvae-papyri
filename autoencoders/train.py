@@ -57,7 +57,7 @@ def get_label(label):
 @util.decorators.timed
 def train(config: Config):
 
-    util.report.header1("Auto-Encoder")
+    #util.report.header1("Auto-Encoder")
 
     logger.info(f"torch.cuda.is_available()={torch.cuda.is_available()}")
 
