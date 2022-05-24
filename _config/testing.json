@@ -1,1 +1,17 @@
-{"name": "testing", "name_time": null, "train": true, "evaluate": true, "model_class": "resnet_AE", "model_path": null, "letters_to_eval": ["alpha", "beta"], "logging_val": 40, "batch_size": 128, "epochs": 2, "tqdm": true, "root": null}
+{
+  "name": "testing",
+  "name_time": null,
+  "train": true,
+  "evaluate": true,
+  "model_class": "resnet_AE",
+  "model_path": null,
+  "letters_to_eval": [
+    "alpha",
+    "beta"
+  ],
+  "logging_val": 40,
+  "batch_size": 128,
+  "epochs": 1,
+  "tqdm": true,
+  "root": null
+}

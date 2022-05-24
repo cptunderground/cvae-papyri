@@ -57,8 +57,8 @@ if __name__ == '__main__':
         standardisation.standardise(config)
 
     if config.train:
-        train.train(config)
-    else:
-        evaluate.evaluate(config)
+        result = train.train(config)
+    if config.evaluate:
+        evaluate.evaluate(config, result)
     print("Evaluating results and summarizing them in report")
     util.report.save_report()

@@ -15,7 +15,7 @@ from autoencoders.convautoencoder import ConvAutoEncoder as CAE
 from util.base_logger import logger
 
 
-def evaluate(run):
+def evaluate(config, result):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     name = "CovAE"
 
@@ -30,7 +30,7 @@ def evaluate(run):
 
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=11082)
     idx = [i for i in range(len(test_set)) if
-           test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in run.letters_to_eval]]
+           test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in config.letters_to_eval]]
     # build the appropriate subset
     subset = Subset(test_set, idx)
 
@@ -39,7 +39,7 @@ def evaluate(run):
     logger.debug(test_loader.batch_size)
 
     model = CAE()
-    model.load_state_dict(torch.load(run.model_path))
+    model.load_state_dict(torch.load(config.model_path))
     model.eval()
 
     # util.report.write_to_report(pretrained_model)
@@ -71,7 +71,7 @@ def evaluate(run):
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
-    fig.savefig(f'./{run.root}/original_decoded.png', bbox_inches='tight')
+    fig.savefig(f'./{config.root}/original_decoded.png', bbox_inches='tight')
     plt.close()
 
     encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
@@ -82,7 +82,7 @@ def evaluate(run):
         ax.set_title(f'feature map: {fm}')
         ax.imshow(encoded_img[fm], cmap='gray')
 
-    fig.savefig(f'./{run.root}/encoded_img_alpha')
+    fig.savefig(f'./{config.root}/encoded_img_alpha')
     plt.close()
 
     encoded_img = encoded_imgs[3]  # get 1st image from the batch (here '7')
@@ -93,7 +93,7 @@ def evaluate(run):
         ax.set_title(f'feature map: {fm}')
         ax.imshow(encoded_img[fm], cmap='gray')
 
-    fig.savefig(f'./{run.root}/encoded_img_epsilon')
+    fig.savefig(f'./{config.root}/encoded_img_epsilon')
     plt.close()
 
     # X, y = load_digits(return_X_y=True)
@@ -150,10 +150,10 @@ def evaluate(run):
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-    plt.title(f"tsne_{name}_final_eval_mode_{run.processing}")
-    util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
-    plt.savefig(f'./{run.root}/{name}/{run.processing}/tsne_{name}_final_eval_mode_{run.processing}.png')
-    util.report.image_to_report(f"{name}/{run.processing}/tsne_{name}_final_eval_mode_{run.processing}.png",
+    plt.title(f"tsne_{name}_final_eval_mode_{config.processing}")
+    util.utils.create_folder(f"./{config.root}/{name}/{config.processing}")
+    plt.savefig(f'./{config.root}/{name}/{config.processing}/tsne_{name}_final_eval_mode_{config.processing}.png')
+    util.report.image_to_report(f"{name}/{config.processing}/tsne_{name}_final_eval_mode_{config.processing}.png",
                                 f"TSNE final_eval")
     plt.close()
 
@@ -163,9 +163,9 @@ def evaluate(run):
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-    plt.title(f"umap_{name}_final_eval_mode_{run.processing}")
-    util.utils.create_folder(f"./{run.root}/{name}/{run.processing}")
-    plt.savefig(f'./{run.root}/{name}/{run.processing}/umap_{name}_final_eval_mode_{run.processing}.png')
-    util.report.image_to_report(f"{name}/{run.processing}/umap_{name}_final_eval_mode_{run.processing}.png",
+    plt.title(f"umap_{name}_final_eval_mode_{config.processing}")
+    util.utils.create_folder(f"./{config.root}/{name}/{config.processing}")
+    plt.savefig(f'./{config.root}/{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png')
+    util.report.image_to_report(f"{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png",
                                 f"UMAP final_eval")
     plt.close()
