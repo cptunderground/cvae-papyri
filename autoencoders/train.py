@@ -121,6 +121,7 @@ def train(config: Config):
     # result.loss = criterion.__dict__
 
     logger.info(f"result obj : {result}")
+    result.saveJSON()
 
     ###TODO
     # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)

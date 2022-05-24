@@ -86,6 +86,17 @@ if __name__ == '__main__':
                            epochs=30,
                            tqdm=True)
 
+    cluster_3_gpu = Config(name="cluster_3_gpu",
+                            train=True,
+                            evaluate=True,
+                            model_class="resnet_AE",
+                            model_path=None,
+                            letters_to_eval=["alpha", "beta"],
+                            logging_val=40,
+                            batch_size=512,
+                            epochs=3,
+                            tqdm=False)
+
     cluster_30_gpu = Config(name="cluster_30_gpu",
                             train=True,
                             evaluate=True,
@@ -131,6 +142,7 @@ if __name__ == '__main__':
                      tqdm=True)
 
     standard_conf.saveJSON()
+    cluster_3_gpu.saveJSON()
     cluster_30_gpu.saveJSON()
     cluster_100_gpu.saveJSON()
     cluster_1000_gpu.saveJSON()
