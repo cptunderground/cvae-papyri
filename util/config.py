@@ -13,8 +13,7 @@ processing_modes = ['gray-scale', 'otsu']
 class Config:
     def __init__(self, name: str = "unnamed", train: bool = False, evaluate: bool = True,
                  model_class: str = None, model_path: str = None, letters_to_eval: list = None, logging_val: int = 40,
-                 batch_size: int = 128, epochs: int = 30,
-                 tqdm: bool = False):
+                 batch_size: int = 128, epochs: int = 30, tqdm: bool = False, root=None, result_path=None):
         self.name = f"config-{name}"
         self.name_time = None
 
@@ -27,24 +26,26 @@ class Config:
         self.batch_size = batch_size
         self.epochs = epochs
         self.tqdm = tqdm
-        self.root = None
+        self.root = root
 
-        self.result_path = None
+        self.result_path = result_path
 
     @classmethod
     def fromfile(self, path_to_file):
         with open(path_to_file, encoding="UTF-8") as file:
             data = json.load(file)
             config = Config(name=data["name"],
-                         train=data["train"],
-                         evaluate=data["evaluate"],
-                         model_class=data["model_class"],
-                         model_path=data["model_path"],
-                         letters_to_eval=data["letters_to_eval"],
-                         logging_val=data["logging_val"],
-                         batch_size=data["batch_size"],
-                         epochs=data["epochs"],
-                         tqdm=data["tqdm"])
+                            train=data["train"],
+                            evaluate=data["evaluate"],
+                            model_class=data["model_class"],
+                            model_path=data["model_path"],
+                            letters_to_eval=data["letters_to_eval"],
+                            logging_val=data["logging_val"],
+                            batch_size=data["batch_size"],
+                            epochs=data["epochs"],
+                            tqdm=data["tqdm"],
+                            root=data["root"],
+                            result_path=data["result_path"])
             return config
 
     def __repr__(self):

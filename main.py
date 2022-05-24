@@ -30,28 +30,28 @@ if __name__ == '__main__':
         config_file = args.config
     config = Config().fromfile(config_file)
 
-    config.name_time = f'{config.name}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}'
+    if not config.name_time == None:
+        config.name_time = f'{config.name}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}'
+        run_path = f'out/{config.name_time}'
+        config.root = run_path
 
-    run_path = f'out/{config.name_time}'
+        util.utils.create_folder(config.root)
 
-    config.root = run_path
+        config.saveJSON()
 
-    util.utils.create_folder(config.root)
-    config.saveJSON()
+        util.base_logger.set_FileHandler(config.root, config.name)
 
-    util.base_logger.set_FileHandler(config.root, config.name)
+        util.report.set_mdPath(config.root)
+        util.report.create_report(f"report-{config.name}", title=f"Report for {config.name}")
+        util.report.write_to_report(f"This is your Report for the run {config.name}. It summarizes all calculations made.")
 
-    util.report.set_mdPath(config.root)
-    util.report.create_report(f"report-{config.name}", title=f"Report for {config.name}")
-    util.report.write_to_report(f"This is your Report for the run {config.name}. It summarizes all calculations made.")
+        logger.info('STARTING PROGRAM')
+        logger.info('Selected parameters:')
+        logger.info(config)
 
-    logger.info('STARTING PROGRAM')
-    logger.info('Selected parameters:')
-    logger.info(config)
-
-    util.report.header1("Config")
-    util.report.write_to_report(config_file)
-    config.write_to_md()
+        util.report.header1("Config")
+        util.report.write_to_report(config_file)
+        config.write_to_md()
 
     if args.generate:
         standardisation.generate_training_sets()
@@ -68,5 +68,6 @@ if __name__ == '__main__':
     if config.evaluate:
         result = Result.fromfile(config.result_path)
         evaluate.evaluate(config, result)
+
     print("Evaluating results and summarizing them in report")
-    util.report.save_report()
+    #util.report.save_report()

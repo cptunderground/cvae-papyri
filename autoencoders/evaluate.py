@@ -147,7 +147,7 @@ def evaluate(config, result):
     util.utils.create_folder(f"./{config.root}/net_eval")
     plt.title("Train Loss")
     plt.savefig(f"./{config.root}/net_eval/loss_train.png")
-    util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
+    #util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
     plt.close()
 
     plt.xlabel('Iterations')
@@ -156,7 +156,7 @@ def evaluate(config, result):
     util.utils.create_folder(f"./{config.root}/net_eval")
     plt.title("Validation Loss")
     plt.savefig(f"./{config.root}/net_eval/loss_valid.png")
-    util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
+    #util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
     plt.close()
 
     plt.xlabel('Iterations')
@@ -165,7 +165,7 @@ def evaluate(config, result):
     util.utils.create_folder(f"./{config.root}/net_eval")
     plt.title("Test Loss")
     plt.savefig(f"./{config.root}/net_eval/loss_test.png")
-    util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
+    #util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
     plt.close()
 
     plt.xlabel('Iterations')
@@ -178,7 +178,7 @@ def evaluate(config, result):
     plt.legend()
     plt.yscale("log")
     plt.savefig(f"./{config.root}/net_eval/loss_all.png")
-    util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
+    #util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
     plt.close()
 
 
