@@ -30,7 +30,7 @@ if __name__ == '__main__':
         config_file = args.config
     config = Config().fromfile(config_file)
 
-    if not config.name_time == None:
+    if config.name_time == None:
         config.name_time = f'{config.name}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}'
         run_path = f'out/{config.name_time}'
         config.root = run_path
