@@ -56,10 +56,7 @@ def get_label(label):
 
 @util.decorators.timed
 def train(config: Config):
-    dim = 224
 
-    dim = math.floor(dim / 4) * 4
-    logger.info(f"Adjusted dim to %4=0 {dim}")
     util.report.header1("Auto-Encoder")
 
     logger.info(f"torch.cuda.is_available()={torch.cuda.is_available()}")
@@ -221,140 +218,19 @@ def train(config: Config):
         losses_valid.append(cum_valid_loss)
         losses_test.append(cum_test_loss)
 
-        torch.save(optimal_model[0], f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth')
-
-        logger.info(f'Epoch={epoch} done.')
+    torch.save(optimal_model[0], f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth')
+    config.model_path = f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth'
+    result.model = f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth'
+    logger.info(f'Epoch={epoch} done.')
 
     # scheduler.step(cum_train_loss)
 
-    images, labels = next(iter(test_loader))
-    # images, labels = next(iter(train_loader))
-    images = images.to(device)
 
-    # get sample outputs
-    encoded_imgs = ae_resnet18.encoder.eval()(images)
-    decoded_imgs = ae_resnet18.decoder.eval()(encoded_imgs)
-    # prep images for display
-    images = images.cpu().numpy()
-
-    # use detach when it's an output that requires_grad
-    encoded_imgs = encoded_imgs.detach().cpu().numpy()
-    decoded_imgs = decoded_imgs.detach().cpu().numpy()
-
-    decoded_imgs = np.reshape(decoded_imgs, (
-        decoded_imgs.shape[0], decoded_imgs.shape[2], decoded_imgs.shape[3], decoded_imgs.shape[1]))
-    images = np.reshape(images, (images.shape[0], images.shape[2], images.shape[3], images.shape[1]))
-
-    # plot the first ten input images and then reconstructed images
-    fig, axes = plt.subplots(nrows=2, ncols=10, sharex=True, sharey=True, figsize=(12, 4))
-
-    # input images on top row, reconstructions on bottom
-    for images, row in zip([images, decoded_imgs], axes):
-        for img, ax in zip(images, row):
-            ax.imshow(np.squeeze(img), cmap="gray")
-            ax.get_xaxis().set_visible(False)
-            ax.get_yaxis().set_visible(False)
-
-    fig.savefig(f'./{config.root}/original_decoded.png', bbox_inches='tight')
-    plt.close()
-
-    ### Calculate worst, best and some random loss on testset
-    test_losses = []
-    test_loader = torch.utils.data.DataLoader(_testset, batch_size=1)
-
-    if config.tqdm:
-        test_loop = tqdm(test_loader, total=len(test_loader))
-    else:
-        test_loop = test_loader
-
-    for image, label in test_loop:
-        image = image.to(device)
-        label = label.to(device)
-
-        ae_resnet18.eval()
-        with torch.no_grad():
-            _enc, _dec = ae_resnet18(image)
-
-        loss = criterion(_dec, image)
-        test_losses.append((loss.cpu().numpy(), image.cpu().numpy(), _dec.cpu().numpy(), label.cpu().numpy()))
-
-    test_losses.sort(key=lambda s: s[0])
-    print("test losses", test_losses)
-    print("test losses first 5", test_losses[:5])
-    print("test losses last 5", test_losses[-5:])
-
-    rows = 6
-    cols = 10
-    fig, axes = plt.subplots(nrows=rows, ncols=cols, sharex=True, sharey=True)
-
-    for i in range(0, cols):
-        axes[0, i].imshow(np.squeeze(test_losses[i][1]), cmap="gray")
-        # axes[0, i].set_title(test_losses[i][0])
-        axes[1, i].imshow(np.squeeze(test_losses[i][2]), cmap="gray")
-        # axes[1, i].set_title(test_losses[i][0])
-
-        axes[2, i].imshow(np.squeeze(test_losses[(len(test_losses) // 2) + i][1]), cmap="gray")
-        # axes[2, i].set_title(test_losses[(len(test_losses)//2)+i][0])
-        axes[3, i].imshow(np.squeeze(test_losses[(len(test_losses) // 2) + i][2]), cmap="gray")
-        # axes[3, i].set_title(test_losses[(len(test_losses)//2)+i][0])
-
-        axes[4, i].imshow(np.squeeze(test_losses[-1 - i][1]), cmap="gray")
-        # axes[4, i].set_title(test_losses[-1-i][0])
-        axes[5, i].imshow(np.squeeze(test_losses[-1 - i][2]), cmap="gray")
-        # axes[5, i].set_title(test_losses[-1-i][0])
-
-    for i in range(0, cols):
-        for j in range(0, rows):
-            axes[j, i].get_xaxis().set_visible(False)
-            axes[j, i].get_yaxis().set_visible(False)
-
-
-    fig.show()
-
-    plt.xlabel('Iterations')
-    plt.ylabel('Loss')
-    plt.plot(losses_train[-num_epochs:])
-    util.utils.create_folder(f"./{config.root}/net_eval")
-    plt.title("Train Loss")
-    plt.savefig(f"./{config.root}/net_eval/loss_train.png")
-    util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
-    plt.close()
-
-    plt.xlabel('Iterations')
-    plt.ylabel('Loss')
-    plt.plot(losses_valid[-num_epochs:])
-    util.utils.create_folder(f"./{config.root}/net_eval")
-    plt.title("Validation Loss")
-    plt.savefig(f"./{config.root}/net_eval/loss_valid.png")
-    util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
-    plt.close()
-
-    plt.xlabel('Iterations')
-    plt.ylabel('Loss')
-    plt.plot(losses_test[-num_epochs:])
-    util.utils.create_folder(f"./{config.root}/net_eval")
-    plt.title("Test Loss")
-    plt.savefig(f"./{config.root}/net_eval/loss_test.png")
-    util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
-    plt.close()
-
-    plt.xlabel('Iterations')
-    plt.ylabel('Loss')
-    plt.plot(losses_train[-num_epochs:], label="train_loss")
-    plt.plot(losses_valid[-num_epochs:], label="valid_loss")
-    plt.plot(losses_test[-num_epochs:], label="test_loss")
-    util.utils.create_folder(f"./{config.root}/net_eval")
-    plt.title("All Losses - Log Scale")
-    plt.legend()
-    plt.yscale("log")
-    plt.savefig(f"./{config.root}/net_eval/loss_all.png")
-    util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
-    plt.close()
 
     result.train_loss = losses_train
     result.valid_loss = losses_valid
     result.test_loss = losses_test
-    logger.info(result)
-    result.saveJSON()
 
-    return result
+    logger.info(result)
+
+    return result, config

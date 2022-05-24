@@ -11,7 +11,7 @@
   ],
   "logging_val": 40,
   "batch_size": 128,
-  "epochs": 1,
+  "epochs": 3,
   "tqdm": true,
   "root": null
 }

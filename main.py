@@ -9,6 +9,7 @@ from autoencoders import evaluate
 from preprocessing import standardisation
 from util.base_logger import logger
 from util.config import Config
+from util.result import Result
 
 if __name__ == '__main__':
 
@@ -57,8 +58,15 @@ if __name__ == '__main__':
         standardisation.standardise(config)
 
     if config.train:
-        result = train.train(config)
+        result, config = train.train(config)
+
+        config.train = False
+        out_path = result.saveJSON()
+        config.result_path = out_path
+        config.saveJSON()
+
     if config.evaluate:
+        result = Result.fromfile(config.result_path)
         evaluate.evaluate(config, result)
     print("Evaluating results and summarizing them in report")
     util.report.save_report()

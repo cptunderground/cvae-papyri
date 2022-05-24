@@ -1,59 +1,60 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 import torch
 import torchvision.transforms as transforms
-from sklearn.manifold import TSNE
-from torch.utils.data import dataset, Subset
+from sklearn.model_selection import train_test_split
+from torch import nn
+from torch.utils.data import dataset
 from torchvision import datasets
 from torchvision.transforms import transforms
-from umap.umap_ import UMAP
+from tqdm import tqdm
 
 import util.report
 import util.utils
-from autoencoders.convautoencoder import ConvAutoEncoder as CAE
-from util.base_logger import logger
+from util import _transforms
 
 
 def evaluate(config, result):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    name = "CovAE"
 
-    test_set = datasets.ImageFolder(
-        './data/raw-cleaned-standardised',
-        # './data/__test-data-standardised',
-        # './data/test-data-manual',
-        # './data/test-data-manual-otsu',
+    ae_resnet18 = torch.load(config.model_path)
+    ae_resnet18.eval()
 
-        transform=transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+    criterion = eval(f"nn.{result.loss}")
+
+    losses_train = result.train_loss
+    losses_valid = result.valid_loss
+    losses_test = result.test_loss
+
+    t = transforms.Compose([
+        _transforms._Pad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
+        transforms.Resize([64, 64]),
+        transforms.Grayscale()
+    ])
+
+    t_prime = transforms.Compose([
+        transforms.ToTensor(),
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
+    _dataset = datasets.ImageFolder(
+        './data/raw',
+
+        transform=transforms.Compose([t, t_prime])
     )
 
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=11082)
-    idx = [i for i in range(len(test_set)) if
-           test_set.imgs[i][1] in [test_set.class_to_idx[letter] for letter in config.letters_to_eval]]
-    # build the appropriate subset
-    subset = Subset(test_set, idx)
+    _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=42)
+    _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=42)
 
-    train_loader = torch.utils.data.DataLoader(subset)
-    test_loader = torch.utils.data.DataLoader(subset, batch_size=11082)
-    logger.debug(test_loader.batch_size)
-
-    model = CAE()
-    model.load_state_dict(torch.load(config.model_path))
-    model.eval()
-
-    # util.report.write_to_report(pretrained_model)
-
-    # pretrained_model.load_state_dict(torch.load('models/pretrained/model-run(lr=0.001, batch_size=256).ckpt', map_location=device))
-
-    logger.info(model)
+    test_loader = torch.utils.data.DataLoader(_testset, batch_size=1)
 
     images, labels = next(iter(test_loader))
     # images, labels = next(iter(train_loader))
     images = images.to(device)
 
     # get sample outputs
-    encoded_imgs, decoded_imgs = model(images)
+    encoded_imgs = ae_resnet18.encoder.eval()(images)
+    decoded_imgs = ae_resnet18.decoder.eval()(encoded_imgs)
     # prep images for display
     images = images.cpu().numpy()
 
@@ -61,43 +62,127 @@ def evaluate(config, result):
     encoded_imgs = encoded_imgs.detach().cpu().numpy()
     decoded_imgs = decoded_imgs.detach().cpu().numpy()
 
+    decoded_imgs = np.reshape(decoded_imgs, (
+        decoded_imgs.shape[0], decoded_imgs.shape[2], decoded_imgs.shape[3], decoded_imgs.shape[1]))
+    images = np.reshape(images, (images.shape[0], images.shape[2], images.shape[3], images.shape[1]))
+
     # plot the first ten input images and then reconstructed images
-    fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(12, 4))
+    fig, axes = plt.subplots(nrows=2, ncols=10, sharex=True, sharey=True, figsize=(12, 4))
 
     # input images on top row, reconstructions on bottom
     for images, row in zip([images, decoded_imgs], axes):
         for img, ax in zip(images, row):
-            ax.imshow(np.squeeze(img), cmap='gray')
+            ax.imshow(np.squeeze(img), cmap="gray")
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
     fig.savefig(f'./{config.root}/original_decoded.png', bbox_inches='tight')
     plt.close()
 
-    encoded_img = encoded_imgs[0]  # get the 7th image from the batch (7th image in the plot above)
+    ### Calculate worst, best and some random loss on testset
+    test_losses = []
+    test_loader = torch.utils.data.DataLoader(_testset, batch_size=1)
 
-    fig = plt.figure(figsize=(4, 4))
-    for fm in range(encoded_img.shape[0]):
-        ax = fig.add_subplot(2, 2, fm + 1, xticks=[], yticks=[])
-        ax.set_title(f'feature map: {fm}')
-        ax.imshow(encoded_img[fm], cmap='gray')
+    if config.tqdm:
+        test_loop = tqdm(test_loader, total=len(test_loader))
+    else:
+        test_loop = test_loader
 
-    fig.savefig(f'./{config.root}/encoded_img_alpha')
+    for image, label in test_loop:
+        image = image.to(device)
+        label = label.to(device)
+
+        ae_resnet18.eval()
+        with torch.no_grad():
+            _enc, _dec = ae_resnet18(image)
+
+        loss = criterion(_dec, image)
+        test_losses.append((loss.cpu().numpy(), image.cpu().numpy(), _dec.cpu().numpy(), label.cpu().numpy()))
+
+    test_losses.sort(key=lambda s: s[0])
+
+    """
+    print("test losses", test_losses)
+    print("test losses first 5", test_losses[:5])
+    print("test losses last 5", test_losses[-5:])
+    """
+
+    rows = 6
+    cols = 10
+    fig, axes = plt.subplots(nrows=rows, ncols=cols, sharex=True, sharey=True)
+
+    for i in range(0, cols):
+        axes[0, i].imshow(np.squeeze(test_losses[i][1]), cmap="gray")
+        # axes[0, i].set_title(test_losses[i][0])
+        axes[1, i].imshow(np.squeeze(test_losses[i][2]), cmap="gray")
+        # axes[1, i].set_title(test_losses[i][0])
+
+        axes[2, i].imshow(np.squeeze(test_losses[(len(test_losses) // 2) + i][1]), cmap="gray")
+        # axes[2, i].set_title(test_losses[(len(test_losses)//2)+i][0])
+        axes[3, i].imshow(np.squeeze(test_losses[(len(test_losses) // 2) + i][2]), cmap="gray")
+        # axes[3, i].set_title(test_losses[(len(test_losses)//2)+i][0])
+
+        axes[4, i].imshow(np.squeeze(test_losses[-1 - i][1]), cmap="gray")
+        # axes[4, i].set_title(test_losses[-1-i][0])
+        axes[5, i].imshow(np.squeeze(test_losses[-1 - i][2]), cmap="gray")
+        # axes[5, i].set_title(test_losses[-1-i][0])
+
+    for i in range(0, cols):
+        for j in range(0, rows):
+            axes[j, i].get_xaxis().set_visible(False)
+            axes[j, i].get_yaxis().set_visible(False)
+
+
+    print(losses_train)
+    print(losses_valid)
+    print(losses_test)
+
+    fig.suptitle("10/10/10 - best/avg/worst - decoding")
+    fig.savefig(f"./{config.root}/10-10-10-decod.png")
     plt.close()
 
-    encoded_img = encoded_imgs[3]  # get 1st image from the batch (here '7')
-
-    fig = plt.figure(figsize=(4, 4))
-    for fm in range(encoded_img.shape[0]):
-        ax = fig.add_subplot(2, 2, fm + 1, xticks=[], yticks=[])
-        ax.set_title(f'feature map: {fm}')
-        ax.imshow(encoded_img[fm], cmap='gray')
-
-    fig.savefig(f'./{config.root}/encoded_img_epsilon')
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses_train)
+    util.utils.create_folder(f"./{config.root}/net_eval")
+    plt.title("Train Loss")
+    plt.savefig(f"./{config.root}/net_eval/loss_train.png")
+    util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
     plt.close()
 
-    # X, y = load_digits(return_X_y=True)
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses_valid)
+    util.utils.create_folder(f"./{config.root}/net_eval")
+    plt.title("Validation Loss")
+    plt.savefig(f"./{config.root}/net_eval/loss_valid.png")
+    util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
+    plt.close()
 
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses_test)
+    util.utils.create_folder(f"./{config.root}/net_eval")
+    plt.title("Test Loss")
+    plt.savefig(f"./{config.root}/net_eval/loss_test.png")
+    util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
+    plt.close()
+
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.plot(losses_train, label="train_loss")
+    plt.plot(losses_valid, label="valid_loss")
+    plt.plot(losses_test, label="test_loss")
+    util.utils.create_folder(f"./{config.root}/net_eval")
+    plt.title("All Losses - Log Scale")
+    plt.legend()
+    plt.yscale("log")
+    plt.savefig(f"./{config.root}/net_eval/loss_all.png")
+    util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
+    plt.close()
+
+
+    """
     data = []
     folder = './data/__training-data-standardised'
 
@@ -169,3 +254,7 @@ def evaluate(config, result):
     util.report.image_to_report(f"{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png",
                                 f"UMAP final_eval")
     plt.close()
+    
+    """
+
+    pass

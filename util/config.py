@@ -15,7 +15,7 @@ class Config:
                  model_class: str = None, model_path: str = None, letters_to_eval: list = None, logging_val: int = 40,
                  batch_size: int = 128, epochs: int = 30,
                  tqdm: bool = False):
-        self.name = name
+        self.name = f"config-{name}"
         self.name_time = None
 
         self.train = train
@@ -29,11 +29,13 @@ class Config:
         self.tqdm = tqdm
         self.root = None
 
+        self.result_path = None
+
     @classmethod
     def fromfile(self, path_to_file):
         with open(path_to_file, encoding="UTF-8") as file:
             data = json.load(file)
-            run = Config(name=data["name"],
+            config = Config(name=data["name"],
                          train=data["train"],
                          evaluate=data["evaluate"],
                          model_class=data["model_class"],
@@ -43,7 +45,7 @@ class Config:
                          batch_size=data["batch_size"],
                          epochs=data["epochs"],
                          tqdm=data["tqdm"])
-            return run
+            return config
 
     def __repr__(self):
         return str(self._toJSON())
