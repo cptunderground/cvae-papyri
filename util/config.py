@@ -11,11 +11,11 @@ processing_modes = ['gray-scale', 'otsu']
 
 
 class Config:
-    def __init__(self, name: str = "unnamed", train: bool = False, evaluate: bool = True,
+    def __init__(self, name: str = "unnamed", name_time=None,train: bool = False, evaluate: bool = True,
                  model_class: str = None, model_path: str = None, letters_to_eval: list = None, logging_val: int = 40,
                  batch_size: int = 128, epochs: int = 30, tqdm: bool = False, root=None, result_path=None):
-        self.name = f"config-{name}"
-        self.name_time = None
+        self.name = name
+        self.name_time = name_time
 
         self.train = train
         self.evaluate = evaluate
@@ -35,6 +35,7 @@ class Config:
         with open(path_to_file, encoding="UTF-8") as file:
             data = json.load(file)
             config = Config(name=data["name"],
+                            name_time=["name_time"],
                             train=data["train"],
                             evaluate=data["evaluate"],
                             model_class=data["model_class"],
@@ -73,7 +74,7 @@ class Config:
 
 
 if __name__ == '__main__':
-    #__debug = Config().fromfile("../_config/__debug.json")
+    # __debug = Config().fromfile("../_config/__debug.json")
 
     standard_conf = Config(name="standard",
                            train=True,
@@ -87,15 +88,15 @@ if __name__ == '__main__':
                            tqdm=True)
 
     cluster_3_gpu = Config(name="cluster_3_gpu",
-                            train=True,
-                            evaluate=True,
-                            model_class="resnet_AE",
-                            model_path=None,
-                            letters_to_eval=["alpha", "beta"],
-                            logging_val=40,
-                            batch_size=512,
-                            epochs=3,
-                            tqdm=False)
+                           train=True,
+                           evaluate=True,
+                           model_class="resnet_AE",
+                           model_path=None,
+                           letters_to_eval=["alpha", "beta"],
+                           logging_val=40,
+                           batch_size=512,
+                           epochs=3,
+                           tqdm=False)
 
     cluster_30_gpu = Config(name="cluster_30_gpu",
                             train=True,

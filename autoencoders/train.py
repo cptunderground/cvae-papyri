@@ -22,36 +22,7 @@ from util.config import Config
 from util.result import Result
 
 
-def get_label(label):
-    switcher = {
-        "tensor(0)": "alpha",
-        "tensor(1)": "beta",
-        "tensor(2)": "chi",
-        "tensor(3)": "delta",
-        "tensor(4)": "epsilon",
-        "tensor(5)": "eta",
-        "tensor(6)": "gamma",
-        "tensor(7)": "iota",
-        "tensor(8)": "kappa",
-        "tensor(9)": "lambda",
-        "tensor(10)": "mu",
-        "tensor(11)": "nu",
-        "tensor(12)": "omega",
-        "tensor(13)": "omicron",
-        "tensor(14)": "phi",
-        "tensor(15)": "pi",
-        "tensor(16)": "psi",
-        "tensor(17)": "rho",
-        "tensor(18)": "sigma",
-        "tensor(19)": "tau",
-        "tensor(20)": "theta",
-        "tensor(21)": "xi",
-        "tensor(22)": "ypsilon",
-        "tensor(23)": "zeta",
 
-    }
-
-    return switcher.get(label)
 
 
 @util.decorators.timed
@@ -218,11 +189,12 @@ def train(config: Config):
         losses_train.append(cum_train_loss)
         losses_valid.append(cum_valid_loss)
         losses_test.append(cum_test_loss)
+        logger.info(f'Epoch={epoch} done.')
 
     torch.save(optimal_model[0], f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth')
     config.model_path = f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth'
     result.model = f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth'
-    logger.info(f'Epoch={epoch} done.')
+
 
     # scheduler.step(cum_train_loss)
 

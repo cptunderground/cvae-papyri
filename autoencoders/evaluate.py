@@ -2,16 +2,101 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torchvision.transforms as transforms
+from sklearn import cluster
+from sklearn.manifold import TSNE
 from sklearn.model_selection import train_test_split
 from torch import nn
-from torch.utils.data import dataset
+from torch.utils.data import dataset, Subset
 from torchvision import datasets
 from torchvision.transforms import transforms
 from tqdm import tqdm
 
+import seaborn as sns
+from umap import plot
+from umap.umap_ import UMAP
+
+
 import util.report
 import util.utils
 from util import _transforms
+
+def draw_umap(data,labels, n_neighbors=15, min_dist=0.1, n_components=2, metric='euclidean', title=''):
+    fit = UMAP(
+        n_neighbors=n_neighbors,
+        min_dist=min_dist,
+        n_components=n_components,
+        metric=metric
+    )
+    u = fit.fit_transform(data);
+    fig = plt.figure()
+
+    if n_components == 3:
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels, s=100)
+    plt.title(title, fontsize=18)
+    plt.close()
+
+def get_num_label_from_name(label):
+    switcher = {
+        "alpha": 0,
+        "beta": 1,
+        "chi": 2,
+        "delta": 3,
+        "epsilon": 4,
+        "eta": 5,
+        "gamma": 6,
+        "iota": 7,
+        "kappa": 8,
+        "lambda": 9,
+        "mu": 10,
+        "nu": 11,
+        "omega": 12,
+        "omicron": 13,
+        "phi": 14,
+        "pi": 15,
+        "psi": 16,
+        "rho": 17,
+        "sigma": 18,
+        "tau": 19,
+        "theta": 20,
+        "xi": 21,
+        "ypsilon": 22,
+        "zeta": 23,
+
+    }
+    return switcher.get(label)
+
+
+def get_label_from_tensor(label):
+    switcher = {
+        "tensor([0], device='cuda:0')": "alpha",
+        "tensor([1], device='cuda:0')": "beta",
+        "tensor([2], device='cuda:0')": "chi",
+        "tensor([3], device='cuda:0')": "delta",
+        "tensor([4], device='cuda:0')": "epsilon",
+        "tensor([5], device='cuda:0')": "eta",
+        "tensor([6], device='cuda:0')": "gamma",
+        "tensor([7], device='cuda:0')": "iota",
+        "tensor([8], device='cuda:0')": "kappa",
+        "tensor([9], device='cuda:0')": "lambda",
+        "tensor([10], device='cuda:0')": "mu",
+        "tensor([11], device='cuda:0')": "nu",
+        "tensor([12], device='cuda:0')": "omega",
+        "tensor([13], device='cuda:0')": "omicron",
+        "tensor([14], device='cuda:0')": "phi",
+        "tensor([15], device='cuda:0')": "pi",
+        "tensor([16], device='cuda:0')": "psi",
+        "tensor([17], device='cuda:0')": "rho",
+        "tensor([18], device='cuda:0')": "sigma",
+        "tensor([19], device='cuda:0')": "tau",
+        "tensor([20], device='cuda:0')": "theta",
+        "tensor([21], device='cuda:0')": "xi",
+        "tensor([22], device='cuda:0')": "ypsilon",
+        "tensor([23], device='cuda:0')": "zeta",
+
+    }
+
+    return switcher.get(label)
 
 
 def evaluate(config, result):
@@ -46,42 +131,13 @@ def evaluate(config, result):
     _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=42)
     _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=42)
 
-    test_loader = torch.utils.data.DataLoader(_testset, batch_size=1)
-
-    images, labels = next(iter(test_loader))
-    # images, labels = next(iter(train_loader))
-    images = images.to(device)
-
-    # get sample outputs
-    encoded_imgs = ae_resnet18.encoder.eval()(images)
-    decoded_imgs = ae_resnet18.decoder.eval()(encoded_imgs)
-    # prep images for display
-    images = images.cpu().numpy()
-
-    # use detach when it's an output that requires_grad
-    encoded_imgs = encoded_imgs.detach().cpu().numpy()
-    decoded_imgs = decoded_imgs.detach().cpu().numpy()
-
-    decoded_imgs = np.reshape(decoded_imgs, (
-        decoded_imgs.shape[0], decoded_imgs.shape[2], decoded_imgs.shape[3], decoded_imgs.shape[1]))
-    images = np.reshape(images, (images.shape[0], images.shape[2], images.shape[3], images.shape[1]))
-
-    # plot the first ten input images and then reconstructed images
-    fig, axes = plt.subplots(nrows=2, ncols=10, sharex=True, sharey=True, figsize=(12, 4))
-
-    # input images on top row, reconstructions on bottom
-    for images, row in zip([images, decoded_imgs], axes):
-        for img, ax in zip(images, row):
-            ax.imshow(np.squeeze(img), cmap="gray")
-            ax.get_xaxis().set_visible(False)
-            ax.get_yaxis().set_visible(False)
-
-    fig.savefig(f'./{config.root}/original_decoded.png', bbox_inches='tight')
-    plt.close()
-
+    #######################################################################################
     ### Calculate worst, best and some random loss on testset
+    #######################################################################################
+
     test_losses = []
     test_loader = torch.utils.data.DataLoader(_testset, batch_size=1)
+
 
     if config.tqdm:
         test_loop = tqdm(test_loader, total=len(test_loader))
@@ -101,11 +157,9 @@ def evaluate(config, result):
 
     test_losses.sort(key=lambda s: s[0])
 
-    """
-    print("test losses", test_losses)
-    print("test losses first 5", test_losses[:5])
-    print("test losses last 5", test_losses[-5:])
-    """
+    #############################################################################################
+    ### Plot 10/10/10
+    #############################################################################################
 
     rows = 6
     cols = 10
@@ -175,41 +229,78 @@ def evaluate(config, result):
     plt.savefig(f"./{config.root}/net_eval/loss_all.png")
     # util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
     plt.close()
+    
+    
 
-    """
-    data = []
-    folder = './data/__training-data-standardised'
+    ################################################################################
+    # Individual letter clustering
+    ################################################################################
 
-    # print(encoded_imgs)
-    # print(labels)
-    # print(len(encoded_imgs))
-    # print(len(labels))
+    print([get_num_label_from_name(letter) for letter in config.letters_to_eval])
+    print(_testset[0][1])
+    idx = [i for i in range(len(_testset)) if
+           _testset[i][1] in [get_num_label_from_name(letter) for letter in config.letters_to_eval]]
+    # build the appropriate subset
+    print(idx)
+    test_subset = Subset(_testset, idx)
+    print(test_subset)
 
-    for i in range(len(encoded_imgs)):
-        data.append([encoded_imgs[i], labels[i]])
+    ind_eval_loader = torch.utils.data.DataLoader(test_subset, batch_size=1)
 
-    # print(data)
+    if config.tqdm:
+        ind_loop = tqdm(ind_eval_loader, total=len(ind_eval_loader))
+    else:
+        ind_loop = ind_eval_loader
 
-    features, images = zip(*data)
-    y = images
-    X = np.array(features)
+    encoded_images = []
+    decoded_images = []
+    labels_list = []
+
+    for image, label in ind_loop:
+        image = image.to(device)
+        label = label.to(device)
+
+        ae_resnet18.eval()
+        with torch.no_grad():
+            _enc, _dec = ae_resnet18(image)
+
+        encoded_images.append(_enc.cpu().numpy())
+        decoded_images.append(_dec.cpu().numpy())
+        labels_list.append(label)  # cpu().numpy())
+
+    print(encoded_images)
+    print(labels_list)
+    print(len(encoded_images))
+    print(len(labels_list))
+
+    y = labels_list
+    X = np.array(encoded_images)
+    Z = np.array(decoded_images)
+
+    print(X.shape)
+    print(Z.shape)
 
     X.reshape(-1)
 
     X.ravel()
 
-    X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3]))
+    X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2]))
 
     y_list = list(y)
-    y_list_old = y_list
-    y_old = y
+    y_list_num = list(y)
+
     for item in range(len(y_list)):
-        y_list[item] = get_label(str(y_list[item]))
+        y_list[item] = get_label_from_tensor(str(y_list[item]))
+        y_list_num[item] = get_num_label_from_name(y_list[item])
 
     y = tuple(y_list)
+    labels_list = np.array(y_list_num)
 
     y_set = set(y)
     y_len = len(y_set)
+
+    print(f"y_set={y_set}")
+    print(f"y_len={y_len}")
 
     palette = sns.color_palette("bright", y_len)
     MACHINE_EPSILON = np.finfo(np.double).eps
@@ -219,21 +310,18 @@ def evaluate(config, result):
     # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
 
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
-    # plt.show()
+
 
     tsne = TSNE()
     X_embedded = tsne.fit_transform(X)
 
-    umap = UMAP()
-
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-    plt.title(f"tsne_{name}_final_eval_mode_{config.processing}")
-    util.utils.create_folder(f"./{config.root}/{name}/{config.processing}")
-    plt.savefig(f'./{config.root}/{name}/{config.processing}/tsne_{name}_final_eval_mode_{config.processing}.png')
-    util.report.image_to_report(f"{name}/{config.processing}/tsne_{name}_final_eval_mode_{config.processing}.png",
-                                f"TSNE final_eval")
+    plt.title(f"tsne_final_eval")
+    util.utils.create_folder(f"./{config.root}/net_eval/")
+    plt.savefig(f'./{config.root}/net_eval/tsne_final_eval_mode.png')
+    # util.report.image_to_report(f"{name}/{config.processing}/tsne_{name}_final_eval_mode_{config.processing}.png",f"TSNE final_eval")
     plt.close()
 
     umap = UMAP()
@@ -242,13 +330,44 @@ def evaluate(config, result):
     sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-    plt.title(f"umap_{name}_final_eval_mode_{config.processing}")
-    util.utils.create_folder(f"./{config.root}/{name}/{config.processing}")
-    plt.savefig(f'./{config.root}/{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png')
-    util.report.image_to_report(f"{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png",
-                                f"UMAP final_eval")
+    plt.title(f"umap_final_eval_mode")
+    plt.savefig(f'./{config.root}/net_eval/umap_final_eval_mode.png')
+    # util.report.image_to_report(f"{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png",f"UMAP final_eval")
     plt.close()
-    
-    """
 
-    pass
+
+    ####################################################################################################
+    ### 3D UMAP
+    ####################################################################################################
+
+    mapper = UMAP(n_components=2).fit(X)
+
+    plot.points(mapper, labels=labels_list, theme="fire")
+
+    plt.title(f"umap_final_eval_{config.letters_to_eval}")
+    plt.savefig(f'./{config.root}/net_eval/umap_scatter_{config.letters_to_eval}.png')
+    plt.close()
+
+    standard_embedding = UMAP(random_state=42).fit_transform(X)
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_list, s=5, cmap='Spectral');
+    plt.title(f"umap_ncluster_{config.letters_to_eval}")
+    plt.legend(labels_list)
+    plt.savefig(f'./{config.root}/net_eval/umap_ncluster_{config.letters_to_eval}.png')
+    plt.close()
+
+    kmeans_labels = cluster.KMeans(n_clusters=len(config.letters_to_eval)).fit_predict(X)
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='Spectral');
+    plt.title(f"umap_kmeans_{config.letters_to_eval}")
+    plt.legend(labels_list)
+    plt.savefig(f'./{config.root}/net_eval/umap_kmeans_{config.letters_to_eval}.png')
+    plt.close()
+
+    fit = UMAP(n_components=3)
+    u = fit.fit_transform(X)
+    fig = plt.figure()
+
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels_list, s=10)
+    plt.title(f'n_components = 3 - {config.letters_to_eval}')
+    plt.savefig(f'./{config.root}/net_eval/umap_ncomp3_{config.letters_to_eval}.png')
+    plt.close()
