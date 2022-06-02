@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from torchvision.transforms import transforms
 
 import util.decorators
-from util._transforms import _Pad
+from util.c_transforms import CustomPad
 
 
 def plot(imgs, with_orig=True, row_title=None, **imshow_kwargs):
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     plt.show()
 
     t = transforms.Compose([
-        _Pad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
+        CustomPad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
         transforms.Resize([224, 224]),
         transforms.Grayscale()]
     )

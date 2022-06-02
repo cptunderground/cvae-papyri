@@ -15,12 +15,13 @@ import seaborn as sns
 from umap import plot
 from umap.umap_ import UMAP
 
-
 import util.report
 import util.utils
-from util import _transforms
+from util import c_transforms
+from util.c_dataset import PapyriDataset
 
-def draw_umap(data,labels, n_neighbors=15, min_dist=0.1, n_components=2, metric='euclidean', title=''):
+
+def draw_umap(data, labels, n_neighbors=15, min_dist=0.1, n_components=2, metric='euclidean', title=''):
     fit = UMAP(
         n_neighbors=n_neighbors,
         min_dist=min_dist,
@@ -35,6 +36,7 @@ def draw_umap(data,labels, n_neighbors=15, min_dist=0.1, n_components=2, metric=
         ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels, s=100)
     plt.title(title, fontsize=18)
     plt.close()
+
 
 def get_num_label_from_name(label):
     switcher = {
@@ -64,7 +66,7 @@ def get_num_label_from_name(label):
         "zeta": 23,
 
     }
-    return switcher.get(label)
+    return switcher.get(label, label)
 
 
 def get_label_from_tensor(label):
@@ -112,7 +114,7 @@ def evaluate(config, result):
     losses_test = result.test_loss
 
     t = transforms.Compose([
-        _transforms._Pad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
+        c_transforms.CustomPad(padding=[0, 0, 0, 0], fill=(255, 255, 255, 1)),
         transforms.Resize([64, 64]),
         transforms.Grayscale()
     ])
@@ -122,47 +124,44 @@ def evaluate(config, result):
         # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
-    _dataset = datasets.ImageFolder(
-        './data/raw',
+    # _dataset = datasets.ImageFolder('./data/raw', transform=transforms.Compose([t, t_prime]))
 
-        transform=transforms.Compose([t, t_prime])
-    )
+    _dataset = PapyriDataset('./data/raw-cleaned-custom', transform=transforms.Compose([t, t_prime]))
 
-    _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=42)
-    _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=42)
+    _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=result.random_state)
+    _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=result.random_state)
 
     #######################################################################################
-    ### Calculate worst, best and some random loss on testset
+    # Calculate worst, best and some random loss on testset
     #######################################################################################
 
     test_losses = []
     test_loader = torch.utils.data.DataLoader(_testset, batch_size=1)
-
 
     if config.tqdm:
         test_loop = tqdm(test_loader, total=len(test_loader))
     else:
         test_loop = test_loader
 
-    for image, label in test_loop:
+    for image, label_char, label_frag in test_loop:
         image = image.to(device)
-        label = label.to(device)
 
         ae_resnet18.eval()
         with torch.no_grad():
             _enc, _dec = ae_resnet18(image)
 
         loss = criterion(_dec, image)
-        test_losses.append((loss.cpu().numpy(), image.cpu().numpy(), _dec.cpu().numpy(), label.cpu().numpy()))
+        test_losses.append((loss.cpu().numpy(), image.cpu().numpy(), _dec.cpu().numpy(), label_char[0],
+                            label_frag[0]))
 
     test_losses.sort(key=lambda s: s[0])
 
     #############################################################################################
-    ### Plot 10/10/10
+    # Plot 10/10/10
     #############################################################################################
 
     rows = 6
-    cols = 10
+    cols = 6
     fig, axes = plt.subplots(nrows=rows, ncols=cols, sharex=True, sharey=True)
 
     for i in range(0, cols):
@@ -186,11 +185,12 @@ def evaluate(config, result):
             axes[j, i].get_xaxis().set_visible(False)
             axes[j, i].get_yaxis().set_visible(False)
 
-    fig.suptitle("10/10/10 - best/avg/worst - decoding")
-    fig.savefig(f"./{config.root}/10-10-10-decod.png")
+    fig.suptitle(f"{cols}/{cols}/{cols} - best/median/worst - decoding")
+    fig.tight_layout()
+    fig.savefig(f"./{config.root}/{cols}-{cols}-{cols}-decod.png", dpi=300)
     plt.close()
 
-    plt.xlabel('Iterations')
+    plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.plot(losses_train)
     util.utils.create_folder(f"./{config.root}/net_eval")
@@ -199,7 +199,7 @@ def evaluate(config, result):
     # util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
     plt.close()
 
-    plt.xlabel('Iterations')
+    plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.plot(losses_valid)
     util.utils.create_folder(f"./{config.root}/net_eval")
@@ -208,7 +208,7 @@ def evaluate(config, result):
     # util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
     plt.close()
 
-    plt.xlabel('Iterations')
+    plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.plot(losses_test)
     util.utils.create_folder(f"./{config.root}/net_eval")
@@ -217,7 +217,7 @@ def evaluate(config, result):
     # util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
     plt.close()
 
-    plt.xlabel('Iterations')
+    plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.plot(losses_train, label="train_loss")
     plt.plot(losses_valid, label="valid_loss")
@@ -229,17 +229,15 @@ def evaluate(config, result):
     plt.savefig(f"./{config.root}/net_eval/loss_all.png")
     # util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
     plt.close()
-    
-    
 
     ################################################################################
     # Individual letter clustering
     ################################################################################
 
-    print([get_num_label_from_name(letter) for letter in config.letters_to_eval])
+    print([letter for letter in config.letters_to_eval])
     print(_testset[0][1])
     idx = [i for i in range(len(_testset)) if
-           _testset[i][1] in [get_num_label_from_name(letter) for letter in config.letters_to_eval]]
+           _testset[i][1] in [letter for letter in config.letters_to_eval]]
     # build the appropriate subset
     print(idx)
     test_subset = Subset(_testset, idx)
@@ -254,11 +252,11 @@ def evaluate(config, result):
 
     encoded_images = []
     decoded_images = []
-    labels_list = []
+    labels_char_list = []
+    labels_frag_list = []
 
-    for image, label in ind_loop:
+    for image, label_char, label_frag in ind_loop:
         image = image.to(device)
-        label = label.to(device)
 
         ae_resnet18.eval()
         with torch.no_grad():
@@ -266,14 +264,17 @@ def evaluate(config, result):
 
         encoded_images.append(_enc.cpu().numpy())
         decoded_images.append(_dec.cpu().numpy())
-        labels_list.append(label)  # cpu().numpy())
+        labels_char_list.append(label_char)  # cpu().numpy())
+        labels_frag_list.append(label_frag)  # cpu().numpy())
 
-    print(encoded_images)
-    print(labels_list)
+    print("enc_images", encoded_images)
+    print(labels_char_list)
+    print(labels_frag_list)
     print(len(encoded_images))
-    print(len(labels_list))
+    print(len(labels_char_list))
 
-    y = labels_list
+    y = labels_char_list
+    f = labels_frag_list
     X = np.array(encoded_images)
     Z = np.array(decoded_images)
 
@@ -289,33 +290,50 @@ def evaluate(config, result):
     y_list = list(y)
     y_list_num = list(y)
 
+    f_list = list(f)
+    f_list_num = list(f)
+
     for item in range(len(y_list)):
-        y_list[item] = get_label_from_tensor(str(y_list[item]))
-        y_list_num[item] = get_num_label_from_name(y_list[item])
+        y_list[item] = (str(y_list[item]))
+        y_list_num[item] = (y_list[item])
+
+    for item in range(len(f_list)):
+        f_list[item] = (str(f_list[item]))
+        f_list_num[item] = (f_list[item])
 
     y = tuple(y_list)
-    labels_list = np.array(y_list_num)
+    f = tuple(f_list)
+    labels_char_list = np.array(y_list_num)
+    frags = np.array(f_list_num)
+
+    print(frags)
+    print(labels_char_list)
+    print(frags.shape)
+    print(labels_char_list.shape)
 
     y_set = set(y)
     y_len = len(y_set)
 
+    f_set = set(f)
+    f_len = len(f_set)
+
     print(f"y_set={y_set}")
     print(f"y_len={y_len}")
 
-    palette = sns.color_palette("bright", y_len)
+    palette_char = sns.color_palette("bright", y_len)
+    palette_frag = sns.color_palette("bright", f_len)
     MACHINE_EPSILON = np.finfo(np.double).eps
     n_components = 2
     perplexity = 30
 
     # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
 
-    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
-
+    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette_char=palette_char)
 
     tsne = TSNE()
     X_embedded = tsne.fit_transform(X)
 
-    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette_char)
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
     plt.title(f"tsne_final_eval")
@@ -327,7 +345,7 @@ def evaluate(config, result):
     umap = UMAP()
     X_embedded = umap.fit_transform(X)
 
-    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette)
+    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette_char)
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
     plt.title(f"umap_final_eval_mode")
@@ -335,30 +353,35 @@ def evaluate(config, result):
     # util.report.image_to_report(f"{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png",f"UMAP final_eval")
     plt.close()
 
-
     ####################################################################################################
-    ### 3D UMAP
+    # 3D UMAP
     ####################################################################################################
 
     mapper = UMAP(n_components=2).fit(X)
 
-    plot.points(mapper, labels=labels_list, theme="fire")
+    plot.points(mapper, labels=labels_char_list, theme="fire")
 
-    plt.title(f"umap_final_eval_{config.letters_to_eval}")
-    plt.savefig(f'./{config.root}/net_eval/umap_scatter_{config.letters_to_eval}.png')
+    plt.title(f"umap_final_eval_{config.letters_to_eval}_char")
+    plt.savefig(f'./{config.root}/net_eval/umap_scatter_{config.letters_to_eval}_char.png')
+    plt.close()
+
+    plot.points(mapper, labels=frags, theme="fire")
+
+    plt.title(f"umap_final_eval_{config.letters_to_eval}_frag")
+    plt.savefig(f'./{config.root}/net_eval/umap_scatter_{config.letters_to_eval}_frag.png')
     plt.close()
 
     standard_embedding = UMAP(random_state=42).fit_transform(X)
-    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_list, s=5, cmap='Spectral');
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_char_list, s=5, cmap='Spectral')
     plt.title(f"umap_ncluster_{config.letters_to_eval}")
-    plt.legend(labels_list)
+    plt.legend(labels_char_list)
     plt.savefig(f'./{config.root}/net_eval/umap_ncluster_{config.letters_to_eval}.png')
     plt.close()
 
     kmeans_labels = cluster.KMeans(n_clusters=len(config.letters_to_eval)).fit_predict(X)
-    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='Spectral');
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='Spectral')
     plt.title(f"umap_kmeans_{config.letters_to_eval}")
-    plt.legend(labels_list)
+    plt.legend(labels_char_list)
     plt.savefig(f'./{config.root}/net_eval/umap_kmeans_{config.letters_to_eval}.png')
     plt.close()
 
@@ -367,7 +390,7 @@ def evaluate(config, result):
     fig = plt.figure()
 
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels_list, s=10)
+    ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels_char_list, s=10)
     plt.title(f'n_components = 3 - {config.letters_to_eval}')
     plt.savefig(f'./{config.root}/net_eval/umap_ncomp3_{config.letters_to_eval}.png')
     plt.close()

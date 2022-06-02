@@ -1,41 +1,33 @@
-import math
-
-import matplotlib.pyplot as plt
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
 from sklearn.model_selection import train_test_split
 from torch.utils.data import dataset
+from torchsummary import summary
 from torchvision import datasets
 from torchvision.transforms import transforms
 from tqdm import tqdm
 
 import autoencoders.resnet_ae
-import util._transforms as _transforms
-import util.report
-import util.utils
+import util.c_transforms as c_transforms
 import util.decorators
 from util.base_logger import logger
 from util.config import Config
 from util.result import Result
-
-
-
+from util.c_dataset import PapyriDataset
 
 
 @util.decorators.timed
 def train(config: Config):
-
-    #util.report.header1("Auto-Encoder")
+    # util.report.header1("Auto-Encoder")
 
     logger.info(f"torch.cuda.is_available()={torch.cuda.is_available()}")
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     t = transforms.Compose([
-        _transforms._Pad(padding=[0, 0, 0, 0], fill=(255, 255, 255)),
+        c_transforms.CustomPad(padding=[0, 0, 0, 0], fill=(255, 255, 255, 1)),
         transforms.Resize([64, 64]),
         transforms.Grayscale()
     ])
@@ -45,14 +37,14 @@ def train(config: Config):
         # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
-    _dataset = datasets.ImageFolder(
-        './data/raw',
+    # _dataset = datasets.ImageFolder('./data/raw', transform=transforms.Compose([t, t_prime]))
 
-        transform=transforms.Compose([t, t_prime])
-    )
+    _dataset = PapyriDataset('./data/raw-cleaned-custom', transform=transforms.Compose([t, t_prime]))
 
-    _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=42)
-    _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=42)
+    random_state = 42
+
+    _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=random_state)
+    _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=random_state)
 
     logger.info(f"len(_trainset)={len(_trainset)}")
     logger.info(f"len(_validset)={len(_validset)}")
@@ -70,6 +62,8 @@ def train(config: Config):
     # logger.info(ae_resnet18)
 
     ae_resnet18.to(device)
+    logger.info(ae_resnet18)
+    summary(ae_resnet18, (1, 64, 64), 2592)
 
     criterion = nn.MSELoss()
 
@@ -89,13 +83,14 @@ def train(config: Config):
     result.optimizer = optimizer.__module__
     result.optimizer_args = optimizer.defaults
     result.loss = str(criterion)
+    result.random_state = random_state
     # result.loss = criterion.__dict__
 
     logger.info(f"result obj : {result}")
     result.saveJSON()
 
     ###TODO
-    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=3, verbose=True)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=1 / 3, patience=25, verbose=True)
 
     losses_train = []
     losses_valid = []
@@ -108,6 +103,8 @@ def train(config: Config):
         cum_train_loss = 0
         cum_valid_loss = 0
         cum_test_loss = 0
+
+        scheduler.step()
 
         ###################
         # train the models #
@@ -129,7 +126,7 @@ def train(config: Config):
             loss_train.backward()
             optimizer.step()
 
-            cum_train_loss += loss_train.item() / len(train_loader.dataset)
+            cum_train_loss += loss_train.item()
 
             if config.tqdm:
                 loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
@@ -153,7 +150,7 @@ def train(config: Config):
                 _enc, _dec = ae_resnet18(images)
             loss_valid = criterion(_dec, images)
 
-            cum_valid_loss += loss_valid.item() / len(valid_loader.dataset)
+            cum_valid_loss += loss_valid.item()
             if config.tqdm:
                 loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_valid_loss)
@@ -181,7 +178,7 @@ def train(config: Config):
 
             loss_test = criterion(_dec, images)
 
-            cum_test_loss += loss_test.item() / len(test_loader.dataset)
+            cum_test_loss += loss_test.item()
             if config.tqdm:
                 loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_test_loss)
@@ -195,10 +192,7 @@ def train(config: Config):
     config.model_path = f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth'
     result.model = f'./{config.root}/optimal-model-{optimal_model[1]}-ae-{config.name_time}.pth'
 
-
     # scheduler.step(cum_train_loss)
-
-
 
     result.train_loss = losses_train
     result.valid_loss = losses_valid

@@ -1,17 +1,12 @@
 import json
-import logging
-
-import torch
-
-from autoencoders.resnet_ae import resnet_AE as AE
-from util.base_logger import logger
-
-modes = ['default', 'testing', 'cluster', 'full', 'init']
-processing_modes = ['gray-scale', 'otsu']
 
 
 class Config:
-    def __init__(self, name: str = "unnamed", name_time=None,train: bool = False, evaluate: bool = True,
+    """
+    Represents the JSON config for the auto-encoder as an instance during runtime.
+    """
+
+    def __init__(self, name: str = "unnamed", name_time: str = None, train: bool = False, evaluate: bool = True,
                  model_class: str = None, model_path: str = None, letters_to_eval: list = None, logging_val: int = 40,
                  batch_size: int = 128, epochs: int = 30, tqdm: bool = False, root=None, result_path=None):
         self.name = name
@@ -31,11 +26,11 @@ class Config:
         self.result_path = result_path
 
     @classmethod
-    def fromfile(self, path_to_file):
+    def fromfile(cls, path_to_file):
         with open(path_to_file, encoding="UTF-8") as file:
             data = json.load(file)
             config = Config(name=data["name"],
-                            name_time=["name_time"],
+                            name_time=data["name_time"],
                             train=data["train"],
                             evaluate=data["evaluate"],
                             model_class=data["model_class"],
@@ -56,18 +51,12 @@ class Config:
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=False, indent=4)
 
     def saveJSON(self) -> None:
-        if self.root != None:
+        if self.root is not None:
             with open(f'./{self.root}/{self.name}.json', 'w') as outfile:
                 json.dump(self.__dict__, outfile)
         else:
             with open(f'../_config/{self.name}.json', 'w') as outfile:
                 json.dump(self.__dict__, outfile)
-
-    def setRoot(self, root_path: str):
-        self.root = root_path
-
-    def getRoot(self):
-        return self.root
 
     def write_to_md(self):
         pass

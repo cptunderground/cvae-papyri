@@ -24,13 +24,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print(args.config)
 
-    if args.config == None:
+    if args.config is None:
         config_file = "./_config/standard_config.json"
     else:
         config_file = args.config
+
     config = Config().fromfile(config_file)
 
-    if config.name_time == None:
+    if config.name_time is None:
         config.name_time = f'{config.name}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}'
         run_path = f'out/{config.name_time}'
         config.root = run_path
@@ -43,7 +44,8 @@ if __name__ == '__main__':
 
         util.report.set_mdPath(config.root)
         util.report.create_report(f"report-{config.name}", title=f"Report for {config.name}")
-        util.report.write_to_report(f"This is your Report for the run {config.name}. It summarizes all calculations made.")
+        util.report.write_to_report(
+            f"This is your Report for the run {config.name}. It summarizes all calculations made.")
 
         logger.info('STARTING PROGRAM')
         logger.info('Selected parameters:')
@@ -70,4 +72,4 @@ if __name__ == '__main__':
         evaluate.evaluate(config, result)
 
     print("Evaluating results and summarizing them in report")
-    #util.report.save_report()
+    # util.report.save_report()
