@@ -104,7 +104,7 @@ def train(config: Config):
         cum_valid_loss = 0
         cum_test_loss = 0
 
-        scheduler.step()
+
 
         ###################
         # train the models #
@@ -132,6 +132,7 @@ def train(config: Config):
                 loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_train_loss)
 
+        scheduler.step(cum_train_loss)
         tqdm._instances.clear()
 
         ######################

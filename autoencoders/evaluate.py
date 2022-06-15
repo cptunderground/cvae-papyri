@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torchvision.transforms as transforms
-from sklearn import cluster
+from sklearn import cluster, preprocessing
 from sklearn.manifold import TSNE
 from sklearn.model_selection import train_test_split
 from torch import nn
@@ -264,8 +264,8 @@ def evaluate(config, result):
 
         encoded_images.append(_enc.cpu().numpy())
         decoded_images.append(_dec.cpu().numpy())
-        labels_char_list.append(label_char)  # cpu().numpy())
-        labels_frag_list.append(label_frag)  # cpu().numpy())
+        labels_char_list.append(label_char[0])  # cpu().numpy())
+        labels_frag_list.append(label_frag[0])  # cpu().numpy())
 
     print("enc_images", encoded_images)
     print(labels_char_list)
@@ -318,13 +318,19 @@ def evaluate(config, result):
     f_len = len(f_set)
 
     print(f"y_set={y_set}")
+    print(f"f_set={f_set}")
     print(f"y_len={y_len}")
+    print(f"f_len={f_len}")
 
     palette_char = sns.color_palette("bright", y_len)
     palette_frag = sns.color_palette("bright", f_len)
     MACHINE_EPSILON = np.finfo(np.double).eps
     n_components = 2
     perplexity = 30
+
+    label_encoder = preprocessing.LabelEncoder()
+    label_encoder.fit(labels_char_list)
+    labels_char_list_enumerated = label_encoder.transform(labels_char_list)
 
     # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
 
@@ -366,23 +372,31 @@ def evaluate(config, result):
     plt.close()
 
     plot.points(mapper, labels=frags, theme="fire")
+    plt.legend().remove()
 
     plt.title(f"umap_final_eval_{config.letters_to_eval}_frag")
     plt.savefig(f'./{config.root}/net_eval/umap_scatter_{config.letters_to_eval}_frag.png')
     plt.close()
 
     standard_embedding = UMAP(random_state=42).fit_transform(X)
-    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_char_list, s=5, cmap='Spectral')
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_char_list_enumerated, s=5, cmap='Spectral')
     plt.title(f"umap_ncluster_{config.letters_to_eval}")
-    plt.legend(labels_char_list)
+    #plt.legend(labels_char_list)
     plt.savefig(f'./{config.root}/net_eval/umap_ncluster_{config.letters_to_eval}.png')
     plt.close()
 
     kmeans_labels = cluster.KMeans(n_clusters=len(config.letters_to_eval)).fit_predict(X)
     plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='Spectral')
     plt.title(f"umap_kmeans_{config.letters_to_eval}")
-    plt.legend(labels_char_list)
+    #plt.legend(labels_char_list)
     plt.savefig(f'./{config.root}/net_eval/umap_kmeans_{config.letters_to_eval}.png')
+    plt.close()
+
+    kmeans_labels_frags = cluster.KMeans(n_clusters=f_len).fit_predict(X)
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels_frags, s=5, cmap='Spectral')
+    plt.title(f"umap_kmeans_frag")
+    # plt.legend(labels_char_list)
+    plt.savefig(f'./{config.root}/net_eval/umap_kmeans_frag.png')
     plt.close()
 
     fit = UMAP(n_components=3)
@@ -390,7 +404,7 @@ def evaluate(config, result):
     fig = plt.figure()
 
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels_char_list, s=10)
+    ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels_char_list_enumerated, s=10)
     plt.title(f'n_components = 3 - {config.letters_to_eval}')
     plt.savefig(f'./{config.root}/net_eval/umap_ncomp3_{config.letters_to_eval}.png')
     plt.close()
