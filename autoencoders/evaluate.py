@@ -1,24 +1,26 @@
+import hdbscan
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import torch
 import torchvision.transforms as transforms
 from sklearn import cluster, preprocessing
 from sklearn.manifold import TSNE
 from sklearn.model_selection import train_test_split
-from torch import nn
 from torch.utils.data import dataset, Subset
-from torchvision import datasets
 from torchvision.transforms import transforms
 from tqdm import tqdm
-
-import seaborn as sns
 from umap import plot
 from umap.umap_ import UMAP
+
+from torch import nn
 
 import util.report
 import util.utils
 from util import c_transforms
 from util.c_dataset import PapyriDataset
+
+from sklearn.metrics import adjusted_rand_score, adjusted_mutual_info_score
 
 
 def draw_umap(data, labels, n_neighbors=15, min_dist=0.1, n_components=2, metric='euclidean', title=''):
@@ -102,6 +104,8 @@ def get_label_from_tensor(label):
 
 
 def evaluate(config, result):
+    nn
+
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     ae_resnet18 = torch.load(config.model_path)
@@ -130,6 +134,15 @@ def evaluate(config, result):
 
     _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=result.random_state)
     _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=result.random_state)
+
+    print([letter for letter in config.letters_to_eval])
+    print(_testset[0][1])
+    idx = [i for i in range(len(_testset)) if
+           _testset[i][1] in [letter for letter in config.letters_to_eval]]
+    # build the appropriate subset
+    print(idx)
+    _testset = Subset(_testset, idx)
+    print(_testset)
 
     #######################################################################################
     # Calculate worst, best and some random loss on testset
@@ -234,16 +247,7 @@ def evaluate(config, result):
     # Individual letter clustering
     ################################################################################
 
-    print([letter for letter in config.letters_to_eval])
-    print(_testset[0][1])
-    idx = [i for i in range(len(_testset)) if
-           _testset[i][1] in [letter for letter in config.letters_to_eval]]
-    # build the appropriate subset
-    print(idx)
-    test_subset = Subset(_testset, idx)
-    print(test_subset)
-
-    ind_eval_loader = torch.utils.data.DataLoader(test_subset, batch_size=1)
+    ind_eval_loader = torch.utils.data.DataLoader(_testset, batch_size=1)
 
     if config.tqdm:
         ind_loop = tqdm(ind_eval_loader, total=len(ind_eval_loader))
@@ -322,15 +326,73 @@ def evaluate(config, result):
     print(f"y_len={y_len}")
     print(f"f_len={f_len}")
 
+    frag_dict = {f: 0 for f in f_set}
+
+    for f in labels_frag_list:
+        frag_dict[f] += 1
+
+    print(frag_dict)
+
+    plt.figure(figsize=(18, 3))
+    plt.bar(frag_dict.keys(), frag_dict.values(), width=0.5, align="edge", color='g')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.show()
+
+    frag_count = [item for item in frag_dict.items()]
+    print(frag_count)
+    print(f"len(frag_count)={len(frag_count)}")
+    frag_count_val = 0
+    for key, value in frag_count:
+        frag_count_val += value
+
+    print(f"frag_count_val={frag_count_val}")
+
+    frag_count_max = [(key, value) for key, value in frag_dict.items() if value >= 50]
+    frag_count_max_count = 0
+
+    for key, value in frag_count_max:
+        frag_count_max_count += value
+
+    frag_count.sort(key=lambda x: x[1], reverse=True)
+
+    keys, values = zip(*frag_count)
+
+    plt.figure(figsize=(18, 3))
+    plt.bar(keys, values, width=0.5, align="edge", color='g')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.show()
+
+    r1 = np.mean(values)
+    print("Mean: ", r1)
+
+    r2 = np.std(values)
+    print("std: ", r2)
+
+    r3 = np.var(values)
+    print("variance: ", r3)
+
+
+
+    print(frag_count_max)
+    print(f"len(frag_count_max)={len(frag_count_max)}")
+    print(f"frag_count_max_count={frag_count_max_count}")
+    print(frag_count)
+
     palette_char = sns.color_palette("bright", y_len)
     palette_frag = sns.color_palette("bright", f_len)
     MACHINE_EPSILON = np.finfo(np.double).eps
     n_components = 2
     perplexity = 30
 
-    label_encoder = preprocessing.LabelEncoder()
-    label_encoder.fit(labels_char_list)
-    labels_char_list_enumerated = label_encoder.transform(labels_char_list)
+    label_encoder_char = preprocessing.LabelEncoder()
+    label_encoder_char.fit(labels_char_list)
+    labels_char_list_enumerated = label_encoder_char.transform(labels_char_list)
+
+    label_encoder_frag = preprocessing.LabelEncoder()
+    label_encoder_frag.fit(labels_frag_list)
+    labels_frag_list_enumerated = label_encoder_frag.transform(labels_frag_list)
 
     # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
 
@@ -381,23 +443,35 @@ def evaluate(config, result):
     standard_embedding = UMAP(random_state=42).fit_transform(X)
     plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_char_list_enumerated, s=5, cmap='Spectral')
     plt.title(f"umap_ncluster_{config.letters_to_eval}")
-    #plt.legend(labels_char_list)
+    # plt.legend(labels_char_list)
     plt.savefig(f'./{config.root}/net_eval/umap_ncluster_{config.letters_to_eval}.png')
     plt.close()
 
+    ####################################################################################################
+    # K MEANS - Letter Labels
+    ####################################################################################################
+
     kmeans_labels = cluster.KMeans(n_clusters=len(config.letters_to_eval)).fit_predict(X)
-    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='Spectral')
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
     plt.title(f"umap_kmeans_{config.letters_to_eval}")
-    #plt.legend(labels_char_list)
+    # plt.legend(labels_char_list)
     plt.savefig(f'./{config.root}/net_eval/umap_kmeans_{config.letters_to_eval}.png')
     plt.close()
 
+    ####################################################################################################
+    # K MEANS - Fragment Labels
+    ####################################################################################################
+
+
+
     kmeans_labels_frags = cluster.KMeans(n_clusters=f_len).fit_predict(X)
-    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels_frags, s=5, cmap='Spectral')
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels_frags, s=5, cmap='gist_ncar')
     plt.title(f"umap_kmeans_frag")
     # plt.legend(labels_char_list)
     plt.savefig(f'./{config.root}/net_eval/umap_kmeans_frag.png')
     plt.close()
+
+    ####################################################################################################
 
     fit = UMAP(n_components=3)
     u = fit.fit_transform(X)
@@ -408,3 +482,125 @@ def evaluate(config, result):
     plt.title(f'n_components = 3 - {config.letters_to_eval}')
     plt.savefig(f'./{config.root}/net_eval/umap_ncomp3_{config.letters_to_eval}.png')
     plt.close()
+
+    ####################################################################################################
+    # UMAP Enhanced Clustering - Character Labels
+    ####################################################################################################
+
+    print("####################################################################################################")
+    print("# UMAP Enhanced Clustering - Character Labels")
+    print("####################################################################################################")
+
+    standard_embedding = UMAP(random_state=42).fit_transform(X)
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_char_list_enumerated, s=5, cmap='gist_ncar')
+    plt.show()
+
+    print(f"distinct char labels: {len(y_set)}")
+    kmeans_labels = cluster.KMeans(n_clusters=len(y_set)).fit_predict(X)
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
+    plt.show()
+
+    ars = adjusted_rand_score(labels_char_list_enumerated, kmeans_labels)
+    amis = adjusted_mutual_info_score(labels_char_list_enumerated, kmeans_labels)
+
+    print(ars, amis)
+
+    clusterable_embedding = UMAP(
+        n_neighbors=30,
+        min_dist=0.0,
+        n_components=2,
+        random_state=42,
+    ).fit_transform(X)
+
+    plt.scatter(clusterable_embedding[:, 0], clusterable_embedding[:, 1], c=labels_char_list_enumerated, s=5,
+                cmap='gist_ncar')
+
+    plt.show()
+
+    hdbscan_labels = hdbscan.HDBSCAN(min_samples=10, min_cluster_size=500).fit_predict(clusterable_embedding)
+
+    clustered = (hdbscan_labels >= 0)
+    plt.scatter(standard_embedding[~clustered, 0], standard_embedding[~clustered, 1], color=(0.5, 0.5, 0.5), s=5,
+                alpha=0.5)
+
+    plt.show()
+    plt.scatter(standard_embedding[clustered, 0], standard_embedding[clustered, 1], c=hdbscan_labels[clustered], s=5,
+                cmap='gist_ncar')
+
+    plt.show()
+
+    ars = adjusted_rand_score(labels_char_list_enumerated, hdbscan_labels)
+    amis = adjusted_mutual_info_score(labels_char_list_enumerated, hdbscan_labels)
+
+    print(ars, amis)
+
+    ars = adjusted_rand_score(labels_char_list_enumerated[clustered], hdbscan_labels[clustered])
+    amis = adjusted_mutual_info_score(labels_char_list_enumerated[clustered], hdbscan_labels[clustered])
+
+    print(ars, amis)
+
+    clustered_sum = np.sum(clustered) / labels_char_list_enumerated.shape[0]
+    print(clustered_sum)
+
+    ####################################################################################################
+    # UMAP Enhanced Clustering - Fragment Labels
+    ####################################################################################################
+
+    print("####################################################################################################")
+    print("# UMAP Enhanced Clustering - Fragment Labels")
+    print("####################################################################################################")
+
+    standard_embedding = UMAP(random_state=42).fit_transform(X)
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_frag_list_enumerated, s=5, cmap='gist_ncar')
+    plt.show()
+
+    print(standard_embedding)
+
+    exit(0)
+
+    print(f"distinct char labels: {len(f_set)}")
+    kmeans_labels = cluster.KMeans(n_clusters=len(f_set)).fit_predict(X)
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='gist_ncar')
+    plt.show()
+
+    ars = adjusted_rand_score(labels_frag_list_enumerated, kmeans_labels)
+    amis = adjusted_mutual_info_score(labels_frag_list_enumerated, kmeans_labels)
+
+    print(ars, amis)
+
+    clusterable_embedding = UMAP(
+        n_neighbors=30,
+        min_dist=0.0,
+        n_components=2,
+        random_state=42,
+    ).fit_transform(X)
+
+    plt.scatter(clusterable_embedding[:, 0], clusterable_embedding[:, 1], c=labels_frag_list_enumerated, s=5,
+                cmap='gist_ncar')
+
+    plt.show()
+
+    hdbscan_labels = hdbscan.HDBSCAN(min_samples=10, min_cluster_size=500).fit_predict(clusterable_embedding)
+
+    clustered = (hdbscan_labels >= 0)
+    plt.scatter(standard_embedding[~clustered, 0], standard_embedding[~clustered, 1], color=(0.5, 0.5, 0.5), s=5,
+                alpha=0.5)
+
+    plt.show()
+    plt.scatter(standard_embedding[clustered, 0], standard_embedding[clustered, 1], c=hdbscan_labels[clustered], s=5,
+                cmap='gist_ncar')
+
+    plt.show()
+
+    ars = adjusted_rand_score(labels_frag_list_enumerated, hdbscan_labels)
+    amis = adjusted_mutual_info_score(labels_frag_list_enumerated, hdbscan_labels)
+
+    print(ars, amis)
+
+    ars = adjusted_rand_score(labels_frag_list_enumerated[clustered], hdbscan_labels[clustered])
+    amis = adjusted_mutual_info_score(labels_frag_list_enumerated[clustered], hdbscan_labels[clustered])
+
+    print(ars, amis)
+
+    clustered_sum = np.sum(clustered) / labels_frag_list_enumerated.shape[0]
+    print(clustered_sum)
