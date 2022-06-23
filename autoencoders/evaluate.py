@@ -30,7 +30,7 @@ def draw_umap(data, labels, n_neighbors=15, min_dist=0.1, n_components=2, metric
         n_components=n_components,
         metric=metric
     )
-    u = fit.fit_transform(data);
+    u = fit.fit_transform(data)
     fig = plt.figure()
 
     if n_components == 3:
@@ -373,8 +373,6 @@ def evaluate(config, result):
     r3 = np.var(values)
     print("variance: ", r3)
 
-
-
     print(frag_count_max)
     print(f"len(frag_count_max)={len(frag_count_max)}")
     print(f"frag_count_max_count={frag_count_max_count}")
@@ -393,7 +391,7 @@ def evaluate(config, result):
     label_encoder_frag = preprocessing.LabelEncoder()
     label_encoder_frag.fit(labels_frag_list)
     labels_frag_list_enumerated = label_encoder_frag.transform(labels_frag_list)
-
+    """
     # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
 
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette_char=palette_char)
@@ -541,7 +539,7 @@ def evaluate(config, result):
 
     clustered_sum = np.sum(clustered) / labels_char_list_enumerated.shape[0]
     print(clustered_sum)
-
+    """
     ####################################################################################################
     # UMAP Enhanced Clustering - Fragment Labels
     ####################################################################################################
@@ -551,10 +549,34 @@ def evaluate(config, result):
     print("####################################################################################################")
 
     standard_embedding = UMAP(random_state=42).fit_transform(X)
-    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_frag_list_enumerated, s=5, cmap='gist_ncar')
-    plt.show()
 
     print(standard_embedding)
+    print(type(standard_embedding))
+
+    active_keys = keys[:5]
+    passive_keys = keys[5:]
+
+    active_embeddings = [x for i, x in enumerate(standard_embedding) if labels_frag_list[i] in active_keys]
+    active_embeddings = np.asarray(active_embeddings)
+    active_labels = [x for i, x in enumerate(labels_frag_list) if labels_frag_list[i] in active_keys]
+    active_labels = label_encoder_frag.transform(active_labels)
+
+    passive_embeddings = [x for i, x in enumerate(standard_embedding) if labels_frag_list[i] in passive_keys]
+    passive_embeddings = np.asarray(passive_embeddings)
+    passive_labels = [x for i, x in enumerate(labels_frag_list) if labels_frag_list[i] in passive_keys]
+    passive_labels = label_encoder_frag.transform(passive_labels)
+
+    print(active_embeddings)
+    print(passive_embeddings)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    ax.scatter(active_embeddings[:, 0], active_embeddings[:, 1], c=active_labels, s=5, cmap='gist_ncar')
+    ax.scatter(passive_embeddings[:, 0], passive_embeddings[:, 1], c="gray", s=1)
+
+    # plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_frag_list_enumerated, s=5, cmap='gist_ncar')
+    plt.show()
 
     exit(0)
 
