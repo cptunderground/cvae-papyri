@@ -149,6 +149,7 @@ def evaluate(config, result):
     #######################################################################################
 
     test_losses = []
+    org_enc_dec = []
     test_loader = torch.utils.data.DataLoader(_testset, batch_size=1)
 
     if config.tqdm:
@@ -162,12 +163,48 @@ def evaluate(config, result):
         ae_resnet18.eval()
         with torch.no_grad():
             _enc, _dec = ae_resnet18(image)
+            org_enc_dec.append((image.cpu().numpy(), _enc.cpu().numpy(), _dec.cpu().numpy()))
 
         loss = criterion(_dec, image)
         test_losses.append((loss.cpu().numpy(), image.cpu().numpy(), _dec.cpu().numpy(), label_char[0],
                             label_frag[0]))
 
     test_losses.sort(key=lambda s: s[0])
+
+    #############################################################################################
+    # Euclidean Distance Pseudo Random Samples
+    #############################################################################################
+    r = 20
+    for _num in range(r):
+        num = _num * 20
+        base = org_enc_dec[num]
+        distances = []
+        print()
+        for o_e_d in org_enc_dec:
+            b = base[1]
+            e = o_e_d[1]
+            distance = np.linalg.norm(b - e)
+
+            distances.append((distance, o_e_d))
+
+        print(distances)
+        distances.sort(key=lambda s: s[0])
+        print(distances)
+
+        rows = 2
+        cols = 4
+        fig, axes = plt.subplots(nrows=rows, ncols=cols, sharex=True, sharey=True)
+        axes[0, 0].imshow(np.squeeze(distances[0][1][0]), cmap="gray")
+        axes[1, 0].imshow(np.squeeze(distances[1][1][0]), cmap="gray")
+        axes[0, 1].imshow(np.squeeze(distances[2][1][0]), cmap="gray")
+        axes[1, 1].imshow(np.squeeze(distances[3][1][0]), cmap="gray")
+
+        axes[0, 2].imshow(np.squeeze(distances[0][1][2]), cmap="gray")
+        axes[1, 2].imshow(np.squeeze(distances[1][1][2]), cmap="gray")
+        axes[0, 3].imshow(np.squeeze(distances[2][1][2]), cmap="gray")
+        axes[1, 3].imshow(np.squeeze(distances[3][1][2]), cmap="gray")
+        plt.show()
+    exit(1)
 
     #############################################################################################
     # Plot 10/10/10
@@ -254,7 +291,7 @@ def evaluate(config, result):
     else:
         ind_loop = ind_eval_loader
 
-    encoded_images = []
+    org_enc_dec = []
     decoded_images = []
     labels_char_list = []
     labels_frag_list = []
@@ -266,20 +303,20 @@ def evaluate(config, result):
         with torch.no_grad():
             _enc, _dec = ae_resnet18(image)
 
-        encoded_images.append(_enc.cpu().numpy())
+        org_enc_dec.append(_enc.cpu().numpy())
         decoded_images.append(_dec.cpu().numpy())
         labels_char_list.append(label_char[0])  # cpu().numpy())
         labels_frag_list.append(label_frag[0])  # cpu().numpy())
 
-    print("enc_images", encoded_images)
+    print("enc_images", org_enc_dec)
     print(labels_char_list)
     print(labels_frag_list)
-    print(len(encoded_images))
+    print(len(org_enc_dec))
     print(len(labels_char_list))
 
     y = labels_char_list
     f = labels_frag_list
-    X = np.array(encoded_images)
+    X = np.array(org_enc_dec)
     Z = np.array(decoded_images)
 
     print(X.shape)
@@ -391,7 +428,7 @@ def evaluate(config, result):
     label_encoder_frag = preprocessing.LabelEncoder()
     label_encoder_frag.fit(labels_frag_list)
     labels_frag_list_enumerated = label_encoder_frag.transform(labels_frag_list)
-    """
+
     # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
 
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette_char=palette_char)
@@ -460,8 +497,6 @@ def evaluate(config, result):
     # K MEANS - Fragment Labels
     ####################################################################################################
 
-
-
     kmeans_labels_frags = cluster.KMeans(n_clusters=f_len).fit_predict(X)
     plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels_frags, s=5, cmap='gist_ncar')
     plt.title(f"umap_kmeans_frag")
@@ -490,17 +525,21 @@ def evaluate(config, result):
     print("####################################################################################################")
 
     standard_embedding = UMAP(random_state=42).fit_transform(X)
-    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_char_list_enumerated, s=5, cmap='gist_ncar')
+    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_char_list_enumerated, s=5,
+                cmap='gist_ncar')
+    plt.title(f"umap_char_labels_gist")
     plt.show()
 
     print(f"distinct char labels: {len(y_set)}")
     kmeans_labels = cluster.KMeans(n_clusters=len(y_set)).fit_predict(X)
     plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
+    plt.title(f"kmeans_char_labels_tab20")
     plt.show()
 
     ars = adjusted_rand_score(labels_char_list_enumerated, kmeans_labels)
     amis = adjusted_mutual_info_score(labels_char_list_enumerated, kmeans_labels)
 
+    print(f"Adjusted rand index of kmeans clustered character labels")
     print(ars, amis)
 
     clusterable_embedding = UMAP(
@@ -512,34 +551,37 @@ def evaluate(config, result):
 
     plt.scatter(clusterable_embedding[:, 0], clusterable_embedding[:, 1], c=labels_char_list_enumerated, s=5,
                 cmap='gist_ncar')
-
+    plt.title(f"clusterable_embeddings_umap_char_labels")
     plt.show()
 
-    hdbscan_labels = hdbscan.HDBSCAN(min_samples=10, min_cluster_size=500).fit_predict(clusterable_embedding)
-
+    hdbscan_labels = hdbscan.HDBSCAN(min_samples=10, min_cluster_size=40).fit_predict(clusterable_embedding)
+    print("hdbscan labels")
+    print(hdbscan_labels)
     clustered = (hdbscan_labels >= 0)
     plt.scatter(standard_embedding[~clustered, 0], standard_embedding[~clustered, 1], color=(0.5, 0.5, 0.5), s=5,
                 alpha=0.5)
-
+    plt.title(f"hdbscan_char_labels_1")
     plt.show()
+
     plt.scatter(standard_embedding[clustered, 0], standard_embedding[clustered, 1], c=hdbscan_labels[clustered], s=5,
                 cmap='gist_ncar')
-
+    plt.title(f"hdbscan_char_labels_2")
     plt.show()
 
     ars = adjusted_rand_score(labels_char_list_enumerated, hdbscan_labels)
     amis = adjusted_mutual_info_score(labels_char_list_enumerated, hdbscan_labels)
-
+    print(f"adjusted rand index hdbscan:")
     print(ars, amis)
 
     ars = adjusted_rand_score(labels_char_list_enumerated[clustered], hdbscan_labels[clustered])
     amis = adjusted_mutual_info_score(labels_char_list_enumerated[clustered], hdbscan_labels[clustered])
-
+    print(f"adjusted rands index hdbscan clustered:")
     print(ars, amis)
 
     clustered_sum = np.sum(clustered) / labels_char_list_enumerated.shape[0]
+    print(f"clustered sum:")
     print(clustered_sum)
-    """
+
     ####################################################################################################
     # UMAP Enhanced Clustering - Fragment Labels
     ####################################################################################################
@@ -549,9 +591,6 @@ def evaluate(config, result):
     print("####################################################################################################")
 
     standard_embedding = UMAP(random_state=42).fit_transform(X)
-
-    print(standard_embedding)
-    print(type(standard_embedding))
 
     active_keys = keys[:5]
     passive_keys = keys[5:]
@@ -566,28 +605,46 @@ def evaluate(config, result):
     passive_labels = [x for i, x in enumerate(labels_frag_list) if labels_frag_list[i] in passive_keys]
     passive_labels = label_encoder_frag.transform(passive_labels)
 
-    print(active_embeddings)
-    print(passive_embeddings)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    ax.scatter(active_embeddings[:, 0], active_embeddings[:, 1], c=active_labels, s=20, cmap='gist_ncar')
+    ax.scatter(passive_embeddings[:, 0], passive_embeddings[:, 1], c="gray", s=5)
+    plt.title(f"umap_frag_labels_active_passive")
+    plt.show()
+
+    print(f"distinct frag labels: {len(f_set)}")
+    kmeans_labels = cluster.KMeans(n_clusters=len(f_set)).fit_predict(X)
+
+    active_keys = keys[:5]
+    active_keys = label_encoder_frag.transform(active_keys)
+    passive_keys = keys[5:]
+    passive_keys = label_encoder_frag.transform(passive_keys)
+
+    active_embeddings = [x for i, x in enumerate(standard_embedding) if kmeans_labels[i] in active_keys]
+    active_embeddings = np.asarray(active_embeddings)
+    active_labels = [x for i, x in enumerate(labels_frag_list) if kmeans_labels[i] in active_keys]
+    active_labels = label_encoder_frag.transform(active_labels)
+
+    passive_embeddings = [x for i, x in enumerate(standard_embedding) if kmeans_labels[i] in passive_keys]
+    passive_embeddings = np.asarray(passive_embeddings)
+    passive_labels = [x for i, x in enumerate(labels_frag_list) if kmeans_labels[i] in passive_keys]
+    passive_labels = label_encoder_frag.transform(passive_labels)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    ax.scatter(active_embeddings[:, 0], active_embeddings[:, 1], c=active_labels, s=5, cmap='gist_ncar')
-    ax.scatter(passive_embeddings[:, 0], passive_embeddings[:, 1], c="gray", s=1)
-
-    # plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_frag_list_enumerated, s=5, cmap='gist_ncar')
+    ax.scatter(active_embeddings[:, 0], active_embeddings[:, 1], c=active_labels, s=20, cmap='gist_ncar')
+    ax.scatter(passive_embeddings[:, 0], passive_embeddings[:, 1], c="gray", s=5)
+    plt.title(f"umap_kmeans_clustered_frag_labels_active_passive")
     plt.show()
 
-    exit(0)
-
-    print(f"distinct char labels: {len(f_set)}")
-    kmeans_labels = cluster.KMeans(n_clusters=len(f_set)).fit_predict(X)
     plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='gist_ncar')
     plt.show()
 
     ars = adjusted_rand_score(labels_frag_list_enumerated, kmeans_labels)
     amis = adjusted_mutual_info_score(labels_frag_list_enumerated, kmeans_labels)
-
+    print(f"Adjusted rand index of kmeans clustered fragment labels")
     print(ars, amis)
 
     clusterable_embedding = UMAP(
@@ -599,30 +656,32 @@ def evaluate(config, result):
 
     plt.scatter(clusterable_embedding[:, 0], clusterable_embedding[:, 1], c=labels_frag_list_enumerated, s=5,
                 cmap='gist_ncar')
-
+    plt.title(f"umap_clusterable_embeddings_frag_labels")
     plt.show()
 
-    hdbscan_labels = hdbscan.HDBSCAN(min_samples=10, min_cluster_size=500).fit_predict(clusterable_embedding)
-
+    hdbscan_labels = hdbscan.HDBSCAN(min_samples=10, min_cluster_size=20).fit_predict(clusterable_embedding)
     clustered = (hdbscan_labels >= 0)
+
     plt.scatter(standard_embedding[~clustered, 0], standard_embedding[~clustered, 1], color=(0.5, 0.5, 0.5), s=5,
                 alpha=0.5)
-
+    plt.title(f"hdbscan_frag_labels_1")
     plt.show()
+
     plt.scatter(standard_embedding[clustered, 0], standard_embedding[clustered, 1], c=hdbscan_labels[clustered], s=5,
                 cmap='gist_ncar')
-
+    plt.title(f"hdbscan_frag_labels_2")
     plt.show()
 
     ars = adjusted_rand_score(labels_frag_list_enumerated, hdbscan_labels)
     amis = adjusted_mutual_info_score(labels_frag_list_enumerated, hdbscan_labels)
-
+    print(f"adjusted rand index hdbscan fragments:")
     print(ars, amis)
 
     ars = adjusted_rand_score(labels_frag_list_enumerated[clustered], hdbscan_labels[clustered])
     amis = adjusted_mutual_info_score(labels_frag_list_enumerated[clustered], hdbscan_labels[clustered])
-
+    print(f"adjusted rand index hdbscan clustered fragments:")
     print(ars, amis)
 
     clustered_sum = np.sum(clustered) / labels_frag_list_enumerated.shape[0]
+    print(f"clustered sum:")
     print(clustered_sum)
