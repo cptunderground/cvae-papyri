@@ -24,6 +24,8 @@ class PapyriDataset(Dataset):
             if self.transform:
                 _img = self.transform(img)
 
+            ### for new class put AE here
+
             label_char = self.label_char[idx]
             label_frag = self.label_frag[idx]
 

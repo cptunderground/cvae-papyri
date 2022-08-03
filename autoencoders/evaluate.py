@@ -163,7 +163,7 @@ def evaluate(config, result):
         ae_resnet18.eval()
         with torch.no_grad():
             _enc, _dec = ae_resnet18(image)
-            org_enc_dec.append((image.cpu().numpy(), _enc.cpu().numpy(), _dec.cpu().numpy()))
+            org_enc_dec.append((image.cpu().numpy(), _enc.cpu().numpy(), _dec.cpu().numpy(), label_char, label_frag))
 
         loss = criterion(_dec, image)
         test_losses.append((loss.cpu().numpy(), image.cpu().numpy(), _dec.cpu().numpy(), label_char[0],
@@ -192,20 +192,31 @@ def evaluate(config, result):
         print(distances)
 
         rows = 2
-        cols = 4
+        cols = 5
         fig, axes = plt.subplots(nrows=rows, ncols=cols, sharex=True, sharey=True)
         axes[0, 0].imshow(np.squeeze(distances[0][1][0]), cmap="gray")
-        axes[1, 0].imshow(np.squeeze(distances[1][1][0]), cmap="gray")
-        axes[0, 1].imshow(np.squeeze(distances[2][1][0]), cmap="gray")
-        axes[1, 1].imshow(np.squeeze(distances[3][1][0]), cmap="gray")
+        axes[0, 0].set_title(f"{distances[0][1][3][0]}\n {distances[0][1][4][0]}")
 
-        axes[0, 2].imshow(np.squeeze(distances[0][1][2]), cmap="gray")
-        axes[1, 2].imshow(np.squeeze(distances[1][1][2]), cmap="gray")
-        axes[0, 3].imshow(np.squeeze(distances[2][1][2]), cmap="gray")
+        axes[0, 1].imshow(np.squeeze(distances[1][1][0]), cmap="gray")
+        axes[0, 1].set_title(f"{distances[1][1][3][0]}\n{distances[1][1][4][0]}")
+
+        axes[0, 2].imshow(np.squeeze(distances[2][1][0]), cmap="gray")
+        axes[0, 2].set_title(f"{distances[2][1][3][0]}\n{distances[2][1][4][0]}")
+
+        axes[0, 3].imshow(np.squeeze(distances[3][1][0]), cmap="gray")
+        axes[0, 3].set_title(f"{distances[3][1][3][0]}\n{distances[3][1][4][0]}")
+
+        axes[0, 4].imshow(np.squeeze(distances[4][1][0]), cmap="gray")
+        axes[0, 4].set_title(f"{distances[4][1][3][0]}\n{distances[4][1][4][0]}")
+
+        axes[1, 0].imshow(np.squeeze(distances[0][1][2]), cmap="gray")
+        axes[1, 1].imshow(np.squeeze(distances[1][1][2]), cmap="gray")
+        axes[1, 2].imshow(np.squeeze(distances[2][1][2]), cmap="gray")
         axes[1, 3].imshow(np.squeeze(distances[3][1][2]), cmap="gray")
+        axes[1, 4].imshow(np.squeeze(distances[4][1][2]), cmap="gray")
         plt.show()
-    exit(1)
 
+    exit()
     #############################################################################################
     # Plot 10/10/10
     #############################################################################################
@@ -485,25 +496,38 @@ def evaluate(config, result):
     ####################################################################################################
     # K MEANS - Letter Labels
     ####################################################################################################
+    print(y_len)
 
-    kmeans_labels = cluster.KMeans(n_clusters=len(config.letters_to_eval)).fit_predict(X)
-    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
-    plt.title(f"umap_kmeans_{config.letters_to_eval}")
-    # plt.legend(labels_char_list)
-    plt.savefig(f'./{config.root}/net_eval/umap_kmeans_{config.letters_to_eval}.png')
-    plt.close()
+    for k in range(3, y_len):
+        kmeans_labels = cluster.KMeans(n_clusters=k).fit_predict(X)
+        #plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
+        #plt.title(f"umap_kmeans_{config.letters_to_eval}")
+        # plt.legend(labels_char_list)
+        #plt.savefig(f'./{config.root}/net_eval/umap_kmeans_{config.letters_to_eval}.png')
+        #plt.close()
+
+        ars = adjusted_rand_score(labels_char_list_enumerated, kmeans_labels)
+        amis = adjusted_mutual_info_score(labels_char_list_enumerated, kmeans_labels)
+
+        print(f"k={k} - Adjusted rand index of kmeans clustered character labels")
+        print(ars, amis)
 
     ####################################################################################################
     # K MEANS - Fragment Labels
     ####################################################################################################
+    for k in range(3, f_len):
+        kmeans_labels_frags = cluster.KMeans(n_clusters=k).fit_predict(X)
+        #plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels_frags, s=5, cmap='gist_ncar')
+        #plt.title(f"umap_kmeans_frag")
+        # plt.legend(labels_char_list)
+        #plt.savefig(f'./{config.root}/net_eval/umap_kmeans_frag.png')
+        #plt.close()
 
-    kmeans_labels_frags = cluster.KMeans(n_clusters=f_len).fit_predict(X)
-    plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels_frags, s=5, cmap='gist_ncar')
-    plt.title(f"umap_kmeans_frag")
-    # plt.legend(labels_char_list)
-    plt.savefig(f'./{config.root}/net_eval/umap_kmeans_frag.png')
-    plt.close()
+        ars = adjusted_rand_score(labels_char_list_enumerated, kmeans_labels_frags)
+        amis = adjusted_mutual_info_score(labels_char_list_enumerated, kmeans_labels_frags)
 
+        print(f"k={k} - Adjusted rand index of kmeans clustered character labels")
+        print(ars, amis)
     ####################################################################################################
 
     fit = UMAP(n_components=3)
