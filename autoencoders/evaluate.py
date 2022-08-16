@@ -160,6 +160,7 @@ def evaluate(config, result):
     for image, label_char, label_frag in test_loop:
         image = image.to(device)
 
+        print(image.shape)
         ae_resnet18.eval()
         with torch.no_grad():
             _enc, _dec = ae_resnet18(image)
@@ -216,7 +217,7 @@ def evaluate(config, result):
         axes[1, 4].imshow(np.squeeze(distances[4][1][2]), cmap="gray")
         plt.show()
 
-    exit()
+
     #############################################################################################
     # Plot 10/10/10
     #############################################################################################
