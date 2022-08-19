@@ -179,7 +179,7 @@ def evaluate(config, result):
     #############################################################################################
     # Euclidean Distance Pseudo Random Samples
     #############################################################################################
-    r = 2
+    r = 20
     for _num in range(r):
         num = _num * 20
         base = org_enc_dec[num]
@@ -217,9 +217,10 @@ def evaluate(config, result):
         axes[1, 2].imshow(np.squeeze(distances[2][1][2]), cmap="gray")
         axes[1, 3].imshow(np.squeeze(distances[3][1][2]), cmap="gray")
         axes[1, 4].imshow(np.squeeze(distances[4][1][2]), cmap="gray")
-        plt.show()
+
         plt.title(f"AE - Euclid - Sample={_num}")
         plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/AE-euclid-sample-{_num}.png")
+        plt.show()
         plt.close()
 
         print(distances[0][0])
@@ -228,15 +229,15 @@ def evaluate(config, result):
         print(distances[3][0])
 
         plt.hist([distances[x][0] for x in range(len(distances))], bins=50)
+
+        plt.title(f"AE - Euclid - Sample={num} - Hist")
+        plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/AE-euclid-sample-{num}-hist.png")
         plt.show()
-        plt.title(f"AE - Euclid - Sample={_num} - Hist")
-        plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/AE-euclid-sample-{_num}-hist.png")
         plt.close()
 
     #############################################################################################
     # Plot 10/10/10
     #############################################################################################
-
 
     rows = 6
     cols = 6

@@ -216,6 +216,30 @@ if __name__ == '__main__':
 
                               )
 
+    cluster_10000_gpu = Config(name="cluster_10000_gpu",
+                              train=True,
+                              evaluate=True,
+                              model_class="resnet_AE",
+                              model_path=None,
+
+                              cvae_char="char_CVAE",
+                              cvae_char_path=None,
+
+                              cvae_frag="frag_CVAE",
+                              cvae_frag_path=None,
+
+                              logging_val=40,
+                              batch_size=512,
+                              epochs=10000,
+                              tqdm=False,
+
+                              chars_to_eval=all_labels_char,
+                              chars_to_train=all_labels_char,
+                              frags_to_eval=all_labels_frags,
+                              frags_to_train=all_labels_frags
+
+                              )
+
     testing = Config(name="testing",
                      train=True,
                      evaluate=True,

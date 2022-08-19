@@ -310,7 +310,7 @@ def evaluate(config: Config, result: Result):
 
             _dec_cvae = char_cvae.decode(_enc_cvae, label)
 
-        org_enc_dec.append(_enc.cpu().numpy())
+        org_enc_dec.append(_enc_cvae.cpu().numpy())
         decoded_images.append(_dec.cpu().numpy())
         labels_char_list.append(label_char[0])  # cpu().numpy())
         labels_frag_list.append(label_frag[0])  # cpu().numpy())

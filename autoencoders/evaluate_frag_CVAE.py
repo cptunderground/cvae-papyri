@@ -248,7 +248,7 @@ def evaluate(config:Config, result:Result):
         plt.hist([distances[x][0] for x in range(len(distances))], bins=50)
 
         plt.title(f"frag_CVAE - Euclid - Sample={num} - Hist")
-        plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/frag_CVAE-euclid-sample-{_num}-hist.png")
+        plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/frag_CVAE-euclid-sample-{num}-hist.png")
         plt.show()
         plt.close()
 
@@ -318,8 +318,8 @@ def evaluate(config:Config, result:Result):
 
             _dec_cvae = frag_cvae.decode(_enc_cvae, label)
 
-
-        org_enc_dec.append(_enc.cpu().numpy())
+        # TODO change to _enc_cvae
+        org_enc_dec.append(_enc_cvae.cpu().numpy())
         decoded_images.append(_dec.cpu().numpy())
         labels_char_list.append(label_char[0])  # cpu().numpy())
         labels_frag_list.append(label_frag[0])  # cpu().numpy())
