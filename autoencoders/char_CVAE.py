@@ -15,6 +15,7 @@ from tqdm import tqdm
 import util
 from util import c_transforms
 from util import decorators
+from util.base_logger import logger
 from util.config import Config
 from util.enc_dataset import EncodedDataset
 from util.result import Result
@@ -320,8 +321,11 @@ def train_char_cvae(config: Config, result: Result):
 
             cum_train_loss += loss.item()
 
-            loop_train.set_description(f'char_CVAE - Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
-            loop_train.set_postfix(loss=cum_train_loss)
+            if config.tqdm:
+                loop_train.set_description(f'char_CVAE - Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_postfix(loss=cum_train_loss)
+            else:
+                logger.info(f'char_CVAE - Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
 
         tqdm._instances.clear()
 
@@ -349,9 +353,11 @@ def train_char_cvae(config: Config, result: Result):
             loss_valid = vae_loss_fn(batch, x[:, :48], mu, logvar)
 
             cum_valid_loss += loss_valid.item()
-
-            loop_train.set_description(f'char_CVAE - Validation Epoch  [{epoch + 1:2d}/{num_epochs}]')
-            loop_train.set_postfix(loss=cum_train_loss)
+            if config.tqdm:
+                loop_train.set_description(f'char_CVAE - Validation Epoch  [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_postfix(loss=cum_train_loss)
+            else:
+                logger.info(f'char_CVAE - Validation Epoch  [{epoch + 1:2d}/{num_epochs}]')
 
         if current_valid_loss > cum_valid_loss:
             optimal_model = (cvae, epoch)
@@ -382,7 +388,11 @@ def train_char_cvae(config: Config, result: Result):
                 x, mu, logvar = cvae(batch, labels)
             loss_test = vae_loss_fn(batch, x[:, :48], mu, logvar)
 
-            loop_train.set_description(f'char_CVAE - Test Epoch  [{epoch + 1:2d}/{num_epochs}]')
+            if config.tqdm:
+                loop_train.set_description(f'char_CVAE - Test Epoch  [{epoch + 1:2d}/{num_epochs}]')
+            else:
+                logger.info(f"char_CVAE - Test Epoch  [{epoch + 1:2d}/{num_epochs}]")
+
             cum_test_loss += loss_test.item()
 
         losses_train.append(cum_train_loss)

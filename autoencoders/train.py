@@ -47,6 +47,7 @@ def train(config: Config):
     _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=random_state)
     _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=random_state)
 
+    logger.info(f"len(_dataset)={len(_dataset)}")
     logger.info(f"len(_trainset)={len(_trainset)}")
     logger.info(f"len(_validset)={len(_validset)}")
     logger.info(f"len(_testset)={len(_testset)}")
