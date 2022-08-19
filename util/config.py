@@ -266,4 +266,5 @@ if __name__ == '__main__':
     cluster_30_gpu.saveJSON()
     cluster_100_gpu.saveJSON()
     cluster_1000_gpu.saveJSON()
+    cluster_10000_gpu.saveJSON()
     testing.saveJSON()
