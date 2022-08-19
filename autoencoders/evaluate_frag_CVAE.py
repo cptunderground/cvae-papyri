@@ -17,11 +17,16 @@ from torch import nn
 
 import util.report
 import util.utils
+from autoencoders.char_CVAE import char_CVAE, one_hot
+from autoencoders.frag_CVAE import frag_CVAE
 from util import c_transforms
 from util.base_logger import logger
 from util.c_dataset import PapyriDataset
 
 from sklearn.metrics import adjusted_rand_score, adjusted_mutual_info_score
+
+from util.config import Config
+from util.result import Result
 
 
 def draw_umap(data, labels, n_neighbors=15, min_dist=0.1, n_components=2, metric='euclidean', title=''):
@@ -104,23 +109,33 @@ def get_label_from_tensor(label):
     return switcher.get(label)
 
 
-def evaluate(config, result):
+def evaluate(config:Config, result:Result):
     util.utils.create_folder(f"./{config.root}/net_eval")
-    util.utils.create_folder(f"./{config.root}/net_eval/ResNet_AE")
-    util.utils.create_folder(f"./{config.root}/net_eval/ResNet_AE_eval")
+    util.utils.create_folder(f"./{config.root}/net_eval/frag_CVAE")
+    util.utils.create_folder(f"./{config.root}/net_eval/frag_CVAE_eval")
 
     nn
-
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     ae_resnet18 = torch.load(config.model_path)
     ae_resnet18.eval()
 
+    frag_cvae = frag_CVAE(48)
+    frag_cvae = torch.load(config.cvae_frag_path)
+    frag_cvae.eval()
+
+    all_labels_frags = [
+        '61210', '61226', '61228', '60402', '59170', '60221', '60475', '60998', '60291', '60941', '60810', '60468',
+        '61140', '60251', '60246', '60891', '60670', '60398', '60589', '60343', '60809', '61026', '60326', '60663',
+        '60220', '60812', '60242', '60400', '60842', '60324', '61236', '60304', '60462', '60934', '61239', '60808',
+        '61106', '60276', '61212', '61244', '60476', '60633', '60238', '61240', '60910', '61245', '61124', '60333',
+        '61138', '60901', '60306', '60214', '61213', '61165', '61246', '60215', '60492', '60258', '60940', '60732',
+        '60216', '60364', '60479', '60847', '60583', '61122', '60283', '60740', '60255', '65858', '60471', '60701',
+        '61117', '60359', '61073', '60367', '60219', '60337', '60312', '60771', '61112', '60867', '60421', '60764',
+        '60217', '60248', '60411', '60253', '60290', '60659', '60481', '61141', '66764', '60267', '60369', '60965']
+
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     criterion = eval(f"nn.{result.loss}")
 
-    losses_train = result.train_loss
-    losses_valid = result.valid_loss
-    losses_test = result.test_loss
 
     t = transforms.Compose([
         c_transforms.CustomPad(padding=[0, 0, 0, 0], fill=(255, 255, 255, 1)),
@@ -137,17 +152,11 @@ def evaluate(config, result):
 
     _dataset = PapyriDataset('./data/raw-cleaned-custom', transform=transforms.Compose([t, t_prime]))
 
-    _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=result.random_state)
-    _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=result.random_state)
+    _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=42)
+    _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=42)
 
-    print([letter for letter in config.chars_to_eval])
-    print(_testset[0][1])
-    idx = [i for i in range(len(_testset)) if
-           _testset[i][1] in [letter for letter in config.chars_to_eval]]
-    # build the appropriate subset
-    print(idx)
-    _testset = Subset(_testset, idx)
-    print(_testset)
+    label_encoder_frag = preprocessing.LabelEncoder()
+    label_encoder_frag.fit(all_labels_frags)
 
     #######################################################################################
     # Calculate worst, best and some random loss on testset
@@ -157,34 +166,42 @@ def evaluate(config, result):
     org_enc_dec = []
     test_loader = torch.utils.data.DataLoader(_testset, batch_size=1)
 
-    if config.tqdm:
-        test_loop = tqdm(test_loader, total=len(test_loader))
-    else:
-        test_loop = test_loader
+    test_loop = tqdm(test_loader, total=len(test_loader))
 
     for image, label_char, label_frag in test_loop:
         image = image.to(device)
 
+        label = label_encoder_frag.transform(label_frag)
+
         ae_resnet18.eval()
         with torch.no_grad():
             _enc, _dec = ae_resnet18(image)
-            org_enc_dec.append((image.cpu().numpy(), _enc.cpu().numpy(), _dec.cpu().numpy(), label_char, label_frag))
+
+            label = one_hot(label, 95).to(device)
+
+            _enc = _enc.view(_enc.size(0), 48)
+
+            mu, logvar = frag_cvae.encode(_enc, label)
+            _enc_cvae = frag_cvae.reparameterize(mu, logvar)
+
+            _dec_cvae = frag_cvae.decode(_enc_cvae, label)
+
+
+            org_enc_dec.append((image.cpu().numpy(), _enc_cvae.cpu().numpy(), _dec.cpu().numpy(), label_char, label_frag))
 
         loss = criterion(_dec, image)
         test_losses.append((loss.cpu().numpy(), image.cpu().numpy(), _dec.cpu().numpy(), label_char[0],
                             label_frag[0]))
 
-    test_losses.sort(key=lambda s: s[0])
-
     #############################################################################################
     # Euclidean Distance Pseudo Random Samples
     #############################################################################################
-    r = 2
+    r = 20
     for _num in range(r):
         num = _num * 20
         base = org_enc_dec[num]
         distances = []
-        print()
+
         for o_e_d in org_enc_dec:
             b = base[1]
             e = o_e_d[1]
@@ -217,9 +234,10 @@ def evaluate(config, result):
         axes[1, 2].imshow(np.squeeze(distances[2][1][2]), cmap="gray")
         axes[1, 3].imshow(np.squeeze(distances[3][1][2]), cmap="gray")
         axes[1, 4].imshow(np.squeeze(distances[4][1][2]), cmap="gray")
+
+        plt.title(f"frag_CVAE - Euclid - Sample={num}")
+        plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/frag_CVAE-euclid-sample-{_num}.png")
         plt.show()
-        plt.title(f"AE - Euclid - Sample={_num}")
-        plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/AE-euclid-sample-{_num}.png")
         plt.close()
 
         print(distances[0][0])
@@ -228,15 +246,15 @@ def evaluate(config, result):
         print(distances[3][0])
 
         plt.hist([distances[x][0] for x in range(len(distances))], bins=50)
+
+        plt.title(f"frag_CVAE - Euclid - Sample={num} - Hist")
+        plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/frag_CVAE-euclid-sample-{_num}-hist.png")
         plt.show()
-        plt.title(f"AE - Euclid - Sample={_num} - Hist")
-        plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/AE-euclid-sample-{_num}-hist.png")
         plt.close()
 
     #############################################################################################
     # Plot 10/10/10
     #############################################################################################
-
 
     rows = 6
     cols = 6
@@ -265,43 +283,7 @@ def evaluate(config, result):
 
     fig.suptitle(f"{cols}/{cols}/{cols} - best/median/worst - decoding")
     fig.tight_layout()
-    fig.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/{cols}-{cols}-{cols}-decod.png", dpi=300)
-    plt.close()
-
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.plot(losses_train)
-    plt.title("Train Loss")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE/loss_train.png")
-    # util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
-    plt.close()
-
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.plot(losses_valid)
-    plt.title("Validation Loss")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE/loss_valid.png")
-    # util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
-    plt.close()
-
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.plot(losses_test)
-    plt.title("Test Loss")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE/loss_test.png")
-    # util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
-    plt.close()
-
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.plot(losses_train, label="train_loss")
-    plt.plot(losses_valid, label="valid_loss")
-    plt.plot(losses_test, label="test_loss")
-    plt.title("All Losses - Log Scale")
-    plt.legend()
-    plt.yscale("log")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE/loss_all.png")
-    # util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
+    fig.savefig(f"./{config.root}/net_eval/char_CVAE_eval/{cols}-{cols}-{cols}-decod.png", dpi=300)
     plt.close()
 
     ################################################################################
@@ -322,10 +304,20 @@ def evaluate(config, result):
 
     for image, label_char, label_frag in ind_loop:
         image = image.to(device)
-
+        label = label_encoder_frag.transform(label_frag)
         ae_resnet18.eval()
         with torch.no_grad():
             _enc, _dec = ae_resnet18(image)
+
+            label = one_hot(label, 95).to(device)
+
+            _enc = _enc.view(_enc.size(0), 48)
+
+            mu, logvar = frag_cvae.encode(_enc, label)
+            _enc_cvae = frag_cvae.reparameterize(mu, logvar)
+
+            _dec_cvae = frag_cvae.decode(_enc_cvae, label)
+
 
         org_enc_dec.append(_enc.cpu().numpy())
         decoded_images.append(_dec.cpu().numpy())
@@ -467,7 +459,7 @@ def evaluate(config, result):
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
     plt.title(f"tsne_final_eval")
-    plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/tsne_final_eval_mode.png')
+    plt.savefig(f'./{config.root}/net_eval/frag_CVAE_eval/tsne_final_eval_mode.png')
     # util.report.image_to_report(f"{name}/{config.processing}/tsne_{name}_final_eval_mode_{config.processing}.png",f"TSNE final_eval")
     plt.close()
 
@@ -478,7 +470,7 @@ def evaluate(config, result):
     # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
     plt.title(f"umap_final_eval_mode")
-    plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/umap_final_eval_mode.png')
+    plt.savefig(f'./{config.root}/net_eval/frag_CVAE_eval/umap_final_eval_mode.png')
     # util.report.image_to_report(f"{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png",f"UMAP final_eval")
     plt.close()
 
@@ -491,21 +483,21 @@ def evaluate(config, result):
     plot.points(mapper, labels=labels_char_list, theme="fire")
 
     plt.title(f"umap_final_eval_{config.chars_to_eval}_char")
-    plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/umap_scatter_{config.chars_to_eval}_char.png')
+    plt.savefig(f'./{config.root}/net_eval/frag_CVAE_eval/umap_scatter_{config.chars_to_eval}_char.png')
     plt.close()
 
     plot.points(mapper, labels=frags, theme="fire")
     plt.legend().remove()
 
     plt.title(f"umap_final_eval_{config.chars_to_eval}_frag")
-    plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/umap_scatter_{config.chars_to_eval}_frag.png')
+    plt.savefig(f'./{config.root}/net_eval/frag_CVAE_eval/umap_scatter_{config.chars_to_eval}_frag.png')
     plt.close()
 
     standard_embedding = UMAP(random_state=42).fit_transform(X)
     plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_char_list_enumerated, s=5, cmap='Spectral')
     plt.title(f"umap_ncluster_{config.chars_to_eval}")
     # plt.legend(labels_char_list)
-    plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/umap_ncluster_{config.chars_to_eval}.png')
+    plt.savefig(f'./{config.root}/net_eval/frag_CVAE_eval/umap_ncluster_{config.chars_to_eval}.png')
     plt.close()
 
     ####################################################################################################
@@ -552,7 +544,7 @@ def evaluate(config, result):
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(u[:, 0], u[:, 1], u[:, 2], c=labels_char_list_enumerated, s=10)
     plt.title(f'n_components = 3 - {config.chars_to_eval}')
-    plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/umap_ncomp3_{config.chars_to_eval}.png')
+    plt.savefig(f'./{config.root}/net_eval/frag_CVAE_eval/umap_ncomp3_{config.chars_to_eval}.png')
     plt.close()
 
     ####################################################################################################
@@ -567,14 +559,14 @@ def evaluate(config, result):
     plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=labels_char_list_enumerated, s=5,
                 cmap='gist_ncar')
     plt.title(f"umap_char_labels_gist")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/umap_char_labels_gist.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/umap_char_labels_gist.png")
     plt.show()
 
     logger.info(f"distinct char labels: {len(y_set)}")
     kmeans_labels = cluster.KMeans(n_clusters=len(y_set)).fit_predict(X)
     plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
     plt.title(f"kmeans_char_labels_tab20")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/kmeans_char_labels_tab20.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/kmeans_char_labels_tab20.png")
     plt.show()
 
     ars = adjusted_rand_score(labels_char_list_enumerated, kmeans_labels)
@@ -593,7 +585,7 @@ def evaluate(config, result):
     plt.scatter(clusterable_embedding[:, 0], clusterable_embedding[:, 1], c=labels_char_list_enumerated, s=5,
                 cmap='gist_ncar')
     plt.title(f"clusterable_embeddings_umap_char_labels")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/clusterable_embeddings_umap_char_labels.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/clusterable_embeddings_umap_char_labels.png")
     plt.show()
 
     hdbscan_labels = hdbscan.HDBSCAN(min_samples=10, min_cluster_size=40).fit_predict(clusterable_embedding)
@@ -603,13 +595,13 @@ def evaluate(config, result):
     plt.scatter(standard_embedding[~clustered, 0], standard_embedding[~clustered, 1], color=(0.5, 0.5, 0.5), s=5,
                 alpha=0.5)
     plt.title(f"hdbscan_char_labels_1")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/hdbscan_char_labels_1.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/hdbscan_char_labels_1.png")
     plt.show()
 
     plt.scatter(standard_embedding[clustered, 0], standard_embedding[clustered, 1], c=hdbscan_labels[clustered], s=5,
                 cmap='gist_ncar')
     plt.title(f"hdbscan_char_labels_2")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/hdbscan_char_labels_2.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/hdbscan_char_labels_2.png")
     plt.show()
 
     ars = adjusted_rand_score(labels_char_list_enumerated, hdbscan_labels)
@@ -655,7 +647,7 @@ def evaluate(config, result):
     ax.scatter(active_embeddings[:, 0], active_embeddings[:, 1], c=active_labels, s=20, cmap='gist_ncar')
     ax.scatter(passive_embeddings[:, 0], passive_embeddings[:, 1], c="gray", s=5)
     plt.title(f"umap_frag_labels_active_passive")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/umap_frag_labels_active_passive.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/umap_frag_labels_active_passive.png")
     plt.show()
     plt.close()
 
@@ -683,12 +675,12 @@ def evaluate(config, result):
     ax.scatter(active_embeddings[:, 0], active_embeddings[:, 1], c=active_labels, s=20, cmap='gist_ncar')
     ax.scatter(passive_embeddings[:, 0], passive_embeddings[:, 1], c="gray", s=5)
     plt.title(f"umap_kmeans_clustered_frag_labels_active_passive")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/umap_kmeans_clustered_frag_labels_active_passive.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/umap_kmeans_clustered_frag_labels_active_passive.png")
     plt.show()
 
     plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='gist_ncar')
     plt.title("scatter-kmeans-gist")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/scatter-kmeans-gist.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/scatter-kmeans-gist.png")
     plt.show()
 
     ars = adjusted_rand_score(labels_frag_list_enumerated, kmeans_labels)
@@ -706,7 +698,7 @@ def evaluate(config, result):
     plt.scatter(clusterable_embedding[:, 0], clusterable_embedding[:, 1], c=labels_frag_list_enumerated, s=5,
                 cmap='gist_ncar')
     plt.title(f"umap_clusterable_embeddings_frag_labels")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/umap_clusterable_embeddings_frag_labels.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/umap_clusterable_embeddings_frag_labels.png")
     plt.show()
 
     hdbscan_labels = hdbscan.HDBSCAN(min_samples=10, min_cluster_size=20).fit_predict(clusterable_embedding)
@@ -715,13 +707,13 @@ def evaluate(config, result):
     plt.scatter(standard_embedding[~clustered, 0], standard_embedding[~clustered, 1], color=(0.5, 0.5, 0.5), s=5,
                 alpha=0.5)
     plt.title(f"hdbscan_frag_labels_1")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/hdbscan_frag_labels_1.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/hdbscan_frag_labels_1.png")
     plt.show()
 
     plt.scatter(standard_embedding[clustered, 0], standard_embedding[clustered, 1], c=hdbscan_labels[clustered], s=5,
                 cmap='gist_ncar')
     plt.title(f"hdbscan_frag_labels_2")
-    plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/hdbscan_frag_labels_2.png")
+    plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/hdbscan_frag_labels_2.png")
     plt.show()
 
     ars = adjusted_rand_score(labels_frag_list_enumerated, hdbscan_labels)

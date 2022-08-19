@@ -12,12 +12,14 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
 
+import util
 from util import c_transforms
-from util.c_dataset import PapyriDataset
-from util.enc_dataset import EncodedDataset
 from util import decorators
+from util.config import Config
+from util.enc_dataset import EncodedDataset
+from util.result import Result
 
-input_size = 1 * 64 * 64
+input_size = 48
 labels_length = 24
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -25,13 +27,13 @@ all_labels_char = ["alpha", "beta", "chi", "delta", "epsilon", "eta", "gamma", "
                    "omega", "omicron", "phi", "pi", "psi", "rho", "sigma", "tau", "theta", "xi", "ypsilon", "zeta"]
 
 
-class CVAE(nn.Module):
+class char_CVAE(nn.Module):
     def __init__(self, input_size, hidden_size=48):  # 30, 48, 96 for hidden_size for characters, 100 for frags
-        super(CVAE, self).__init__()
+        super(char_CVAE, self).__init__()
         input_size_with_label = input_size + labels_length
         hidden_size += labels_length
 
-        self.fc1 = nn.Linear(input_size_with_label + 1,
+        self.fc1 = nn.Linear(input_size_with_label,
                              input_size_with_label)  # output <= to 48 + 24 (input size + labels) for chars, larger for frags
         # if needed one more fc layer
         self.fc21 = nn.Linear(input_size_with_label, hidden_size)
@@ -111,7 +113,7 @@ def evaluate(losses, autoencoder, dataloader, flatten=True):
     for inputs, labels, frags in dataloader:
         inputs = inputs.to(DEVICE)
         labels = label_encoder_char.transform([labels])
-        labels = one_hot(labels, 24).to(DEVICE)
+        labels = one_hot(labels, 23).to(DEVICE)
 
         if flatten:
             inputs = inputs.view(inputs.size(0), 48)
@@ -130,7 +132,7 @@ def evaluate(losses, autoencoder, dataloader, flatten=True):
 
 
 @decorators.timed
-def train_cvae(net, dataloader, test_dataloader, flatten=True, epochs=20):
+def _train_char_cvae(net, dataloader, test_dataloader, flatten=True, epochs=20):
     print("training")
     validation_losses = []
     optim = torch.optim.Adam(net.parameters())
@@ -146,7 +148,7 @@ def train_cvae(net, dataloader, test_dataloader, flatten=True, epochs=20):
                 labels = label_encoder_char.transform([labels])
 
                 batch = batch.to(DEVICE)
-                labels = one_hot(labels, 24).to(DEVICE)
+                labels = one_hot(labels, 23).to(DEVICE)
 
                 if flatten:
                     batch = batch.view(batch.size(0), 48)
@@ -179,7 +181,7 @@ def get_latent_data(net, dataset, count=1000, is_cvae=False):
             inputs = inputs.to(DEVICE)
 
             labels = label_encoder_char.transform(labels)
-            labels_one_hot = one_hot(labels, 24).to(DEVICE)
+            labels_one_hot = one_hot(labels, 23).to(DEVICE)
             if is_cvae:
                 outputs, mu, logvar = net(inputs, labels_one_hot)
             else:
@@ -230,7 +232,7 @@ def split_data(_dataset, random_state=42):
     return _trainset, _testset, _validset
 
 
-if __name__ == '__main__':
+def train_char_cvae(config: Config, result: Result):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     t = transforms.Compose([
@@ -248,9 +250,8 @@ if __name__ == '__main__':
 
     print("loading data")
 
-    _dataset = EncodedDataset(
-        "../out/config-config-cluster_1000_gpu-2022-05-24-22-35-20/optimal-model-203-ae-config-config-cluster_1000_gpu-2022-05-24-22-35-20.pth",
-        '../data/raw-cleaned-custom', transform=transforms.Compose([t, t_prime]))
+    _dataset = EncodedDataset(config.model_path, './data/raw-cleaned-custom',
+                              transform=transforms.Compose([t, t_prime]))
 
     print("data loaded")
 
@@ -260,7 +261,7 @@ if __name__ == '__main__':
 
     _trainset, _testset, _validset = split_data(_dataset)
 
-    batch = 128
+    batch = config.batch_size
 
     print("splitted")
     print("creating loaders")
@@ -271,14 +272,14 @@ if __name__ == '__main__':
 
     print("loaders created")
     print("Setting up CVAE")
-    cvae = CVAE(48).to(DEVICE)
+    cvae = char_CVAE(48).to(DEVICE)
     losses_train = []
     losses_valid = []
     losses_test = []
     optimal_model = None
     current_valid_loss = 10000
 
-    num_epochs = 2000
+    num_epochs = config.epochs
 
     print("training")
     validation_losses = []
@@ -297,14 +298,17 @@ if __name__ == '__main__':
         # train the models #
         ###################
 
-        loop_train = tqdm(train_loader, total=len(train_loader))
+        if config.tqdm:
+            loop_train = tqdm(train_loader, total=len(train_loader))
+        else:
+            loop_train = train_loader
         log_template = "\nEpoch {ep:03d} val_loss {v_loss:0.4f}"
 
         for batch, labels, frags in loop_train:
             labels = label_encoder_char.transform(labels)
 
             batch = batch.to(DEVICE)
-            labels = one_hot(labels, 24).to(DEVICE)
+            labels = one_hot(labels, 23).to(DEVICE)
 
             batch = batch.view(batch.size(0), 48)
 
@@ -316,7 +320,7 @@ if __name__ == '__main__':
 
             cum_train_loss += loss.item()
 
-            loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
+            loop_train.set_description(f'char_CVAE - Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
             loop_train.set_postfix(loss=cum_train_loss)
 
         tqdm._instances.clear()
@@ -325,13 +329,16 @@ if __name__ == '__main__':
         # validate the model #
         ######################
 
-        loop_valid = tqdm(valid_loader, total=len(valid_loader))
+        if config.tqdm:
+            loop_valid = tqdm(valid_loader, total=len(valid_loader))
+        else:
+            loop_valid = valid_loader
 
         for batch, labels, frags in loop_valid:
             labels = label_encoder_char.transform(labels)
 
             batch = batch.to(DEVICE)
-            labels = one_hot(labels, 24).to(DEVICE)
+            labels = one_hot(labels, 23).to(DEVICE)
 
             batch = batch.view(batch.size(0), 48)
 
@@ -343,7 +350,7 @@ if __name__ == '__main__':
 
             cum_valid_loss += loss_valid.item()
 
-            loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
+            loop_train.set_description(f'char_CVAE - Validation Epoch  [{epoch + 1:2d}/{num_epochs}]')
             loop_train.set_postfix(loss=cum_train_loss)
 
         if current_valid_loss > cum_valid_loss:
@@ -356,13 +363,16 @@ if __name__ == '__main__':
         # test the model #
         ##################
 
-        loop_test = tqdm(test_loader, total=len(test_loader))
+        if config.tqdm:
+            loop_test = tqdm(test_loader, total=len(test_loader))
+        else:
+            loop_test = test_loader
 
         for batch, labels, frags in loop_test:
             labels = label_encoder_char.transform(labels)
 
             batch = batch.to(DEVICE)
-            labels = one_hot(labels, 24).to(DEVICE)
+            labels = one_hot(labels, 23).to(DEVICE)
 
             batch = batch.view(batch.size(0), 48)
 
@@ -372,6 +382,7 @@ if __name__ == '__main__':
                 x, mu, logvar = cvae(batch, labels)
             loss_test = vae_loss_fn(batch, x[:, :48], mu, logvar)
 
+            loop_train.set_description(f'char_CVAE - Test Epoch  [{epoch + 1:2d}/{num_epochs}]')
             cum_test_loss += loss_test.item()
 
         losses_train.append(cum_train_loss)
@@ -379,44 +390,52 @@ if __name__ == '__main__':
         losses_test.append(cum_test_loss)
         print(f'Epoch={epoch} done.')
 
-    print(losses_train)
-    print(losses_valid)
-    print(losses_test)
+    torch.save(optimal_model[0], f'./{config.root}/char_CVAE-optimal-{optimal_model[1]}-{config.name_time}.pth')
+    config.cvae_char_path = f'./{config.root}/char_CVAE-optimal-{optimal_model[1]}-{config.name_time}.pth'
+    result.char_cvae = f'./{config.root}/char_CVAE-optimal-{optimal_model[1]}-{config.name_time}.pth'
 
-    plt.xlabel('Iterations')
+    result.char_cvae_train_loss = losses_train
+    result.char_cvae_valid_loss = losses_valid
+    result.char_cvae_test_loss = losses_test
+
+    plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.plot(losses_train[-num_epochs:])
-
-    plt.title("Train Loss")
-    plt.show()
+    plt.plot(losses_train)
+    util.utils.create_folder(f"./{config.root}/net_eval/char_CVAE")
+    plt.title("Train Loss - char_CVAE")
+    plt.savefig(f"./{config.root}/net_eval/char_CVAE/char_CVAE_loss_train.png")
+    # util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
     plt.close()
 
-    plt.xlabel('Iterations')
+    plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.plot(losses_valid[-num_epochs:])
-
-    plt.title("Validation Loss")
-    plt.show()
+    plt.plot(losses_valid)
+    util.utils.create_folder(f"./{config.root}/net_eval/char_CVAE")
+    plt.title("Validation Loss - char_CVAE")
+    plt.savefig(f"./{config.root}/net_eval/char_CVAE/char_CVAE_loss_valid.png")
+    # util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
     plt.close()
 
-    plt.xlabel('Iterations')
+    plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.plot(losses_test[-num_epochs:])
-
-    plt.title("Test Loss")
-    plt.show()
+    plt.plot(losses_test)
+    util.utils.create_folder(f"./{config.root}/net_eval/char_CVAE")
+    plt.title("Test Loss - char_CVAE")
+    plt.savefig(f"./{config.root}/net_eval/char_CVAE/char_CVAE_loss_test.png")
+    # util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
     plt.close()
 
-    plt.xlabel('Iterations')
+    plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.plot(losses_train[-num_epochs:], label="train_loss")
-    plt.plot(losses_valid[-num_epochs:], label="valid_loss")
-    plt.plot(losses_test[-num_epochs:], label="test_loss")
-
+    plt.plot(losses_train, label="train_loss")
+    plt.plot(losses_valid, label="valid_loss")
+    plt.plot(losses_test, label="test_loss")
+    util.utils.create_folder(f"./{config.root}/net_eval/char_CVAE")
     plt.title("All Losses - Log Scale")
     plt.legend()
     # plt.yscale("log")
-    plt.show()
+    plt.savefig(f"./{config.root}/net_eval/char_CVAE/char_CVAE_loss_all.png")
+    # util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
     plt.close()
 
-    torch.save(optimal_model[0], f'../_out/cvae_{optimal_model[1]}.pth')
+    return result, config

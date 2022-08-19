@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
+from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from torch.utils.data import dataset
 from torchsummary import summary
@@ -129,7 +130,7 @@ def train(config: Config):
             cum_train_loss += loss_train.item()
 
             if config.tqdm:
-                loop_train.set_description(f'Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_description(f'ResNet_AE - Training Epoch  [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_train_loss)
 
         scheduler.step(cum_train_loss)
@@ -153,7 +154,7 @@ def train(config: Config):
 
             cum_valid_loss += loss_valid.item()
             if config.tqdm:
-                loop_train.set_description(f'Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_description(f'ResNet_AE - Validation Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_valid_loss)
 
         if current_valid_loss > cum_valid_loss:
@@ -181,7 +182,7 @@ def train(config: Config):
 
             cum_test_loss += loss_test.item()
             if config.tqdm:
-                loop_train.set_description(f'Test Epoch [{epoch + 1:2d}/{num_epochs}]')
+                loop_train.set_description(f'ResNet_AE - Test Epoch [{epoch + 1:2d}/{num_epochs}]')
                 loop_train.set_postfix(loss=cum_test_loss)
 
         losses_train.append(cum_train_loss)
@@ -198,6 +199,46 @@ def train(config: Config):
     result.train_loss = losses_train
     result.valid_loss = losses_valid
     result.test_loss = losses_test
+
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.plot(losses_train)
+    util.utils.create_folder(f"./{config.root}/net_eval/ResNet_AE")
+    plt.title("Train Loss - ResNet_AE")
+    plt.savefig(f"./{config.root}/net_eval/ResNet_AE/AE_loss_train.png")
+    # util.report.image_to_report("net_eval/loss_train.png", "Network Training Loss")
+    plt.close()
+
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.plot(losses_valid)
+    util.utils.create_folder(f"./{config.root}/net_eval/ResNet_AE")
+    plt.title("Validation Loss - ResNet_AE")
+    plt.savefig(f"./{config.root}/net_eval/ResNet_AE/AE_loss_valid.png")
+    # util.report.image_to_report("net_eval/loss_valid.png", "Network Validation Loss")
+    plt.close()
+
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.plot(losses_test)
+    util.utils.create_folder(f"./{config.root}/net_eval/ResNet_AE")
+    plt.title("Test Loss - ResNet_AE")
+    plt.savefig(f"./{config.root}/net_eval/ResNet_AE/AE_loss_test.png")
+    # util.report.image_to_report("net_eval/loss_test.png", "Network Test Loss")
+    plt.close()
+
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.plot(losses_train, label="train_loss")
+    plt.plot(losses_valid, label="valid_loss")
+    plt.plot(losses_test, label="test_loss")
+    util.utils.create_folder(f"./{config.root}/net_eval/ResNet_AE")
+    plt.title("All Losses - ResNet_AE - Log Scale")
+    plt.legend()
+    plt.yscale("log")
+    plt.savefig(f"./{config.root}/net_eval/ResNet_AE/AE_loss_all.png")
+    # util.report.image_to_report("net_eval/loss_all.png", "Network All Loss")
+    plt.close()
 
     logger.info(result)
 

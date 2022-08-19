@@ -1,15 +1,20 @@
 import json
 
 
+
+
 class Result:
     """
     Encapsulates the training and the results form pytorch for evaluation the model in a separate step.
     """
+
     def __init__(self, root, name):
         self.root = root
         self.name = f"result-{name}"
 
         self.model = None
+        self.char_cvae = None
+        self.frag_cvae = None
         self.epochs = None
         self.batch_size = None
 
@@ -23,6 +28,14 @@ class Result:
         self.train_loss = None
         self.valid_loss = None
         self.test_loss = None
+
+        self.char_cvae_train_loss = None
+        self.char_cvae_valid_loss = None
+        self.char_cvae_test_loss = None
+
+        self.frag_cvae_train_loss = None
+        self.frag_cvae_valid_loss = None
+        self.frag_cvae_test_loss = None
 
     def __repr__(self):
         return str(self._toJSON())

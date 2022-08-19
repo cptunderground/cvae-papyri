@@ -1,18 +1,29 @@
 import argparse
 from datetime import datetime
 
+import torch
+
+from util import decorators
 import util.base_logger
 import util.report
 import util.utils
+from autoencoders import evaluate, evaluate_frag_CVAE
+from autoencoders import evaluate_char_CVAE
 from autoencoders import train
-from autoencoders import evaluate
+from autoencoders.char_CVAE import char_CVAE
+from autoencoders.char_CVAE import train_char_cvae
+
+from autoencoders.frag_CVAE import frag_CVAE
+from autoencoders.frag_CVAE import train_frag_cvae
+
 from preprocessing import standardisation
 from util.base_logger import logger
 from util.config import Config
 from util.result import Result
 
-if __name__ == '__main__':
 
+@decorators.timed
+def run():
     modes = ['test', 'cluster', 'full', 'init']
     processing_modes = ['gray-scale', 'otsu']
 
@@ -55,12 +66,15 @@ if __name__ == '__main__':
         util.report.write_to_report(config_file)
         config.write_to_md()
 
-    if args.generate:
-        standardisation.generate_training_sets()
-        standardisation.standardise(config)
+    # if args.generate:
+    # standardisation.generate_training_sets()
+    # standardisation.standardise(config)
 
     if config.train:
         result, config = train.train(config)
+
+        result, config = train_char_cvae(config, result)
+        result, config = train_frag_cvae(config, result)
 
         config.train = False
         out_path = result.saveJSON()
@@ -69,7 +83,14 @@ if __name__ == '__main__':
 
     if config.evaluate:
         result = Result.fromfile(config.result_path)
+
         evaluate.evaluate(config, result)
+        evaluate_char_CVAE.evaluate(config, result)
+        evaluate_frag_CVAE.evaluate(config, result)
 
     print("Evaluating results and summarizing them in report")
     # util.report.save_report()
+
+
+if __name__ == '__main__':
+    run()
