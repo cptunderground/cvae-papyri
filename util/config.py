@@ -22,7 +22,8 @@ class Config:
                  model_class: str = None, model_path: str = None, cvae_char: str = None, cvae_char_path: str = None,
                  cvae_frag: str = None, cvae_frag_path: str = None, chars_to_eval: list = None,
                  chars_to_train: list = None, frags_to_eval: list = None, frags_to_train: list = None,
-                 logging_val: int = 40, batch_size: int = 128, epochs: int = 30, tqdm: bool = False, root=None,
+                 logging_val: int = 40, batch_size: int = 128, epochs: int = 30, epochs_cvae: int = 1000,
+                 tqdm: bool = False, root=None,
                  result_path=None):
 
         self.name = name
@@ -40,10 +41,10 @@ class Config:
         self.cvae_frag = cvae_frag
         self.cvae_frag_path = cvae_frag_path
 
-
         self.logging_val = logging_val
         self.batch_size = batch_size
         self.epochs = epochs
+        self.epochs_cvae = epochs_cvae
         self.tqdm = tqdm
         self.root = root
 
@@ -81,6 +82,7 @@ class Config:
                             logging_val=data["logging_val"],
                             batch_size=data["batch_size"],
                             epochs=data["epochs"],
+                            epochs_cvae=data["epochs_cvae"],
                             tqdm=data["tqdm"],
                             root=data["root"],
                             result_path=data["result_path"])
@@ -127,6 +129,7 @@ if __name__ == '__main__':
                            logging_val=40,
                            batch_size=128,
                            epochs=30,
+                           epochs_cvae=100,
                            tqdm=True)
 
     cluster_3_gpu = Config(name="cluster_3_gpu",
@@ -148,6 +151,7 @@ if __name__ == '__main__':
                            logging_val=40,
                            batch_size=512,
                            epochs=3,
+                           epochs_cvae=100,
                            tqdm=False)
 
     cluster_30_gpu = Config(name="cluster_30_gpu",
@@ -169,6 +173,7 @@ if __name__ == '__main__':
                             logging_val=40,
                             batch_size=512,
                             epochs=30,
+                            epochs_cvae=100,
                             tqdm=False)
 
     cluster_100_gpu = Config(name="cluster_100_gpu",
@@ -190,6 +195,7 @@ if __name__ == '__main__':
                              logging_val=40,
                              batch_size=512,
                              epochs=100,
+                             epochs_cvae=100,
                              tqdm=False)
 
     cluster_1000_gpu = Config(name="cluster_1000_gpu",
@@ -207,6 +213,7 @@ if __name__ == '__main__':
                               logging_val=40,
                               batch_size=512,
                               epochs=1000,
+                              epochs_cvae=100,
                               tqdm=False,
 
                               chars_to_eval=all_labels_char,
@@ -217,28 +224,29 @@ if __name__ == '__main__':
                               )
 
     cluster_10000_gpu = Config(name="cluster_10000_gpu",
-                              train=True,
-                              evaluate=True,
-                              model_class="resnet_AE",
-                              model_path=None,
+                               train=True,
+                               evaluate=True,
+                               model_class="resnet_AE",
+                               model_path=None,
 
-                              cvae_char="char_CVAE",
-                              cvae_char_path=None,
+                               cvae_char="char_CVAE",
+                               cvae_char_path=None,
 
-                              cvae_frag="frag_CVAE",
-                              cvae_frag_path=None,
+                               cvae_frag="frag_CVAE",
+                               cvae_frag_path=None,
 
-                              logging_val=40,
-                              batch_size=512,
-                              epochs=10000,
-                              tqdm=False,
+                               logging_val=40,
+                               batch_size=512,
+                               epochs=1000,
+                               epochs_cvae=20000,
+                               tqdm=False,
 
-                              chars_to_eval=all_labels_char,
-                              chars_to_train=all_labels_char,
-                              frags_to_eval=all_labels_frags,
-                              frags_to_train=all_labels_frags
+                               chars_to_eval=all_labels_char,
+                               chars_to_train=all_labels_char,
+                               frags_to_eval=all_labels_frags,
+                               frags_to_train=all_labels_frags
 
-                              )
+                               )
 
     testing = Config(name="testing",
                      train=True,
@@ -259,6 +267,7 @@ if __name__ == '__main__':
                      logging_val=40,
                      batch_size=128,
                      epochs=1,
+                     epochs_cvae=2,
                      tqdm=True)
 
     standard_conf.saveJSON()

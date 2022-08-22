@@ -280,7 +280,7 @@ def train_char_cvae(config: Config, result: Result):
     optimal_model = None
     current_valid_loss = 10000
 
-    num_epochs = config.epochs
+    num_epochs = config.epochs_cvae
 
     print("training")
     validation_losses = []

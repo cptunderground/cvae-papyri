@@ -28,7 +28,8 @@ def train(config: Config):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     t = transforms.Compose([
-        c_transforms.CustomPad(padding=[0, 0, 0, 0], fill=(255, 255, 255, 1)),
+        c_transforms.CustomPad(padding=[0, 0, 0, 0],
+                               fill=(255, 255, 255, 1)),
         transforms.Resize([64, 64]),
         transforms.Grayscale()
     ])
