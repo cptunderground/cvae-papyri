@@ -351,7 +351,7 @@ def evaluate(config, result):
 
     X.ravel()
 
-    X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2]))
+    X = np.reshape(X, (X.shape[0], X.shape[1] * X.shape[2] * X.shape[3] * X.shape[4] ))
 
     y_list = list(y)
     y_list_num = list(y)

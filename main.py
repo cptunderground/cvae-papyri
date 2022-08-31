@@ -7,9 +7,10 @@ from util import decorators
 import util.base_logger
 import util.report
 import util.utils
-from autoencoders import evaluate, evaluate_frag_CVAE
+from autoencoders import evaluate_resnetAE, evaluate_frag_CVAE, evaluate_convAE
 from autoencoders import evaluate_char_CVAE
-from autoencoders import train
+from autoencoders import train_resnetAE
+from autoencoders import train_covAE
 from autoencoders.char_CVAE import char_CVAE
 from autoencoders.char_CVAE import train_char_cvae
 
@@ -71,10 +72,10 @@ def run():
     # standardisation.standardise(config)
 
     if config.train:
-        result, config = train.train(config)
-
-        result, config = train_char_cvae(config, result)
-        result, config = train_frag_cvae(config, result)
+        #result, config = train_covAE.train(config)
+        result, config = train_resnetAE.train(config)
+        #result, config = train_char_cvae(config, result)
+        #result, config = train_frag_cvae(config, result)
 
         config.train = False
         out_path = result.saveJSON()
@@ -84,9 +85,10 @@ def run():
     if config.evaluate:
         result = Result.fromfile(config.result_path)
 
-        evaluate.evaluate(config, result)
-        evaluate_char_CVAE.evaluate(config, result)
-        evaluate_frag_CVAE.evaluate(config, result)
+        #evaluate_convAE.evaluate(config, result)
+        evaluate_resnetAE.evaluate(config, result)
+        #evaluate_char_CVAE.evaluate(config, result)
+        #evaluate_frag_CVAE.evaluate(config, result)
 
     print("Evaluating results and summarizing them in report")
     # util.report.save_report()

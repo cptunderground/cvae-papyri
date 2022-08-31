@@ -1,3 +1,5 @@
+import math
+
 import hdbscan
 import matplotlib.pyplot as plt
 import numpy as np
@@ -188,9 +190,9 @@ def evaluate(config: Config, result: Result):
     #############################################################################################
     # Euclidean Distance Pseudo Random Samples
     #############################################################################################
-    r = 20
+    r = math.floor(len(_testset) / 10)
     for _num in range(r):
-        num = _num * 20
+        num = _num * 10
         base = org_enc_dec[num]
         distances = []
 
@@ -227,8 +229,8 @@ def evaluate(config: Config, result: Result):
         axes[1, 3].imshow(np.squeeze(distances[3][1][2]), cmap="gray")
         axes[1, 4].imshow(np.squeeze(distances[4][1][2]), cmap="gray")
 
-        plt.title(f"char_CVAE - Euclid - Sample={num}")
-        plt.savefig(f"./{config.root}/net_eval/char_CVAE_eval/char_CVAE-euclid-sample-{num}.png")
+        plt.title(f"char_CVAE - Euclid - Sample={_num}")
+        plt.savefig(f"./{config.root}/net_eval/char_CVAE_eval/char_CVAE-euclid-sample-{_num}.png")
         plt.show()
         plt.close()
 
@@ -239,8 +241,8 @@ def evaluate(config: Config, result: Result):
 
         plt.hist([distances[x][0] for x in range(len(distances))], bins=50)
 
-        plt.title(f"char_CVAE - Euclid - Sample={num} - Hist")
-        plt.savefig(f"./{config.root}/net_eval/char_CVAE_eval/char_CVAE-euclid-sample-{num}-hist.png")
+        plt.title(f"char_CVAE - Euclid - Sample={_num} - Hist")
+        plt.savefig(f"./{config.root}/net_eval/char_CVAE_eval/char_CVAE-euclid-sample-{_num}-hist.png")
         plt.show()
         plt.close()
 

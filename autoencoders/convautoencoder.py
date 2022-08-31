@@ -5,7 +5,7 @@ class ConvAutoEncoder(nn.Module):
     """
     TODO: Class doc
     """
-    def __init__(self, dim):
+    def __init__(self):
         super().__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=16, kernel_size=(5, 5), stride=(1, 1), padding=2),
