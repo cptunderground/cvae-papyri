@@ -111,7 +111,7 @@ def get_label_from_tensor(label):
     return switcher.get(label)
 
 
-def evaluate(config:Config, result:Result):
+def evaluate(config: Config, result: Result):
     util.utils.create_folder(f"./{config.root}/net_eval")
     util.utils.create_folder(f"./{config.root}/net_eval/frag_CVAE")
     util.utils.create_folder(f"./{config.root}/net_eval/frag_CVAE_eval")
@@ -138,7 +138,6 @@ def evaluate(config:Config, result:Result):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     criterion = eval(f"nn.{result.loss}")
 
-
     t = transforms.Compose([
         c_transforms.CustomPad(padding=[0, 0, 0, 0], fill=(255, 255, 255, 1)),
         transforms.Resize([64, 64]),
@@ -156,6 +155,15 @@ def evaluate(config:Config, result:Result):
 
     _trainset, _testset = train_test_split(_dataset, test_size=0.2, random_state=42)
     _trainset, _validset = train_test_split(_trainset, test_size=0.25, random_state=42)
+
+    print([letter for letter in config.chars_to_eval])
+    print(_testset[0][1])
+    idx = [i for i in range(len(_testset)) if
+           _testset[i][1] in [letter for letter in config.chars_to_eval]]
+    # build the appropriate subset
+    print(idx)
+    _testset = Subset(_testset, idx)
+    print(_testset)
 
     label_encoder_frag = preprocessing.LabelEncoder()
     label_encoder_frag.fit(all_labels_frags)
@@ -188,8 +196,8 @@ def evaluate(config:Config, result:Result):
 
             _dec_cvae = frag_cvae.decode(_enc_cvae, label)
 
-
-            org_enc_dec.append((image.cpu().numpy(), _enc_cvae.cpu().numpy(), _dec.cpu().numpy(), label_char, label_frag))
+            org_enc_dec.append(
+                (image.cpu().numpy(), _enc_cvae.cpu().numpy(), _dec.cpu().numpy(), label_char, label_frag))
 
         loss = criterion(_dec, image)
         test_losses.append((loss.cpu().numpy(), image.cpu().numpy(), _dec.cpu().numpy(), label_char[0],
@@ -198,8 +206,10 @@ def evaluate(config:Config, result:Result):
     #############################################################################################
     # Euclidean Distance Pseudo Random Samples
     #############################################################################################
+    samples = [0, 2, 6, 10, 11, 13, 18, 20, 22, 52, 60, 81, 101, 116, 138, 164, 192, 219, 236]
+    # samples = [0]
     r = math.floor(len(_testset) / 10)
-    for _num in range(r):
+    for _num in samples:
         num = _num * 10
         base = org_enc_dec[num]
         distances = []
@@ -237,7 +247,7 @@ def evaluate(config:Config, result:Result):
         axes[1, 3].imshow(np.squeeze(distances[3][1][2]), cmap="gray")
         axes[1, 4].imshow(np.squeeze(distances[4][1][2]), cmap="gray")
 
-        plt.title(f"frag_CVAE - Euclid - Sample={_num}")
+        fig.suptitle(f"fragCVAE - Euclidean Distance - Test Sample Index {num}", fontsize="x-large")
         plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/frag_CVAE-euclid-sample-{_num}.png")
         plt.show()
         plt.close()
@@ -249,7 +259,7 @@ def evaluate(config:Config, result:Result):
 
         plt.hist([distances[x][0] for x in range(len(distances))], bins=50)
 
-        plt.title(f"frag_CVAE - Euclid - Sample={_num} - Hist")
+        plt.title(f"fragCVAE - Euclid - Test Sample Index {num} - Histogram")
         plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/frag_CVAE-euclid-sample-{_num}-hist.png")
         plt.show()
         plt.close()
@@ -450,31 +460,22 @@ def evaluate(config:Config, result:Result):
     label_encoder_frag.fit(labels_frag_list)
     labels_frag_list_enumerated = label_encoder_frag.transform(labels_frag_list)
 
-    # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
+    for n_neighbor in [2, 5, 10, 15, 20, 100, 200]:
+        umap = UMAP(n_components=2, random_state=42, n_neighbors=n_neighbor)
+        X_embedded = umap.fit_transform(X)
 
-    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette_char=palette_char)
+        plt.figure(figsize=(12, 8))
+        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full',
+                        palette=sns.color_palette("hls", y_len), s=10)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        # plt.scatter(X_embedded[:, 0], X_embedded[:, 1], c=labels_char_list_enumerated, s=2, cmap='tab20')
+        # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-    tsne = TSNE()
-    X_embedded = tsne.fit_transform(X)
-
-    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette_char)
-    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
-
-    plt.title(f"tsne_final_eval")
-    plt.savefig(f'./{config.root}/net_eval/frag_CVAE_eval/tsne_final_eval_mode.png')
-    # util.report.image_to_report(f"{name}/{config.processing}/tsne_{name}_final_eval_mode_{config.processing}.png",f"TSNE final_eval")
-    plt.close()
-
-    umap = UMAP()
-    X_embedded = umap.fit_transform(X)
-
-    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette_char)
-    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
-
-    plt.title(f"umap_final_eval_mode")
-    plt.savefig(f'./{config.root}/net_eval/frag_CVAE_eval/umap_final_eval_mode.png')
-    # util.report.image_to_report(f"{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png",f"UMAP final_eval")
-    plt.close()
+        plt.title(f"fragCVAE - UMAP - n_neighbors={n_neighbor}")
+        plt.tight_layout()
+        plt.savefig(f'./{config.root}/net_eval/frag_CVAE_eval/fragCVAE_umap_n{n_neighbor}.png', bbox_inches='tight')
+        plt.show()
+        plt.close()
 
     ####################################################################################################
     # 3D UMAP
@@ -507,6 +508,7 @@ def evaluate(config:Config, result:Result):
     ####################################################################################################
     print(y_len)
 
+    """
     for k in range(3, y_len):
         kmeans_labels = cluster.KMeans(n_clusters=k).fit_predict(X)
         # plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
@@ -538,7 +540,8 @@ def evaluate(config:Config, result:Result):
         logger.info(f"k={k} - Adjusted rand index of kmeans clustered character labels")
         logger.info(str((ars, amis)))
     ####################################################################################################
-
+    
+    """
     fit = UMAP(n_components=3)
     u = fit.fit_transform(X)
     fig = plt.figure()
@@ -632,6 +635,30 @@ def evaluate(config:Config, result:Result):
 
     active_keys = keys[:5]
     passive_keys = keys[5:]
+
+    for n_neighbor in [2, 5, 10, 15, 20, 100, 200]:
+        standard_embedding = UMAP(n_components=2, random_state=42, n_neighbors=n_neighbor).fit_transform(X)
+        active_embeddings = [x for i, x in enumerate(standard_embedding) if labels_frag_list[i] in active_keys]
+        active_embeddings = np.asarray(active_embeddings)
+        active_labels = [x for i, x in enumerate(labels_frag_list) if labels_frag_list[i] in active_keys]
+        active_labels = label_encoder_frag.transform(active_labels)
+
+        passive_embeddings = [x for i, x in enumerate(standard_embedding) if labels_frag_list[i] in passive_keys]
+        passive_embeddings = np.asarray(passive_embeddings)
+        passive_labels = [x for i, x in enumerate(labels_frag_list) if labels_frag_list[i] in passive_keys]
+        passive_labels = label_encoder_frag.transform(passive_labels)
+
+        fig = plt.figure(figsize=(12, 8))
+        ax = fig.add_subplot(111)
+        ax.scatter(active_embeddings[:, 0], active_embeddings[:, 1], c=active_labels, s=20, cmap='gist_ncar')
+        ax.scatter(passive_embeddings[:, 0], passive_embeddings[:, 1], c="gray", s=2)
+        # ax.legend(l, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        plt.title(f"fragCVAE - UMAP - Fragment Labels - n_neighbors={n_neighbor}")
+        plt.tight_layout()
+        plt.savefig(f"./{config.root}/net_eval/frag_CVAE_eval/umap_frag_labels_active_passive_n{n_neighbor}.png",
+                    bbox_inches='tight')
+        plt.show()
+        plt.close()
 
     active_embeddings = [x for i, x in enumerate(standard_embedding) if labels_frag_list[i] in active_keys]
     active_embeddings = np.asarray(active_embeddings)

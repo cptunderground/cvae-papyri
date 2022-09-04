@@ -74,8 +74,8 @@ def run():
     if config.train:
         #result, config = train_covAE.train(config)
         result, config = train_resnetAE.train(config)
-        #result, config = train_char_cvae(config, result)
-        #result, config = train_frag_cvae(config, result)
+        result, config = train_char_cvae(config, result)
+        result, config = train_frag_cvae(config, result)
 
         config.train = False
         out_path = result.saveJSON()
@@ -87,8 +87,8 @@ def run():
 
         #evaluate_convAE.evaluate(config, result)
         evaluate_resnetAE.evaluate(config, result)
-        #evaluate_char_CVAE.evaluate(config, result)
-        #evaluate_frag_CVAE.evaluate(config, result)
+        evaluate_char_CVAE.evaluate(config, result)
+        evaluate_frag_CVAE.evaluate(config, result)
 
     print("Evaluating results and summarizing them in report")
     # util.report.save_report()

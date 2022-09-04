@@ -8,9 +8,8 @@
 
 
 # CVAE Papyri
-Some blabla about the work in this repo. I'm not creative enough rn to do this #juststudentthings
-
-
+To be done
+<!--
 ## Setup
 The repository was developed on Windows 10 and Ubuntu 18.04 LTS with python version 3.6 - It is recommended to setup an anaconda environement.
 
@@ -32,7 +31,7 @@ pip install -r reqirements.txt
 From there you're ready to go!
 
 ## CVAE-Papyri Script
-
+-->
 
 
 <!-- MARKDOWN LINKS & IMAGES -->

@@ -152,6 +152,15 @@ def evaluate(config: Config, result: Result):
     label_encoder_char = preprocessing.LabelEncoder()
     label_encoder_char.fit(all_labels_char)
 
+    print([letter for letter in config.chars_to_eval])
+    print(_testset[0][1])
+    idx = [i for i in range(len(_testset)) if
+           _testset[i][1] in [letter for letter in config.chars_to_eval]]
+    # build the appropriate subset
+    print(idx)
+    _testset = Subset(_testset, idx)
+    print(_testset)
+
     #######################################################################################
     # Calculate worst, best and some random loss on testset
     #######################################################################################
@@ -190,8 +199,12 @@ def evaluate(config: Config, result: Result):
     #############################################################################################
     # Euclidean Distance Pseudo Random Samples
     #############################################################################################
+
+
     r = math.floor(len(_testset) / 10)
-    for _num in range(r):
+    samples = [0, 2, 6, 10, 11, 13, 18, 20, 22, 52, 60, 81, 101, 116, 138, 164, 192, 219, 236]
+    samples = [0]
+    for _num in samples:
         num = _num * 10
         base = org_enc_dec[num]
         distances = []
@@ -229,7 +242,7 @@ def evaluate(config: Config, result: Result):
         axes[1, 3].imshow(np.squeeze(distances[3][1][2]), cmap="gray")
         axes[1, 4].imshow(np.squeeze(distances[4][1][2]), cmap="gray")
 
-        plt.title(f"char_CVAE - Euclid - Sample={_num}")
+        fig.suptitle(f"charCVAE - Euclidean Distance - Test Sample Index {num}", fontsize="x-large")
         plt.savefig(f"./{config.root}/net_eval/char_CVAE_eval/char_CVAE-euclid-sample-{_num}.png")
         plt.show()
         plt.close()
@@ -241,7 +254,7 @@ def evaluate(config: Config, result: Result):
 
         plt.hist([distances[x][0] for x in range(len(distances))], bins=50)
 
-        plt.title(f"char_CVAE - Euclid - Sample={_num} - Hist")
+        plt.title(f"charCVAE - Euclid - Test Sample Index {num} - Histogram")
         plt.savefig(f"./{config.root}/net_eval/char_CVAE_eval/char_CVAE-euclid-sample-{_num}-hist.png")
         plt.show()
         plt.close()
@@ -441,31 +454,43 @@ def evaluate(config: Config, result: Result):
     label_encoder_frag.fit(labels_frag_list)
     labels_frag_list_enumerated = label_encoder_frag.transform(labels_frag_list)
 
-    # X_embedded = fit(X,y, MACHINE_EPSILON, n_components, perplexity)
+    for n_neighbor in [2,5,10,15,20,100,200]:
+        umap = UMAP(n_components=2, random_state=42, n_neighbors=n_neighbor)
+        X_embedded = umap.fit_transform(X)
 
-    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette_char=palette_char)
+        plt.figure(figsize=(12, 8))
+        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=sns.color_palette("hls", y_len), s=10)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        # plt.scatter(X_embedded[:, 0], X_embedded[:, 1], c=labels_char_list_enumerated, s=2, cmap='tab20')
+        # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-    tsne = TSNE()
-    X_embedded = tsne.fit_transform(X)
+        plt.title(f"charCVAE - UMAP - n_neighbors={n_neighbor}")
+        plt.tight_layout()
+        plt.savefig(f'./{config.root}/net_eval/char_CVAE_eval/charCVAE_umap_n{n_neighbor}.png', bbox_inches='tight')
+        plt.show()
+        plt.close()
 
-    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette_char)
-    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
+    standard_embedding = UMAP(n_components=2, random_state=42, n_neighbors=15).fit_transform(X)
+    for k in [3, 6, 12, 24]:
+        kmeans_labels = cluster.KMeans(n_clusters=k).fit_predict(X)
+        # plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
 
-    plt.title(f"tsne_final_eval")
-    plt.savefig(f'./{config.root}/net_eval/char_CVAE_eval/tsne_final_eval_mode.png')
-    # util.report.image_to_report(f"{name}/{config.processing}/tsne_{name}_final_eval_mode_{config.processing}.png",f"TSNE final_eval")
-    plt.close()
+        ars = adjusted_rand_score(labels_char_list_enumerated, kmeans_labels)
+        amis = adjusted_mutual_info_score(labels_char_list_enumerated, kmeans_labels)
 
-    umap = UMAP()
-    X_embedded = umap.fit_transform(X)
+        logger.info(f"k={k} - Adjusted rand index of kmeans clustered character labels")
+        logger.info(str((ars, amis)))
 
-    sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=palette_char)
-    # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
-
-    plt.title(f"umap_final_eval_mode")
-    plt.savefig(f'./{config.root}/net_eval/char_CVAE_eval/umap_final_eval_mode.png')
-    # util.report.image_to_report(f"{name}/{config.processing}/umap_{name}_final_eval_mode_{config.processing}.png",f"UMAP final_eval")
-    plt.close()
+        plt.figure(figsize=(12, 8))
+        sns.scatterplot(standard_embedding[:, 0], standard_embedding[:, 1], hue=kmeans_labels, legend='full',
+                        palette=sns.color_palette("hls", k), s=10)
+        plt.title(f"charCVAE - k-means - Character Labels - k={k}")
+        plt.xlabel(f"Rand Index = {round(ars, 3)}")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        plt.tight_layout()
+        plt.savefig(f'./{config.root}/net_eval/char_CVAE_eval/charCVAE_umap_kmeans_{k}', bbox_inches='tight')
+        plt.show()
+        plt.close()
 
     ####################################################################################################
     # 3D UMAP
@@ -498,6 +523,7 @@ def evaluate(config: Config, result: Result):
     ####################################################################################################
     print(y_len)
 
+    """    
     for k in range(3, y_len):
         kmeans_labels = cluster.KMeans(n_clusters=k).fit_predict(X)
         # plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
@@ -529,7 +555,7 @@ def evaluate(config: Config, result: Result):
         logger.info(f"k={k} - Adjusted rand index of kmeans clustered character labels")
         logger.info(str((ars, amis)))
     ####################################################################################################
-
+    """
     fit = UMAP(n_components=3)
     u = fit.fit_transform(X)
     fig = plt.figure()

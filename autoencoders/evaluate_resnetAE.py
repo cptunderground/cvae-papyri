@@ -155,6 +155,7 @@ def evaluate(config, result):
     _testset = Subset(_testset, idx)
     print(_testset)
 
+    _testset = _dataset
     #######################################################################################
     # Calculate worst, best and some random loss on testset
     #######################################################################################
@@ -187,7 +188,7 @@ def evaluate(config, result):
     #############################################################################################
 
     samples = [0, 2, 6, 10, 11, 13, 18, 20, 22, 52, 60, 81, 101, 116, 138, 164, 192, 219, 236]
-    #samples = [0]
+    # samples = [0]
     r = math.floor(len(_testset) / 10)
     for _num in samples:
         num = _num * 10
@@ -429,12 +430,15 @@ def evaluate(config, result):
 
     frag_count.sort(key=lambda x: x[1], reverse=True)
 
+    print(frag_count)
+
     keys, values = zip(*frag_count)
 
     plt.figure(figsize=(18, 3))
     plt.bar(keys, values, width=0.5, align="edge", color='g')
     plt.xticks(rotation=90)
     plt.tight_layout()
+    plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/data_fragcount_hist.png', bbox_inches='tight')
     plt.show()
 
     r1 = np.mean(values)
@@ -450,6 +454,8 @@ def evaluate(config, result):
     print(f"len(frag_count_max)={len(frag_count_max)}")
     print(f"frag_count_max_count={frag_count_max_count}")
     print(frag_count)
+
+
 
     palette_char = sns.color_palette("bright", y_len)
     palette_frag = sns.color_palette("bright", f_len)
@@ -481,27 +487,54 @@ def evaluate(config, result):
     plt.close()
     """
     # UMAP eval
-    for n_neighbor in [2,5,10,15,20,100,200]:
+    for n_neighbor in [2, 5, 10, 15, 20, 100, 200]:
         umap = UMAP(n_components=2, random_state=42, n_neighbors=n_neighbor)
         X_embedded = umap.fit_transform(X)
 
-        plt.figure(figsize=(12, 9))
-        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full', palette=sns.color_palette("hls", y_len), s=10)
+        plt.figure(figsize=(12, 8))
+        sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full',
+                        palette=sns.color_palette("hls", y_len), s=10)
         plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
         # plt.scatter(X_embedded[:, 0], X_embedded[:, 1], c=labels_char_list_enumerated, s=2, cmap='tab20')
         # sns.scatterplot(X_embedded[:, 0], X_embedded[:, 1], hue=y, legend='full')
 
-        plt.title(f"resnetAE - UMAP - n_neighbors={n_neighbor}")
+        plt.title(f"resnetAE - UMAP - Character Labels - n_neighbors={n_neighbor}")
         plt.tight_layout()
         plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/resnetAE_umap_n{n_neighbor}.png', bbox_inches='tight')
         plt.show()
         plt.close()
 
-    exit(0)
+    active_keys = keys[:5]
+    passive_keys = keys[5:]
+
+    for n_neighbor in [2, 5, 10, 15, 20, 100, 200]:
+        standard_embedding = UMAP(n_components=2, random_state=42, n_neighbors=n_neighbor).fit_transform(X)
+        active_embeddings = [x for i, x in enumerate(standard_embedding) if labels_frag_list[i] in active_keys]
+        active_embeddings = np.asarray(active_embeddings)
+        active_labels = [x for i, x in enumerate(labels_frag_list) if labels_frag_list[i] in active_keys]
+        active_labels = label_encoder_frag.transform(active_labels)
+
+        passive_embeddings = [x for i, x in enumerate(standard_embedding) if labels_frag_list[i] in passive_keys]
+        passive_embeddings = np.asarray(passive_embeddings)
+        passive_labels = [x for i, x in enumerate(labels_frag_list) if labels_frag_list[i] in passive_keys]
+        passive_labels = label_encoder_frag.transform(passive_labels)
+
+        fig = plt.figure(figsize=(12, 8))
+        ax = fig.add_subplot(111)
+        ax.scatter(active_embeddings[:, 0], active_embeddings[:, 1], c=active_labels, s=20, cmap='gist_ncar')
+        ax.scatter(passive_embeddings[:, 0], passive_embeddings[:, 1], c="gray", s=2)
+        # ax.legend(l, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        plt.title(f"resnetAE - UMAP - Fragment Labels - n_neighbors={n_neighbor}")
+        plt.tight_layout()
+        plt.savefig(f"./{config.root}/net_eval/ResNet_AE_eval/umap_frag_labels_active_passive_n{n_neighbor}.png",
+                    bbox_inches='tight')
+        plt.show()
+        plt.close()
+
     ####################################################################################################
     # 3D UMAP
     ####################################################################################################
-
+    """
     mapper = UMAP(n_components=2).fit(X)
 
     plot.points(mapper, labels=labels_char_list, theme="fire")
@@ -516,19 +549,16 @@ def evaluate(config, result):
     plt.title(f"umap_final_eval_{config.chars_to_eval}_frag")
     plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/umap_scatter_{config.chars_to_eval}_frag.png')
     plt.close()
-
+    """
     ####################################################################################################
     # K MEANS - Letter Labels
     ####################################################################################################
     print(y_len)
-    """
-    for k in range(3, y_len):
+
+    standard_embedding = UMAP(n_components=2, random_state=42, n_neighbors=15).fit_transform(X)
+    for k in [3, 6, 12, 24]:
         kmeans_labels = cluster.KMeans(n_clusters=k).fit_predict(X)
         # plt.scatter(standard_embedding[:, 0], standard_embedding[:, 1], c=kmeans_labels, s=5, cmap='tab20')
-        # plt.title(f"umap_kmeans_{config.letters_to_eval}")
-        # plt.legend(labels_char_list)
-        # plt.savefig(f'./{config.root}/net_eval/umap_kmeans_{config.letters_to_eval}.png')
-        # plt.close()
 
         ars = adjusted_rand_score(labels_char_list_enumerated, kmeans_labels)
         amis = adjusted_mutual_info_score(labels_char_list_enumerated, kmeans_labels)
@@ -536,6 +566,18 @@ def evaluate(config, result):
         logger.info(f"k={k} - Adjusted rand index of kmeans clustered character labels")
         logger.info(str((ars, amis)))
 
+        plt.figure(figsize=(12, 8))
+        sns.scatterplot(standard_embedding[:, 0], standard_embedding[:, 1], hue=kmeans_labels, legend='full',
+                        palette=sns.color_palette("hls", k), s=10)
+        plt.title(f"resnetAE - k-means - Character Labels - k={k}")
+        plt.xlabel(f"Rand Index = {round(ars, 3)}")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        plt.tight_layout()
+        plt.savefig(f'./{config.root}/net_eval/ResNet_AE_eval/resnetAE_umap_kmeans_{k}', bbox_inches='tight')
+        plt.show()
+        plt.close()
+
+    """
     ####################################################################################################
     # K MEANS - Fragment Labels
     ####################################################################################################
